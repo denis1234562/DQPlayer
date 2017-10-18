@@ -56,7 +56,8 @@ namespace DQPlayer
 
         private void Test7()
         {
-
+            int tovaEtest;
+            int b;
         }
 
         private void Test8()
