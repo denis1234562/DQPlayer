@@ -24,45 +24,5 @@ namespace DQPlayer
         {
             InitializeComponent();          
         }
-
-        private void Test()
-        {
-
-        }
-        private void Test2()
-        {
-
-        }
-
-        private void Test3()
-        {
-
-        }
-
-        private void Test4()
-        {
-
-        }
-
-        private void Test5()
-        {
-
-        }
-
-        private void Test6()
-        {
-
-        }
-
-        private void Test7()
-        {
-            int tovaEtest;
-            int b = 5;
-        }
-
-        private void Test8()
-        {
-
-        }
     }
 }
