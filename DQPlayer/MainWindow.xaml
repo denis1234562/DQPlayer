@@ -9,6 +9,6 @@
     <Grid AllowDrop="True">
         <MediaElement Name="Player" HorizontalAlignment="Left" Height="262" Margin="10,10,0,0" VerticalAlignment="Top" Width="497"/>
         <Button Name="bChangeStatePlayer"  Content="Loading.." HorizontalAlignment="Left" Margin="10,277,0,0" VerticalAlignment="Top" Width="75" Click="bChangeStatePlayer_Click"/>
-        <Button Content="Browse" HorizontalAlignment="Left" Margin="90,277,0,0" VerticalAlignment="Top" Width="75" Click="Button_Click"/>
+        <Button Name ="bBrowse" Content="Loading.." HorizontalAlignment="Left" Margin="90,277,0,0" VerticalAlignment="Top" Width="75" Click="bBrowse_Click"/>
     </Grid>
 </Window>

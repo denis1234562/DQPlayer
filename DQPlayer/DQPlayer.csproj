@@ -54,6 +54,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="MoviePlayerSourceTracker.cs" />
     <Compile Include="Properties\Annotations.cs" />
     <Compile Include="ResourceFiles\Strings.Designer.cs">
       <AutoGen>True</AutoGen>

@@ -1,9 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
-using DQPlayer.Annotations;
 using Microsoft.Win32;
 
 namespace DQPlayer
@@ -17,10 +15,10 @@ namespace DQPlayer
         {
             InitializeComponent();
             SetupControls();
-            _moviePlayerTracker.PropertyChanged += Asd_PropertyChanged;
+            _moviePlayerTracker.PropertyChanged += MoviePlayer_PropertyChanged;
         }
 
-        private void Asd_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        private void MoviePlayer_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             SourceChanged(((MediaElement)sender).Source != null);
         }
@@ -36,6 +34,7 @@ namespace DQPlayer
         private void SetupControlTexts()
         {
             UpdateChangeStateContent();
+            bBrowse.Content = ResourceFiles.Strings.Browse;
         }
 
         private void SetupPlayer()
@@ -78,7 +77,7 @@ namespace DQPlayer
             SwitchPlayerState();
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void bBrowse_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog fileDialog =
                 new OpenFileDialog {Filter = "Matrioshka files (*.mkv)|*.mkv|Music files (*.mp3)|*.mp3"};
@@ -111,37 +110,5 @@ namespace DQPlayer
             _moviePlayerTracker.MoviePlayerSource = Player.Source;
         }
         #endregion
-    }
-
-    public class MoviePlayerSourceTracker : INotifyPropertyChanged
-    {
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        private readonly MediaElement _moviePlayer;
-
-        private Uri _moviePlayerSource;
-        public Uri MoviePlayerSource
-        {
-            get => _moviePlayerSource;
-            set
-            {
-                if (value != _moviePlayerSource)
-                {
-                    _moviePlayerSource = value;
-                    OnPropertyChanged(nameof(MoviePlayerSource));
-                }
-            }
-        }
-
-        public MoviePlayerSourceTracker(MediaElement moviePlayer)
-        {
-            _moviePlayer = moviePlayer;
-        }
-
-        [NotifyPropertyChangedInvocator]
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            PropertyChanged?.Invoke(_moviePlayer, new PropertyChangedEventArgs(propertyName));
-        }
     }
 }
