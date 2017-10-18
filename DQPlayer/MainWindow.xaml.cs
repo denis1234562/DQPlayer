@@ -22,7 +22,12 @@ namespace DQPlayer
     {
         public MainWindow()
         {
-            InitializeComponent();
+            InitializeComponent();          
+        }
+
+        private void Test()
+        {
+
         }
     }
 }
