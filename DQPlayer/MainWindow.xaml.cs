@@ -39,8 +39,8 @@ namespace DQPlayer
             _moviePlayerTracker = new MoviePlayerSourceTracker(Player);
             _moviePlayerTracker.PropertyChanged += MoviePlayer_PropertyChanged;
             sVolumeSlider.ValueChanged += SVolumeSlider_ValueChanged;
-            sVolumeSlider.Value = 100;
-            Player.Volume = 100;
+            sVolumeSlider.Value = 1;
+            Player.Volume = 1;
         }
         #endregion
 
