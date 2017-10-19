@@ -5,11 +5,19 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:DQPlayer"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525" AllowDrop="True" Drop="Window_Drop">
+        Title="MainWindow" Height="380.685" Width="525" AllowDrop="True" Drop="Window_Drop">
     <Grid AllowDrop="True">
         <MediaElement Name="Player" HorizontalAlignment="Left" Height="262" Margin="10,10,0,0" VerticalAlignment="Top" Width="500"/>
-        <Button Name="bChangeStatePlayer"  Content="Loading.." HorizontalAlignment="Left" Margin="10,277,0,0" VerticalAlignment="Top" Width="75" Click="bChangeStatePlayer_Click"/>
-        <Button Name ="bBrowse" Content="Loading.." HorizontalAlignment="Left" Margin="90,277,0,0" VerticalAlignment="Top" Width="75" Click="bBrowse_Click"/>
-        <Slider Name="sVolumeSlider" Minimum="0" Maximum="1" HorizontalAlignment="Left" Margin="404,279,0,0" VerticalAlignment="Top" Width="100"/>
+        <Button Name="bChangeStatePlayer"  Content="Loading.." HorizontalAlignment="Left" Margin="10,313,0,0" VerticalAlignment="Top" Width="75" 
+                Click="bChangeStatePlayer_Click"/>
+        
+        <Button Name ="bBrowse" Content="Loading.." HorizontalAlignment="Left" Margin="90,313,0,0" VerticalAlignment="Top" Width="75" 
+                Click="bBrowse_Click"/>
+        
+        <Slider Name="sVolumeSlider" Minimum="0" Maximum="1" HorizontalAlignment="Left" Margin="399,313,0,0" VerticalAlignment="Top" Width="100"
+                Value="{Binding Path=Volume, ElementName=Player}"/>
+
+        <Slider Name="sMovieSkipSlider" HorizontalAlignment="Left" Height="25" Margin="10,283,0,0" VerticalAlignment="Top" Width="497"
+                ValueChanged ="SMovieSkipSlider_OnValueChanged"/>
     </Grid>
 </Window>
