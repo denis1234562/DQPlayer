@@ -15,13 +15,7 @@ namespace DQPlayer
         public MainWindow()
         {
             InitializeComponent();
-            SetupControls();
-            _moviePlayerTracker.PropertyChanged += MoviePlayer_PropertyChanged;
-        }
-
-        private void MoviePlayer_PropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            SourceChanged(((MediaElement)sender).Source != null);
+            SetupControls();         
         }
 
         #region Startup Methods
@@ -43,6 +37,10 @@ namespace DQPlayer
             Player.LoadedBehavior = MediaState.Manual;
             Player.UnloadedBehavior = MediaState.Manual;
             _moviePlayerTracker = new MoviePlayerSourceTracker(Player);
+            _moviePlayerTracker.PropertyChanged += MoviePlayer_PropertyChanged;
+            sVolumeSlider.ValueChanged += SVolumeSlider_ValueChanged;
+            sVolumeSlider.Value = 100;
+            Player.Volume = 100;
         }
         #endregion
 
@@ -73,6 +71,11 @@ namespace DQPlayer
         #endregion
 
         #region Event Handlers
+        private void MoviePlayer_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            SourceChanged(((MediaElement)sender).Source != null);
+        }
+
         private void bChangeStatePlayer_Click(object sender, RoutedEventArgs e)
         {
             SwitchPlayerState();
@@ -109,6 +112,11 @@ namespace DQPlayer
             _isPlaying = true;
             UpdateChangeStateContent();
             _moviePlayerTracker.MoviePlayerSource = Player.Source;
+        }
+
+        private void SVolumeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            Player.Volume = ((Slider)sender).Value;
         }
         #endregion
     }
