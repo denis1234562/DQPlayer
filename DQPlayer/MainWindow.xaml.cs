@@ -1,21 +1,39 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using Microsoft.Win32;
 using System.Linq;
+using System.Windows.Controls.Primitives;
+using System.Windows.Threading;
 
 namespace DQPlayer
 {
     public partial class MainWindow
     {
+        private readonly DispatcherTimer _currentMovieTimeTimer = new DispatcherTimer();
+        private TimeSpan _movieElapsedTime;
+        private TimeSpan _movieLeftTime;
+
+        private IReadOnlyDictionary<MoviePlayerState, Action> _modifyPlayerState;
+
         private bool _isPlaying;
         private MoviePlayerSourceTracker _moviePlayerTracker;
 
         public MainWindow()
         {
             InitializeComponent();
-            SetupControls();         
+            SetupControls();
+            SetupCaches();
+            SetupTimers();
+        }
+
+        private void CurrentMovieTimeTimer_Tick(object sender, EventArgs e)
+        {
+            _movieElapsedTime = _movieElapsedTime.Add(TimeSpan.FromSeconds(1));
+            _movieLeftTime = _movieLeftTime.Subtract(TimeSpan.FromSeconds(1));
+            UpdateTimerLabels();
         }
 
         #region Startup Methods
@@ -34,27 +52,53 @@ namespace DQPlayer
 
         private void SetupPlayer()
         {
+            Player.ScrubbingEnabled = true;
             Player.LoadedBehavior = MediaState.Manual;
             Player.UnloadedBehavior = MediaState.Manual;
             _moviePlayerTracker = new MoviePlayerSourceTracker(Player);
             _moviePlayerTracker.PropertyChanged += MoviePlayer_PropertyChanged;
         }
+
+        private void SetupCaches()
+        {
+            _modifyPlayerState = new Dictionary<MoviePlayerState, Action>
+            {
+                //TODO maybe check if video is available?
+                [MoviePlayerState.Pause] = () =>
+                {
+                    Player.Pause();
+                    _isPlaying = false;
+                    UpdateChangeStateContent();
+                    _currentMovieTimeTimer.Stop();
+                },
+                [MoviePlayerState.Play] = () =>
+                {
+                    Player.Play();
+                    _isPlaying = true;
+                    UpdateChangeStateContent();
+                    _currentMovieTimeTimer.Start();
+                },
+                [MoviePlayerState.Stop] = () =>
+                {
+                    Player.Stop();
+                    _isPlaying = false;
+                    UpdateChangeStateContent();
+                    _currentMovieTimeTimer.Stop();
+                    AlignTimersWithSource();
+                }
+            };
+        }
+
+        private void SetupTimers()
+        {
+            _currentMovieTimeTimer.Interval = TimeSpan.FromMilliseconds(1000);
+            _currentMovieTimeTimer.Tick += CurrentMovieTimeTimer_Tick;
+        }
         #endregion
 
         #region Private Methods
-        private void SwitchPlayerState()
-        {
-            if (_isPlaying)
-            {
-                Player.Pause();
-            }
-            else
-            {
-                Player.Play();
-            }
-            _isPlaying = !_isPlaying;
-            UpdateChangeStateContent();
-        }
+
+        private void SetPlayerState(MoviePlayerState state) => _modifyPlayerState[state].Invoke();
 
         private void UpdateChangeStateContent()
         {
@@ -66,6 +110,7 @@ namespace DQPlayer
         private void SourceChanged(bool state)
         {
             bChangeStatePlayer.IsEnabled = state;
+            sMovieSkipSlider.IsEnabled = state;
         }
 
         private void SetNewPlayerSource(Uri source)
@@ -77,9 +122,27 @@ namespace DQPlayer
         private void PlayNewPlayerSource(Uri source)
         {
             SetNewPlayerSource(source);
-            Player.Play();
-            _isPlaying = true;
-            UpdateChangeStateContent();
+            SetPlayerState(MoviePlayerState.Play);
+        }
+
+        private void AlignTimersWithSource(TimeSpan currentPosition)
+        {
+            _movieLeftTime = Player.NaturalDuration.TimeSpan - currentPosition;
+            _movieElapsedTime = currentPosition;
+            UpdateTimerLabels();
+        }
+
+        private void AlignTimersWithSource()
+        {
+            _movieLeftTime = Player.NaturalDuration.TimeSpan;
+            _movieElapsedTime = new TimeSpan(0);
+            UpdateTimerLabels();
+        }
+
+        private void UpdateTimerLabels()
+        {
+            lbMovieTimeLeft.Content = _movieLeftTime.ToString(@"hh\:mm\:ss");
+            lbMovieElapsedTime.Content = _movieElapsedTime.ToString(@"hh\:mm\:ss");
         }
         #endregion
 
@@ -88,12 +151,18 @@ namespace DQPlayer
         private void MoviePlayer_PropertyChanged(object sender, PropertyChangedEventArgs e)
             => SourceChanged(Player.Source != null);
 
-        private void bChangeStatePlayer_Click(object sender, RoutedEventArgs e) 
-            => SwitchPlayerState();
+        private void bChangeStatePlayer_Click(object sender, RoutedEventArgs e)
+            => SetPlayerState(_isPlaying ? MoviePlayerState.Pause : MoviePlayerState.Play);
 
         private void bBrowse_Click(object sender, RoutedEventArgs e)
         {
-            var fileDialog = new OpenFileDialog {Filter = "Matrioshka files (*.mkv)|*.mkv|Music files (*.mp3)|*.mp3"};
+            var fileDialog = new OpenFileDialog
+            {
+                Filter = $"Media files ({string.Join(",", Settings.AllowedExtensions.Select(ae => "*" + ae))})|" +
+                         $"{string.Join(";", Settings.AllowedExtensions.Select(ae => "*" + ae))}|" +
+                         "Matrioshka files (*.mkv)|*.mkv|" +
+                         "Music files (*.mp3)|*.mp3"
+            };
             var shown = fileDialog.ShowDialog();
             if (shown.HasValue && shown.Value)
             {
@@ -114,11 +183,40 @@ namespace DQPlayer
             }
             PlayNewPlayerSource(new Uri(filePath));
         }
-        #endregion
 
-        private void SMovieSkipSlider_OnValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        private void Player_OnMediaOpened(object sender, RoutedEventArgs e)
         {
-            //TODO
+            if (Player.NaturalDuration.HasTimeSpan)
+            {
+                sMovieSkipSlider.Maximum = Player.NaturalDuration.TimeSpan.TotalSeconds;
+                AlignTimersWithSource(new TimeSpan(0));
+                _currentMovieTimeTimer.Start();
+            }
         }
+
+        private void Player_OnMediaEnded(object sender, RoutedEventArgs e)
+        {
+            SetPlayerState(MoviePlayerState.Stop);
+        }
+
+        private void SMovieSkipSlider_OnDragStarted(object sender, DragStartedEventArgs e)
+        {
+            SetPlayerState(MoviePlayerState.Pause);
+        }
+
+        private void SMovieSkipSlider_OnDragCompleted(object sender, DragCompletedEventArgs e)
+        {
+            SetPlayerState(MoviePlayerState.Play);
+            Player.Position = TimeSpan.FromSeconds(sMovieSkipSlider.Value);
+            AlignTimersWithSource(Player.Position);
+        }
+        #endregion
+    }
+
+    public enum MoviePlayerState
+    {
+        Play,
+        Pause,
+        Stop
     }
 }
