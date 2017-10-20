@@ -83,6 +83,18 @@ namespace DQPlayer
 
         #region Private Methods
 
+        private void SetFullScreen()
+        {
+            WindowState = WindowState.Maximized;
+            WindowStyle = WindowStyle.None;
+        }
+
+        private void SetNormalized()
+        {
+            WindowState = WindowState.Normal;
+            WindowStyle = WindowStyle.SingleBorderWindow;
+        }
+
         private void SetPlayerState(PlayerState state) => _modifyPlayerState[state].Invoke();
 
         private void SetPlayerStateImpl(PlayerState state, Action action)
@@ -206,14 +218,6 @@ namespace DQPlayer
             AlignTimersWithSource(Player.Position);
         }
 
-        private void CurrentMovieTimeTimer_Tick(object sender, EventArgs e)
-        {
-            ViewModel.MovieElapsedTime = ViewModel.MovieElapsedTime.Add(_currentMovieTimeTimer.Interval);
-            _movieLeftTime = _movieLeftTime.Subtract(_currentMovieTimeTimer.Interval);
-            UpdateTimerLabels();
-        }
-        #endregion
-
         private void SMovieSkipSlider_OnMouseDown(object sender, MouseButtonEventArgs e)
         {
             //TODO
@@ -225,15 +229,21 @@ namespace DQPlayer
             {
                 if (WindowState == WindowState.Normal)
                 {
-                    WindowState = WindowState.Maximized;
-                    WindowStyle = WindowStyle.None;
+                    SetFullScreen();
                 }
                 else if (WindowState == WindowState.Maximized)
                 {
-                    WindowState = WindowState.Normal;
-                    WindowStyle = WindowStyle.SingleBorderWindow;
+                    SetNormalized();
                 }
             }
         }
+
+        private void CurrentMovieTimeTimer_Tick(object sender, EventArgs e)
+        {
+            ViewModel.MovieElapsedTime = ViewModel.MovieElapsedTime.Add(_currentMovieTimeTimer.Interval);
+            _movieLeftTime = _movieLeftTime.Subtract(_currentMovieTimeTimer.Interval);
+            UpdateTimerLabels();
+        }
+        #endregion
     }
 }
