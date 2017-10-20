@@ -18,6 +18,7 @@ namespace DQPlayer
             {
                 ".mp3",
                 ".mkv",
+                ".mp4"
             };
             MinimumWindowSize = new Size(600, 410);
         }
