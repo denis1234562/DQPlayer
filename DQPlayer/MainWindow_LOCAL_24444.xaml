@@ -1,0 +1,42 @@
+﻿<Window x:Name="Window" x:Class="DQPlayer.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:DQPlayer"
+        xmlns:customControls="clr-namespace:DQPlayer.CustomControls"
+        xmlns:m="clr-namespace:DQPlayer.ViewModels"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="410" Width="533.836" AllowDrop="True" Drop="Window_Drop"
+        MinHeight="{Binding Source={x:Static local:Settings.MinimumWindowSize}, Path=Height}"
+        MinWidth="{Binding Source={x:Static local:Settings.MinimumWindowSize}, Path=Width}">
+    <Window.DataContext>
+        <m:VideoPlayerViewModel/>
+    </Window.DataContext>
+    <Grid AllowDrop="True">
+        <MediaElement Name="Player" Margin="0,0,0,117"
+                      MediaOpened="Player_OnMediaOpened" Stretch="Fill"
+                      MediaEnded="Player_OnMediaEnded"
+                      MouseDown="Player_OnMouseDown"/>
+
+        <Button Name="bChangeStatePlayer"  Content="Loading.." HorizontalAlignment="Left" Margin="10,0,0,46" VerticalAlignment="Bottom" Width="75" 
+                Click="bChangeStatePlayer_Click"/>
+
+        <Button Name ="bBrowse" Content="Loading.." HorizontalAlignment="Left" Margin="90,0,0,46" VerticalAlignment="Bottom" Width="75" 
+                Click="bBrowse_Click"/>
+
+        <Slider Name="sVolumeSlider" Minimum="0" Maximum="1" HorizontalAlignment="Right" Margin="0,0,10,46" VerticalAlignment="Bottom" Width="100"
+                Value="{Binding ElementName=Player, Path=Volume}"/>
+
+        <customControls:ThumbDragSlider x:Name="sMovieSkipSlider" Height="25" Margin="65,0,65,71" VerticalAlignment="Bottom" IsMoveToPointEnabled="True"
+                Value="{Binding MovieElapsedTime.TotalSeconds, Mode=OneWay}"
+                DragStarted="SMovieSkipSlider_OnDragStarted"
+                DragCompleted="SMovieSkipSlider_OnDragCompleted"                                       
+                ValueChanged="SMovieSkipSlider_OnValueChanged"
+                Loaded="SMovieSkipSlider_OnLoaded"/>
+
+        <Label Name="lbMovieElapsedTime" Content="--:--" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="-12,0,0,74" VerticalAlignment="Bottom" Width="67"/>
+        <Label Name="lbMovieTimeLeft" Content="--:--" HorizontalContentAlignment="Left" HorizontalAlignment="Right" Margin="0,0,-7,74" VerticalAlignment="Bottom" Width="67"/>
+        <Label Name="lbTimeTooltip" Content="01:20:34" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" HorizontalAlignment="Left" Margin="183,308,0,0" VerticalAlignment="Top" Height="21" FontSize="10"/>
+    </Grid>
+</Window>
