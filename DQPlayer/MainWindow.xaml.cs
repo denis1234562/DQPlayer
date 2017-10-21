@@ -41,13 +41,13 @@ namespace DQPlayer
         private void SetupControls()
         {
             SetupControlTexts();
+            SetupControlImages();
             SetupPlayer();
-            SourceChanged(false);
+            SourceChanged(false);          
         }
 
         private void SetupControlTexts()
-        {
-            UpdateChangeStateContent();
+        {            
             bBrowse.Content = ResourceFiles.Strings.Browse;
         }
 
@@ -56,6 +56,15 @@ namespace DQPlayer
             Player.ScrubbingEnabled = true;
             Player.LoadedBehavior = MediaState.Manual;
             Player.UnloadedBehavior = MediaState.Manual;
+        }
+
+        private void SetupControlImages()
+        {
+            UpdateChangeStateImage();
+            imgSkipBack.Source = Settings.SkipBack;
+            imgSkipForward.Source = Settings.SkipForward;
+            imgStop.Source = Settings.Stop;
+            imgSplashScreen.Source = Settings.SpashScreenImage;
         }
 
         private void SetupCaches()
@@ -116,7 +125,7 @@ namespace DQPlayer
         {
             action.Invoke();
             _currentState = state;
-            UpdateChangeStateContent();
+            UpdateChangeStateImage();
             if (state.IsRunning)
             {
                 _currentMovieTimeTimer.Start();
@@ -127,7 +136,7 @@ namespace DQPlayer
             }
         }
 
-        private void UpdateChangeStateContent()
+        private void UpdateChangeStateImage()
         {
             imgChangePlayerState.Source = Equals(_currentState, PlayerStates.Play)
                  ? Settings.PauseImage
@@ -138,6 +147,9 @@ namespace DQPlayer
         {
             imgChangePlayerState.IsEnabled = state;
             sMovieSkipSlider.IsEnabled = state;
+            imgSkipForward.IsEnabled = state;
+            imgSkipBack.IsEnabled = state;
+            imgStop.IsEnabled = state;
         }
 
         private void SetNewPlayerSource(Uri source)
@@ -173,8 +185,13 @@ namespace DQPlayer
 
         #region Event Handlers
 
-        private void imgChangePlayerState_OnMouseDown(object sender, RoutedEventArgs e)
-            => SetPlayerState(Equals(_currentState, PlayerStates.Play) ? PlayerStates.Pause : PlayerStates.Play);
+        private void imgChangePlayerState_OnMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.Left)
+            {
+                SetPlayerState(Equals(_currentState, PlayerStates.Play) ? PlayerStates.Pause : PlayerStates.Play);
+            }
+        }
 
         private void bBrowse_Click(object sender, RoutedEventArgs e)
         {
@@ -189,7 +206,8 @@ namespace DQPlayer
             var shown = fileDialog.ShowDialog();
             if (shown.HasValue && shown.Value)
             {
-                PlayNewPlayerSource(new Uri(fileDialog.FileName));
+                imgSplashScreen.Visibility = Visibility.Collapsed;
+                SetNewPlayerSource(new Uri(fileDialog.FileName));
             }
 
         }
@@ -211,6 +229,7 @@ namespace DQPlayer
         {
             if (Player.NaturalDuration.HasTimeSpan)
             {
+
                 sMovieSkipSlider.Maximum = Player.NaturalDuration.TimeSpan.TotalSeconds;
                 AlignTimersWithSource(new TimeSpan(0));
                 _currentMovieTimeTimer.Start();
@@ -281,11 +300,43 @@ namespace DQPlayer
                 SetNewPlayerPosition(TimeSpan.FromSeconds(sMovieSkipSlider.Value));
             }
         }
-        #endregion
 
         private void imgSkipBack_MouseDown(object sender, MouseButtonEventArgs e)
         {
-           
+            if (e.ChangedButton == MouseButton.Left)
+            {
+                if (ViewModel.MovieElapsedTime.Subtract(Settings.SkipSeconds).TotalSeconds >= 0)
+                {
+                    SetNewPlayerPosition(ViewModel.MovieElapsedTime.Subtract(Settings.SkipSeconds));
+                }
+                else
+                {
+                    SetNewPlayerPosition(new TimeSpan(0));
+                }
+            }
         }
+        private void imgSkipForward_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.Left)
+            {
+                if (ViewModel.MovieElapsedTime.Add(Settings.SkipSeconds).TotalSeconds <= Player.NaturalDuration.TimeSpan.TotalSeconds)
+                {
+                    SetNewPlayerPosition(ViewModel.MovieElapsedTime.Add(Settings.SkipSeconds));
+                }
+                else
+                {
+                    SetNewPlayerPosition(Player.NaturalDuration.TimeSpan);
+                }
+
+            }
+        }
+        private void imgStop_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.Left)
+            {
+                SetPlayerState(PlayerStates.Stop);
+            }
+        }
+        #endregion
     }
 }

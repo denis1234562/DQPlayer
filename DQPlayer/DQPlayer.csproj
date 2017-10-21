@@ -160,5 +160,8 @@
   <ItemGroup>
     <None Include="bin\Debug\Assets\Stop.jpeg" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="bin\Debug\Assets\Player.jpg" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

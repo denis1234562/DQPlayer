@@ -18,14 +18,22 @@
                       MediaOpened="Player_OnMediaOpened" Stretch="Fill"
                       MediaEnded="Player_OnMediaEnded"
                       MouseDown="Player_OnMouseDown"/>
-        <Image Name="imgChangePlayerState" HorizontalAlignment="Left" Height="40" Margin="10,0,0,10" VerticalAlignment="Bottom" Width="40" Source="DQPlayer/DQPlayer/bin/Debug/Assets/Play.jpeg"
+        <Image Name="imgSplashScreen" Margin="0,0,0,117" Stretch="Fill" />
+
+        <Image Name="imgChangePlayerState" HorizontalAlignment="Left" Height="40" Margin="10,0,0,10" VerticalAlignment="Bottom" Width="40" Source="bin/Debug/Assets/Play.jpeg"
                MouseDown="imgChangePlayerState_OnMouseDown"/>
+
+        <Image Name="imgStop" HorizontalAlignment="Left" Height="40" Margin="50,0,0,10" VerticalAlignment="Bottom" Width="40" Source="bin/Debug/Assets/Stop.jpeg"
+               MouseDown="imgStop_MouseDown"/>
+
+        <Image Name="imgSkipBack" HorizontalAlignment="Left" Height="40" Margin="90,0,0,10" VerticalAlignment="Bottom" Width="40" Source="bin/Debug/Assets/SkipBack.jpeg"
+               MouseDown="imgSkipBack_MouseDown"/>
+
+        <Image Name="imgSkipForward" HorizontalAlignment="Left" Height="40" Margin="130,0,0,10" VerticalAlignment="Bottom" Width="40" Source="bin/Debug/Assets/SkipForward.jpeg"
+               MouseDown="imgSkipForward_MouseDown"/>
 
         <Button Name ="bBrowse" Content="Loading.." Margin="0,0,10,10" VerticalAlignment="Bottom" 
                 Click="bBrowse_Click" HorizontalAlignment="Right" Width="76"/>
-
-        <Image Name="imgSkipBack" HorizontalAlignment="Left" Height="40" Margin="197,0,0,33" VerticalAlignment="Bottom" Width="40"
-               MouseDown="imgSkipBack_MouseDown"/>
 
         <Slider Name="sVolumeSlider" Minimum="0" Maximum="1" HorizontalAlignment="Right" Margin="0,0,10,46" VerticalAlignment="Bottom" Width="100"
                 Value="{Binding ElementName=Player, Path=Volume}"/>
