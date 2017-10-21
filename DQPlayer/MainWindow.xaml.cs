@@ -129,14 +129,14 @@ namespace DQPlayer
 
         private void UpdateChangeStateContent()
         {
-            bChangeStatePlayer.Content = Equals(_currentState, PlayerStates.Play)
-                ? ResourceFiles.Strings.Pause
-                : ResourceFiles.Strings.Resume;
+            imgChangePlayerState.Source = Equals(_currentState, PlayerStates.Play)
+                 ? Settings.PauseImage
+                 : Settings.PlayImage;
         }
 
         private void SourceChanged(bool state)
         {
-            bChangeStatePlayer.IsEnabled = state;
+            imgChangePlayerState.IsEnabled = state;
             sMovieSkipSlider.IsEnabled = state;
         }
 
@@ -173,7 +173,7 @@ namespace DQPlayer
 
         #region Event Handlers
 
-        private void bChangeStatePlayer_Click(object sender, RoutedEventArgs e)
+        private void imgChangePlayerState_OnMouseDown(object sender, RoutedEventArgs e)
             => SetPlayerState(Equals(_currentState, PlayerStates.Play) ? PlayerStates.Pause : PlayerStates.Play);
 
         private void bBrowse_Click(object sender, RoutedEventArgs e)
@@ -282,5 +282,10 @@ namespace DQPlayer
             }
         }
         #endregion
+
+        private void imgSkipBack_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+           
+        }
     }
 }
