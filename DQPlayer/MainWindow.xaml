@@ -31,10 +31,12 @@
         <customControls:ThumbDragSlider x:Name="sMovieSkipSlider" Height="25" Margin="65,0,65,71" VerticalAlignment="Bottom" IsMoveToPointEnabled="True"
                 Value="{Binding MovieElapsedTime.TotalSeconds, Mode=OneWay}"
                 DragStarted="SMovieSkipSlider_OnDragStarted"
-                DragCompleted="SMovieSkipSlider_OnDragCompleted"
-                MouseDown="SMovieSkipSlider_OnMouseDown"/>
-        
+                DragCompleted="SMovieSkipSlider_OnDragCompleted"                                       
+                ValueChanged="SMovieSkipSlider_OnValueChanged"
+                Loaded="SMovieSkipSlider_OnLoaded"/>
+
         <Label Name="lbMovieElapsedTime" Content="--:--" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="-12,0,0,74" VerticalAlignment="Bottom" Width="67"/>
         <Label Name="lbMovieTimeLeft" Content="--:--" HorizontalContentAlignment="Left" HorizontalAlignment="Right" Margin="0,0,-7,74" VerticalAlignment="Bottom" Width="67"/>
+        <Label Name="lbTimeTooltip" Content="01:20:34" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" HorizontalAlignment="Left" Margin="183,308,0,0" VerticalAlignment="Top" Height="21" FontSize="10"/>
     </Grid>
 </Window>
