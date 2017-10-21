@@ -300,7 +300,6 @@ namespace DQPlayer
                 SetNewPlayerPosition(TimeSpan.FromSeconds(sMovieSkipSlider.Value));
             }
         }
-
         private void imgSkipBack_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.ChangedButton == MouseButton.Left)

@@ -140,12 +140,6 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <None Include="bin\Debug\Assets\Pause.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="bin\Debug\Assets\Play.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="bin\Debug\Assets\Pause.jpeg" />
   </ItemGroup>
   <ItemGroup>
