@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Windows.Controls.Primitives;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Threading;
 using DQPlayer.MVVMFiles.ViewModels;
@@ -160,7 +161,8 @@ namespace DQPlayer
         /// <returns>It returns the value at which the projection falls.</returns>
         private double SimulateTrackPosition(Point point, Track track)
         {
-            return (point.X - track.Thumb.DesiredSize.Width / 2) * CalculateTrackDensity(track);
+            var simulatedPosition = (point.X - track.Thumb.DesiredSize.Width / 2) * CalculateTrackDensity(track);            
+            return Math.Min(Math.Max(simulatedPosition, 0), sMovieSkipSlider.Maximum);
         }
 
         /// <summary>
@@ -189,6 +191,16 @@ namespace DQPlayer
         {
             Player.Position = newPosition;
             AlignTimersWithSource(Player.Position);
+        }
+
+        /// <summary>
+        /// Sets the <see cref="Player.Position"/> to the cursor's location relative to the <see cref="_movieSkipSliderTrack"/>. 
+        /// </summary>
+        private void SetPlayerPositionToCursor()
+        {
+            Point mousePosition = new Point(Mouse.GetPosition(sMovieSkipSlider).X, 0);
+            double simulatedValue = SimulateTrackPosition(mousePosition, _movieSkipSliderTrack);
+            SetNewPlayerPosition(TimeSpan.FromSeconds(simulatedValue));
         }
 
         /// <summary>
@@ -228,7 +240,7 @@ namespace DQPlayer
         }
 
         /// <summary>
-        /// Sets the <see cref="Control.IsEnabled"/> property of all controls interested in the change of <see cref="o:Player.Source"/>.
+        /// Keeps Controls interested in <see cref="Player"/>'s Source change updated depending on state.
         /// </summary>
         /// <param name="state"></param>
         private void SourceChanged(bool state)
@@ -238,6 +250,12 @@ namespace DQPlayer
             imgSkipForward.IsEnabled = state;
             imgSkipBack.IsEnabled = state;
             imgStop.IsEnabled = state;
+
+            if (Player.NaturalDuration.HasTimeSpan)
+            {
+                sMovieSkipSlider.Maximum = Player.NaturalDuration.TimeSpan.TotalSeconds;
+                AlignTimersWithSource(new TimeSpan(0));
+            }
         }
 
         /// <summary>
@@ -307,7 +325,6 @@ namespace DQPlayer
                 imgSplashScreen.Visibility = Visibility.Collapsed;
                 PlayNewPlayerSource(new Uri(fileDialog.FileName));
             }
-
         }
         private void Window_Drop(object sender, DragEventArgs e)
         {
@@ -325,12 +342,7 @@ namespace DQPlayer
 
         private void Player_OnMediaOpened(object sender, RoutedEventArgs e)
         {
-            if (Player.NaturalDuration.HasTimeSpan)
-            {
-                sMovieSkipSlider.Maximum = Player.NaturalDuration.TimeSpan.TotalSeconds;
-                AlignTimersWithSource(new TimeSpan(0));
-                _currentMovieTimeTimer.Start();
-            }
+            SourceChanged(Player.Source != null);
         }
         private void Player_OnMediaEnded(object sender, RoutedEventArgs e)
         {
@@ -385,15 +397,14 @@ namespace DQPlayer
                 {
                     RoutedEvent = MouseLeftButtonDownEvent
                 };
+                SetPlayerPositionToCursor();
                 _movieSkipSliderTrack.Thumb.RaiseEvent(args);
             }
         }
 
         private void Thumb_DragDelta(object sender, DragDeltaEventArgs e)
         {
-            var mousePosition = new Point(Mouse.GetPosition(sMovieSkipSlider).X, 0);
-            var simulatedValue = SimulateTrackPosition(mousePosition, _movieSkipSliderTrack);
-            SetNewPlayerPosition(TimeSpan.FromSeconds(simulatedValue));
+            SetPlayerPositionToCursor();
         }
 
         private void SMovieSkipSlider_OnMouseEnter(object sender, MouseEventArgs e)
@@ -404,7 +415,6 @@ namespace DQPlayer
         private void SMovieSkipSlider_OnPreviewMouseMove(object sender, MouseEventArgs e)
         {
             double simulatedPosition = SimulateTrackPosition(e.GetPosition(sMovieSkipSlider), _movieSkipSliderTrack);
-            simulatedPosition = Math.Min(Math.Max(simulatedPosition, 0), sMovieSkipSlider.Maximum);
             lbTimeTooltip.AddToLeftMargin(Mouse.GetPosition(sMovieSkipSlider).X - lbTimeTooltip.Margin.Left + 35);
             lbTimeTooltip.Content = TimeSpan.FromSeconds(simulatedPosition).ToShortString();
         }
