@@ -1,32 +1,52 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using Microsoft.Win32;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
-using System.Windows.Media.Imaging;
 using System.Windows.Threading;
-using DQPlayer.CustomControls;
-using DQPlayer.ViewModels;
+using DQPlayer.MVVMFiles.ViewModels;
+using EnvDTE80;
+using Point = System.Windows.Point;
 
 namespace DQPlayer
 {
     public partial class MainWindow
     {
+        /// <summary>
+        /// Updates <see cref="VideoPlayerViewModel.MovieElapsedTime"/> and <see cref="VideoPlayerViewModel.MovieLeftTime"/>
+        /// and their respective labels every <see cref="Settings.TimerTickUpdate"/>.
+        /// </summary>
         private readonly DispatcherTimer _currentMovieTimeTimer = new DispatcherTimer();
 
-        public VideoPlayerViewModel ViewModel => DataContext as VideoPlayerViewModel;
-
-        private TimeSpan _movieLeftTime;
-
+        /// <summary>
+        /// Invokes predetermined <see cref="Action"/> depending on what <see cref="PlayerState"/> is passed as a key.
+        /// </summary>
         private IReadOnlyDictionary<PlayerState, Action> _modifyPlayerState;
 
+        /// <summary>
+        /// Used when you need to save the <see cref="_currentState"/> to reuse it afterwards.
+        /// </summary>
         private PlayerState _lastState = PlayerStates.Pause;
+
+        /// <summary>
+        /// Keeps tracks of the current state of the player.
+        /// </summary>
         private PlayerState _currentState;
+
+        /// <summary>
+        /// Cache for the <see cref="Player"/> slider's track.
+        /// </summary>
+        private Track _movieSkipSliderTrack;
+
+        /// <summary>
+        /// Reference to the ViewModel.
+        /// </summary>
+        public VideoPlayerViewModel ViewModel => DataContext as VideoPlayerViewModel;
 
         public MainWindow()
         {
@@ -38,12 +58,17 @@ namespace DQPlayer
         }
 
         #region Startup Methods
+
+        /// <summary>
+        /// Invokes all startup control configuration methods.
+        /// </summary>
         private void SetupControls()
         {
             SetupControlTexts();
             SetupControlImages();
             SetupPlayer();
-            SourceChanged(false);          
+            SetupControlVisibility();
+            SourceChanged(false);
         }
 
         private void SetupControlTexts()
@@ -51,11 +76,17 @@ namespace DQPlayer
             bBrowse.Content = ResourceFiles.Strings.Browse;
         }
 
+        private void SetupControlVisibility()
+        {
+            lbTimeTooltip.Visibility = Visibility.Hidden;
+        }
+
         private void SetupPlayer()
         {
             Player.ScrubbingEnabled = true;
             Player.LoadedBehavior = MediaState.Manual;
             Player.UnloadedBehavior = MediaState.Manual;
+            Player.Volume = 0;
         }
 
         private void SetupControlImages()
@@ -82,45 +113,95 @@ namespace DQPlayer
                 [PlayerStates.Stop] = () =>
                 {
                     SetPlayerStateImpl(PlayerStates.Stop, Player.Stop);
-                    AlignTimersWithSource();
+                    AlignTimersWithSource(new TimeSpan(0));
                 }
             };
         }
 
         private void SetupTimers()
         {
-            _currentMovieTimeTimer.Interval = TimeSpan.FromMilliseconds(1000);
+            _currentMovieTimeTimer.Interval = Settings.TimerTickUpdate;
             _currentMovieTimeTimer.Tick += CurrentMovieTimeTimer_Tick;
         }
         #endregion
 
         #region Private Methods
-        private Thumb GetThumb(Slider slider)
+
+        /// <summary>
+        /// Returns the <see cref="Track"/> element from a specified <see cref="Slider"/> control.
+        /// </summary>
+        /// <param name="slider">The <see cref="Slider"/> from which the <see cref="Track"/> to be obtained from.</param>
+        /// <returns>Returns the <see cref="Track"/> element from a specified <see cref="Slider"/> control.</returns>
+        private static Track GetTrack(Slider slider)
         {
-            var track = slider.Template.FindName("PART_Track", slider) as Track;
-            return track?.Thumb;
+            return slider.Template.FindName("PART_Track", slider) as Track;
         }
 
+        /// <summary>
+        /// Returns the point density of the <see cref="Track"/>
+        /// </summary>
+        /// <param name="track"><see cref="Track"/> which's density should be calculated.</param>
+        /// <returns>Returns the point density of the <see cref="Track"/></returns>
+        private double CalculateTrackDensity(Track track)
+        {
+            double effectivePoints = Math.Max(0, track.Maximum - track.Minimum);
+            double effectiveLength = track.Orientation == Orientation.Horizontal
+                ? track.ActualWidth - track.Thumb.DesiredSize.Width
+                : track.ActualHeight - track.Thumb.DesiredSize.Height;
+            return effectivePoints / effectiveLength;
+        }
+
+        /// <summary>
+        /// Simulates a projection of a <see cref="Point"/> over a <see cref="Track"/>.
+        /// It returns the value at which the projection falls.
+        /// </summary>
+        /// <param name="point">Point to simulate projection of.</param>
+        /// <param name="track">Track to project the simulation at.</param>
+        /// <returns>It returns the value at which the projection falls.</returns>
+        private double SimulateTrackPosition(Point point, Track track)
+        {
+            return (point.X - track.Thumb.DesiredSize.Width / 2) * CalculateTrackDensity(track);
+        }
+
+        /// <summary>
+        /// Sets <see cref="MainWindow"/> to FullScreen mode.
+        /// </summary>
         private void SetFullScreen()
         {
             WindowState = WindowState.Maximized;
             WindowStyle = WindowStyle.None;
         }
 
-        private void SetNewPlayerPosition(TimeSpan newPosition)
-        {
-            Player.Position = newPosition;
-            AlignTimersWithSource(Player.Position);
-        }
-
+        /// <summary>
+        /// Sets <see cref="MainWindow"/> to Normalized mode.
+        /// </summary>
         private void SetNormalized()
         {
             WindowState = WindowState.Normal;
             WindowStyle = WindowStyle.SingleBorderWindow;
         }
 
+        /// <summary>
+        /// Sets a new <see cref="Player"/> position and invokes <see cref="AlignTimersWithSource()"/>
+        /// </summary>
+        /// <param name="newPosition"></param>
+        private void SetNewPlayerPosition(TimeSpan newPosition)
+        {
+            Player.Position = newPosition;
+            AlignTimersWithSource(Player.Position);
+        }
+
+        /// <summary>
+        /// Invokes <see cref="_modifyPlayerState"/> with the specified <see cref="PlayerState"/>
+        /// </summary>
+        /// <param name="state">State to be set.</param>
         private void SetPlayerState(PlayerState state) => _modifyPlayerState[state].Invoke();
 
+        /// <summary>
+        /// Used internally by <see cref="_modifyPlayerState"/>
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="action"></param>
         private void SetPlayerStateImpl(PlayerState state, Action action)
         {
             action.Invoke();
@@ -136,6 +217,9 @@ namespace DQPlayer
             }
         }
 
+        /// <summary>
+        /// Updates the <see cref="Player"/> Play/Pause image button.
+        /// </summary>
         private void UpdateChangeStateImage()
         {
             imgChangePlayerState.Source = Equals(_currentState, PlayerStates.Play)
@@ -143,6 +227,10 @@ namespace DQPlayer
                  : Settings.PlayImage;
         }
 
+        /// <summary>
+        /// Sets the <see cref="Control.IsEnabled"/> property of all controls interested in the change of <see cref="o:Player.Source"/>.
+        /// </summary>
+        /// <param name="state"></param>
         private void SourceChanged(bool state)
         {
             imgChangePlayerState.IsEnabled = state;
@@ -152,34 +240,44 @@ namespace DQPlayer
             imgStop.IsEnabled = state;
         }
 
+        /// <summary>
+        /// Sets new specified <see cref="source"/> to <see cref="o:Player.Source"/> and invokes <see cref="SourceChanged(bool)"/>
+        /// </summary>
+        /// <param name="source">New source to set.</param>
         private void SetNewPlayerSource(Uri source)
         {
             Player.Source = source;
             SourceChanged(Player.Source != null);
         }
+        /// <summary>
+        /// Set and plays new specified <see cref="source"/> and invokes <see cref="SetNewPlayerSource(Uri)"/>
+        /// </summary>
+        /// <param name="source">New source to set.</param>
         private void PlayNewPlayerSource(Uri source)
         {
             SetNewPlayerSource(source);
             SetPlayerState(PlayerStates.Play);
         }
 
+        /// <summary>
+        /// Updates <see cref="VideoPlayerViewModel.MovieElapsedTime"/>, <see cref="VideoPlayerViewModel.MovieLeftTime"/> 
+        /// and their associated labels, in respect to the new value of <see cref="currentPosition"/>.
+        /// </summary>
+        /// <param name="currentPosition"></param>
         private void AlignTimersWithSource(TimeSpan currentPosition)
         {
-            _movieLeftTime = Player.NaturalDuration.TimeSpan - currentPosition;
+            ViewModel.MovieLeftTime = Player.NaturalDuration.TimeSpan - currentPosition;
             ViewModel.MovieElapsedTime = currentPosition;
             UpdateTimerLabels();
         }
-        private void AlignTimersWithSource()
-        {
-            _movieLeftTime = Player.NaturalDuration.TimeSpan;
-            ViewModel.MovieElapsedTime = new TimeSpan(0);
-            UpdateTimerLabels();
-        }
 
+        /// <summary>
+        /// Updates movie time labels.
+        /// </summary>
         private void UpdateTimerLabels()
         {
-            lbMovieTimeLeft.Content = _movieLeftTime.ToString(@"hh\:mm\:ss");
-            lbMovieElapsedTime.Content = ViewModel.MovieElapsedTime.ToString(@"hh\:mm\:ss");
+            lbMovieTimeLeft.Content = ViewModel.MovieLeftTime.ToShortString();
+            lbMovieElapsedTime.Content = ViewModel.MovieElapsedTime.ToShortString();
         }
         #endregion
 
@@ -207,7 +305,7 @@ namespace DQPlayer
             if (shown.HasValue && shown.Value)
             {
                 imgSplashScreen.Visibility = Visibility.Collapsed;
-                SetNewPlayerSource(new Uri(fileDialog.FileName));
+                PlayNewPlayerSource(new Uri(fileDialog.FileName));
             }
 
         }
@@ -229,7 +327,6 @@ namespace DQPlayer
         {
             if (Player.NaturalDuration.HasTimeSpan)
             {
-
                 sMovieSkipSlider.Maximum = Player.NaturalDuration.TimeSpan.TotalSeconds;
                 AlignTimersWithSource(new TimeSpan(0));
                 _currentMovieTimeTimer.Start();
@@ -269,64 +366,71 @@ namespace DQPlayer
         private void CurrentMovieTimeTimer_Tick(object sender, EventArgs e)
         {
             ViewModel.MovieElapsedTime = ViewModel.MovieElapsedTime.Add(_currentMovieTimeTimer.Interval);
-            _movieLeftTime = _movieLeftTime.Subtract(_currentMovieTimeTimer.Interval);
+            ViewModel.MovieLeftTime = ViewModel.MovieLeftTime.Subtract(_currentMovieTimeTimer.Interval);
             UpdateTimerLabels();
         }
 
         private void SMovieSkipSlider_OnLoaded(object sender, RoutedEventArgs e)
         {
-            var thumb = GetThumb(sMovieSkipSlider);
-            thumb.DragDelta += Thumb_DragDelta;
-            thumb.PreviewMouseDown += Thumb_MouseDown;
+            _movieSkipSliderTrack = GetTrack(sMovieSkipSlider);
+            _movieSkipSliderTrack.Thumb.DragDelta += Thumb_DragDelta;
+            _movieSkipSliderTrack.Thumb.MouseEnter += Thumb_MouseEnter;
         }
 
-        private void Thumb_MouseDown(object sender, MouseButtonEventArgs e)
+        private void Thumb_MouseEnter(object sender, MouseEventArgs e)
         {
-            if (e.ChangedButton == MouseButton.Left && e.ClickCount == 1)
+            if (e.LeftButton == MouseButtonState.Pressed && e.MouseDevice.Captured == null)
             {
-                lbTimeTooltip.Content = TimeSpan.FromSeconds(sMovieSkipSlider.Value).ToString(@"hh\:mm\:ss");
+                var args = new MouseButtonEventArgs(e.MouseDevice, e.Timestamp, MouseButton.Left)
+                {
+                    RoutedEvent = MouseLeftButtonDownEvent
+                };
+                _movieSkipSliderTrack.Thumb.RaiseEvent(args);
             }
         }
 
         private void Thumb_DragDelta(object sender, DragDeltaEventArgs e)
         {
-            lbTimeTooltip.Content = TimeSpan.FromSeconds(sMovieSkipSlider.Value).ToString(@"hh\:mm\:ss");
+            var mousePosition = new Point(Mouse.GetPosition(sMovieSkipSlider).X, 0);
+            var simulatedValue = SimulateTrackPosition(mousePosition, _movieSkipSliderTrack);
+            SetNewPlayerPosition(TimeSpan.FromSeconds(simulatedValue));
         }
 
-        private void SMovieSkipSlider_OnValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        private void SMovieSkipSlider_OnMouseEnter(object sender, MouseEventArgs e)
         {
-            if ((int)Math.Abs(e.NewValue - e.OldValue) != 1)
-            {
-                SetNewPlayerPosition(TimeSpan.FromSeconds(sMovieSkipSlider.Value));
-            }
+            lbTimeTooltip.Visibility = Visibility.Visible;
+            lbTimeTooltip.SetLeftMargin(Mouse.GetPosition(sMovieSkipSlider).X);
         }
+        private void SMovieSkipSlider_OnPreviewMouseMove(object sender, MouseEventArgs e)
+        {
+            double simulatedPosition = SimulateTrackPosition(e.GetPosition(sMovieSkipSlider), _movieSkipSliderTrack);
+            simulatedPosition = Math.Min(Math.Max(simulatedPosition, 0), sMovieSkipSlider.Maximum);
+            lbTimeTooltip.AddToLeftMargin(Mouse.GetPosition(sMovieSkipSlider).X - lbTimeTooltip.Margin.Left + 35);
+            lbTimeTooltip.Content = TimeSpan.FromSeconds(simulatedPosition).ToShortString();
+        }
+        private void SMovieSkipSlider_OnMouseLeave(object sender, MouseEventArgs e)
+        {
+            lbTimeTooltip.Visibility = Visibility.Hidden;
+        }
+
         private void imgSkipBack_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.ChangedButton == MouseButton.Left)
             {
-                if (ViewModel.MovieElapsedTime.Subtract(Settings.SkipSeconds).TotalSeconds >= 0)
-                {
-                    SetNewPlayerPosition(ViewModel.MovieElapsedTime.Subtract(Settings.SkipSeconds));
-                }
-                else
-                {
-                    SetNewPlayerPosition(new TimeSpan(0));
-                }
+                SetNewPlayerPosition(ViewModel.MovieElapsedTime.Subtract(Settings.SkipSeconds).TotalSeconds >= 0
+                    ? ViewModel.MovieElapsedTime.Subtract(Settings.SkipSeconds)
+                    : new TimeSpan(0));
             }
         }
         private void imgSkipForward_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.ChangedButton == MouseButton.Left)
             {
-                if (ViewModel.MovieElapsedTime.Add(Settings.SkipSeconds).TotalSeconds <= Player.NaturalDuration.TimeSpan.TotalSeconds)
-                {
-                    SetNewPlayerPosition(ViewModel.MovieElapsedTime.Add(Settings.SkipSeconds));
-                }
-                else
-                {
-                    SetNewPlayerPosition(Player.NaturalDuration.TimeSpan);
-                }
-
+                SetNewPlayerPosition(
+                    ViewModel.MovieElapsedTime.Add(Settings.SkipSeconds).TotalSeconds <=
+                    Player.NaturalDuration.TimeSpan.TotalSeconds
+                        ? ViewModel.MovieElapsedTime.Add(Settings.SkipSeconds)
+                        : Player.NaturalDuration.TimeSpan);
             }
         }
         private void imgStop_MouseDown(object sender, MouseButtonEventArgs e)
@@ -337,5 +441,13 @@ namespace DQPlayer
             }
         }
         #endregion
+
+        //pomaga pri testvane
+        protected void ClearOutput()
+        {
+            DTE2 ide = (DTE2)Marshal.GetActiveObject("VisualStudio.DTE.15.0");
+            ide.ToolWindows.OutputWindow.OutputWindowPanes.Item("Debug").Clear();
+            Marshal.ReleaseComObject(ide);
+        }
     }
 }

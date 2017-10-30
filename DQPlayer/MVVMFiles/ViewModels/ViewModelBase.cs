@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using DQPlayer.Annotations;
 
-namespace DQPlayer.ViewModels
+namespace DQPlayer.MVVMFiles.ViewModels
 {
     public class ViewModelBase : INotifyPropertyChanged
     {

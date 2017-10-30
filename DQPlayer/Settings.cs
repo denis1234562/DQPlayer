@@ -6,23 +6,30 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using static System.Windows.Interop.Imaging;
 
 namespace DQPlayer
 {
     public static class Settings
     {
         public static HashSet<string> AllowedExtensions { get; }
+
         public static Size MinimumWindowSize { get; }
+
         public static ImageSource SpashScreenImage { get; }
         public static ImageSource PlayImage { get; }
         public static ImageSource PauseImage { get; }
         public static ImageSource SkipBack { get; }
         public static ImageSource SkipForward { get; }
         public static ImageSource Stop { get; }
+
         public static TimeSpan SkipSeconds { get; }
+
+        public static TimeSpan TimerTickUpdate { get; }
 
         static Settings()
         {
+            TimerTickUpdate = TimeSpan.FromSeconds(1);
             SkipSeconds = TimeSpan.FromSeconds(10);
             AllowedExtensions = new HashSet<string>
             {
@@ -31,12 +38,27 @@ namespace DQPlayer
                 ".mp4"
             };
             MinimumWindowSize = new Size(600, 410);
-            SpashScreenImage = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(ResourceFiles.Strings.SpashScreenImage.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
-            PlayImage = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(ResourceFiles.Strings.PlayImage.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
-            PauseImage = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(ResourceFiles.Strings.PauseImage.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
-            SkipBack = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(ResourceFiles.Strings.SkipBackImage.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
-            SkipForward = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(ResourceFiles.Strings.SkipForwardImage.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
-            Stop = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(ResourceFiles.Strings.StopImage.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+            SpashScreenImage =
+                CreateBitmapSourceFromHBitmap(
+                    ResourceFiles.Strings.SplashScreenImage.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty,
+                    BitmapSizeOptions.FromEmptyOptions());
+            PlayImage = CreateBitmapSourceFromHBitmap(
+                ResourceFiles.Strings.PlayImage.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty,
+                BitmapSizeOptions.FromEmptyOptions());
+            PauseImage =
+                CreateBitmapSourceFromHBitmap(
+                    ResourceFiles.Strings.PauseImage.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty,
+                    BitmapSizeOptions.FromEmptyOptions());
+            SkipBack = CreateBitmapSourceFromHBitmap(
+                ResourceFiles.Strings.SkipBackImage.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty,
+                BitmapSizeOptions.FromEmptyOptions());
+            SkipForward =
+                CreateBitmapSourceFromHBitmap(
+                    ResourceFiles.Strings.SkipForwardImage.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty,
+                    BitmapSizeOptions.FromEmptyOptions());
+            Stop = CreateBitmapSourceFromHBitmap(
+                ResourceFiles.Strings.StopImage.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty,
+                BitmapSizeOptions.FromEmptyOptions());
         }
     }
 }
