@@ -37,6 +37,12 @@ namespace DQPlayer
     {
         //TODO some refactoring maybe with null checks
 
+        public static T GetElementFromTemplate<T>(this System.Windows.Controls.Control source, string name)
+            where T : UIElement
+        {
+            return source.Template.FindName(name, source) as T;
+        }
+
         public static void SetLeftMargin(this FrameworkElement target, double value)
         {
             target.Margin = new Thickness(value, target.Margin.Top, target.Margin.Right, target.Margin.Bottom);

@@ -135,7 +135,7 @@ namespace DQPlayer
         /// <returns>Returns the <see cref="Track"/> element from a specified <see cref="Slider"/> control.</returns>
         private static Track GetTrack(Slider slider)
         {
-            return slider.Template.FindName("PART_Track", slider) as Track;
+            return slider.GetElementFromTemplate<Track>("PART_Track");
         }
 
         /// <summary>
