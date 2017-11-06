@@ -6,17 +6,31 @@
         xmlns:local="clr-namespace:DQPlayer"
         xmlns:customControls="clr-namespace:DQPlayer.CustomControls"
         xmlns:viewModels="clr-namespace:DQPlayer.MVVMFiles.ViewModels"
-        xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+        xmlns:ia="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
         xmlns:ei="http://schemas.microsoft.com/expression/2010/interactions"
-mc:Ignorable="d"
+        xmlns:converters="clr-namespace:DQPlayer.MVVMFiles.Converters"
+        xmlns:res="clr-namespace:DQPlayer.ResourceFiles"
+        mc:Ignorable="d"
         Title="MainWindow" Height="410" Width="533.836" AllowDrop="True" Drop="Window_Drop"
         MinHeight="{Binding Source={x:Static local:Settings.MinimumWindowSize}, Path=Height}"
-        MinWidth="{Binding Source={x:Static local:Settings.MinimumWindowSize}, Path=Width}">
+        MinWidth="{Binding Source={x:Static local:Settings.MinimumWindowSize}, Path=Width}"
+        >
     <Window.DataContext>
         <viewModels:VideoPlayerViewModel/>
     </Window.DataContext>
 
     <Window.Resources>
+        <Style x:Key="TransparentStyle" TargetType="{x:Type Button}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="Transparent">
+                            <ContentPresenter/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
         <SolidColorBrush x:Key="HorizontalSliderThumbHoverBorder" Color="#3C7FB1"/>
         <SolidColorBrush x:Key="HorizontalSliderThumbPressedBorder" Color="#2C628B"/>
         <Geometry x:Key="SliderThumbDisabledGeometry">M -5,-10.5 L 5,-10.5 L 5,10.5 L -5,10.5 Z</Geometry>
@@ -136,25 +150,46 @@ mc:Ignorable="d"
     </Window.Resources>
 
     <Grid AllowDrop="True">
-        <MediaElement Name="Player" Margin="0,0,0,117"
+        <ia:Interaction.Triggers>
+            <ia:EventTrigger EventName="Loaded">
+                <ia:InvokeCommandAction Command="{Binding LoadedCommand}" CommandParameter="{Binding ElementName=Window}"></ia:InvokeCommandAction>
+            </ia:EventTrigger>
+        </ia:Interaction.Triggers>
+        <MediaElement x:Name="Player" Margin="0,0,0,117"                    
                       MediaOpened="Player_OnMediaOpened" Stretch="Fill"
                       MediaEnded="Player_OnMediaEnded"
-                      MouseDown="Player_OnMouseDown"/>
-        <Image Name="imgSplashScreen" Margin="0,0,0,117" Stretch="Fill" />
+                      MouseDown="Player_OnMouseDown">
+        </MediaElement>
+        
+        <Image Name="imgSplashScreen" Margin="0,0,0,117" Stretch="Fill" Source="pack://application:,,,/bin/Debug/Assets/SplashScreen.jpg"/>
 
-        <Image Name="imgChangePlayerState" HorizontalAlignment="Left" Height="40" Margin="10,0,0,10" VerticalAlignment="Bottom" Width="40" Source="bin/Debug/Assets/Play.jpeg"
-               MouseDown="imgChangePlayerState_OnMouseDown"/>
+        <Image Name="imgChangePlayerState" HorizontalAlignment="Left" Height="40" Margin="10,0,0,10" VerticalAlignment="Bottom" Width="40"
+               IsEnabled="{Binding PlayerSourceState}"
+               Source="{Binding IsPlaying}"
+               MouseLeftButtonDown="imgChangePlayerState_OnMouseDown"/>
 
-        <Image Name="imgStop" HorizontalAlignment="Left" Height="40" Margin="50,0,0,10" VerticalAlignment="Bottom" Width="40" Source="bin/Debug/Assets/Stop.jpeg"
-               MouseDown="imgStop_MouseDown"/>
+        <Button Name="bStop"  HorizontalAlignment="Left" Height="40" Margin="50,0,0,10" VerticalAlignment="Bottom" Width="40"
+                IsEnabled="{Binding PlayerSourceState}"
+                Command="{Binding StopCommand}"
+                Style="{StaticResource TransparentStyle}">
+            <Image Source="pack://application:,,,/bin/Debug/Assets/Stop.jpeg"/>
+        </Button>
 
-        <Image Name="imgSkipBack" HorizontalAlignment="Left" Height="40" Margin="90,0,0,10" VerticalAlignment="Bottom" Width="40" Source="bin/Debug/Assets/SkipBack.jpeg"
-               MouseDown="imgSkipBack_MouseDown"/>
+        <Button Name="bRewind" HorizontalAlignment="Left" Height="40" Margin="90,0,0,10" VerticalAlignment="Bottom" Width="40"
+                IsEnabled="{Binding PlayerSourceState}"
+                Command="{Binding RewindCommand}"
+                Style="{StaticResource TransparentStyle}">
+            <Image Source="pack://application:,,,/bin/Debug/Assets/SkipBack.jpeg"/>
+        </Button>
 
-        <Image Name="imgSkipForward" HorizontalAlignment="Left" Height="40" Margin="130,0,0,10" VerticalAlignment="Bottom" Width="40" Source="bin/Debug/Assets/SkipForward.jpeg"
-               MouseDown="imgSkipForward_MouseDown"/>
+        <Button Name="bFastForward" HorizontalAlignment="Left" Height="40" Margin="130,0,0,10" VerticalAlignment="Bottom" Width="40"
+                IsEnabled="{Binding PlayerSourceState}"
+                Command="{Binding FastForwardCommand}"
+                Style="{StaticResource TransparentStyle}">
+            <Image Source="pack://application:,,,/bin/Debug/Assets/SkipForward.jpeg"/>
+        </Button>
 
-        <Button Name ="bBrowse" Content="Loading.." Margin="0,0,10,10" VerticalAlignment="Bottom" 
+        <Button Name ="bBrowse" Content="{x:Static res:Strings.Browse}" Margin="0,0,10,10" VerticalAlignment="Bottom" 
                 Click="bBrowse_Click" HorizontalAlignment="Right" Width="76"/>
 
         <Slider Name="sVolumeSlider" Minimum="0" Maximum="1" HorizontalAlignment="Right" Margin="0,0,10,46" VerticalAlignment="Bottom" Width="100"
@@ -162,18 +197,27 @@ mc:Ignorable="d"
                 Value="{Binding ElementName=Player, Path=Volume}"/>
 
         <customControls:ThumbDragSlider x:Name="sMovieSkipSlider" Height="22" Margin="65,0,65,74" VerticalAlignment="Bottom" IsMoveToPointEnabled="True"
+                IsEnabled="{Binding PlayerSourceState}"
                 Style="{DynamicResource BasicSliderStyle}"
-                Value="{Binding MovieElapsedTime.TotalSeconds, Mode=OneWay}"
+                Value="{Binding ElementName=Player, Path=Position, Mode=OneWay, Converter={converters:SecondsToTimeSpanConverter}}"
+                Maximum="0"
                 DragStarted="SMovieSkipSlider_OnDragStarted"
                 DragCompleted="SMovieSkipSlider_OnDragCompleted"
                 Loaded="SMovieSkipSlider_OnLoaded"
                 MouseEnter="SMovieSkipSlider_OnMouseEnter"
                 MouseMove="SMovieSkipSlider_OnPreviewMouseMove"
                 MouseLeave="SMovieSkipSlider_OnMouseLeave">
-        </customControls:ThumbDragSlider>
-        <Label Name="lbMovieElapsedTime" Content="--:--" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="-12,0,0,74" VerticalAlignment="Bottom" Width="67"/>
-        <Label Name="lbMovieTimeLeft" Content="--:--" HorizontalContentAlignment="Left" HorizontalAlignment="Right" Margin="0,0,-7,74" VerticalAlignment="Bottom" Width="67"/>
-        <Label Name="lbTimeTooltip" Content="01:20:34" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" HorizontalAlignment="Left" Margin="124,0,0,95" VerticalAlignment="Bottom" Height="23" FontSize="12" Width="57"/>
 
+        </customControls:ThumbDragSlider>
+        <Label Name="lbMovieElapsedTime" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="-12,0,0,74" VerticalAlignment="Bottom" Width="67"
+               Content="{Binding ElementName=sMovieSkipSlider, Path=Value, Converter={converters:SecondsToFormattedTimeSpan} }">
+        </Label>
+        <Label Name="lbMovieTimeLeft" HorizontalContentAlignment="Left" HorizontalAlignment="Right" Margin="0,0,-7,74" VerticalAlignment="Bottom" Width="67">
+            <Label.Content>
+                <Binding ElementName="sMovieSkipSlider" Path="Value" Converter="{converters:LeftTimeConverter}"
+                         ConverterParameter="{x:Reference sMovieSkipSlider}" Mode="OneWay"/>
+            </Label.Content>
+        </Label>
+        <Label Name="lbTimeTooltip" Content="01:20:34" Visibility="Hidden" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" HorizontalAlignment="Left" Margin="124,0,0,95" VerticalAlignment="Bottom" Height="23" FontSize="12" Width="57"/>
     </Grid>
 </Window>

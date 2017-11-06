@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 
 namespace DQPlayer
 {
@@ -12,6 +14,78 @@ namespace DQPlayer
         public static StringBuilder Prepend(this StringBuilder sb, string content)
         {
             return sb.Insert(0, content);
+        }
+
+        public static T Min<T>(params T[] values)
+        {
+            if (values == null) throw new ArgumentNullException(nameof(values));
+            var comparer = Comparer<T>.Default;
+            switch (values.Length)
+            {
+                case 0: throw new ArgumentException();
+                case 1: return values[0];
+                case 2:
+                    return comparer.Compare(values[0], values[1]) < 0
+                        ? values[0]
+                        : values[1];
+                default:
+                    T best = values[0];
+                    for (int i = 1; i < values.Length; i++)
+                    {
+                        if (comparer.Compare(values[i], best) < 0)
+                        {
+                            best = values[i];
+                        }
+                    }
+                    return best;
+            }
+        }
+
+        public static T Max<T>(params T[] values)
+        {
+            if (values == null) throw new ArgumentNullException(nameof(values));
+            var comparer = Comparer<T>.Default;
+            switch (values.Length)
+            {
+                case 0: throw new ArgumentException();
+                case 1: return values[0];
+                case 2:
+                    return comparer.Compare(values[0], values[1]) > 0
+                        ? values[0]
+                        : values[1];
+                default:
+                    T best = values[0];
+                    for (int i = 1; i < values.Length; i++)
+                    {
+                        if (comparer.Compare(values[i], best) > 0)
+                        {
+                            best = values[i];
+                        }
+                    }
+                    return best;
+            }
+        }
+
+        public static T SerializedClone<T>(this T source)
+        {
+            if (!typeof(T).IsSerializable)
+            {
+                throw new ArgumentException(@"The type must be serializable.", nameof(source));
+            }
+
+            if (ReferenceEquals(source, null))
+            {
+                return default(T);
+            }
+
+            BinaryFormatter formatter = new BinaryFormatter();
+            MemoryStream stream = new MemoryStream();
+            using (stream)
+            {
+                formatter.Serialize(stream, source);
+                stream.Position = 0;
+                return (T)formatter.Deserialize(stream);
+            }
         }
     }
 
@@ -36,6 +110,21 @@ namespace DQPlayer
     public static class UIElementsExtensions
     {
         //TODO some refactoring maybe with null checks
+
+        public static double CalculateTrackDensity(this Track track)
+        {
+            double effectivePoints = Math.Max(0, track.Maximum - track.Minimum);
+            double effectiveLength = track.Orientation == Orientation.Horizontal
+                ? track.ActualWidth - track.Thumb.DesiredSize.Width
+                : track.ActualHeight - track.Thumb.DesiredSize.Height;
+            return effectivePoints / effectiveLength;
+        }
+
+        public static double SimulateTrackPosition(this Track track, Point point)
+        {
+            var simulatedPosition = (point.X - track.Thumb.DesiredSize.Width / 2) * CalculateTrackDensity(track);
+            return Math.Min(Math.Max(simulatedPosition, 0), track.Maximum);
+        }
 
         public static T GetElementFromTemplate<T>(this System.Windows.Controls.Control source, string name)
             where T : UIElement

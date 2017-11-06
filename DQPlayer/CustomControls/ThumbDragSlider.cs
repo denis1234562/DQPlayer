@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
-using System.Windows.Input;
 
 namespace DQPlayer.CustomControls
 {
@@ -10,6 +9,12 @@ namespace DQPlayer.CustomControls
         public event DragStartedEventHandler DragStarted;
         public event DragDeltaEventHandler DragDelta;
         public event DragCompletedEventHandler DragCompleted;
+
+        public new TimeSpan Value
+        {
+            get => TimeSpan.FromSeconds(base.Value);
+            set => base.Value = value.TotalSeconds;
+        }
 
         protected override void OnThumbDragStarted(DragStartedEventArgs e)
         {
