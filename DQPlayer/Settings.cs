@@ -7,6 +7,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using DQPlayer.ControlTemplates;
 using DQPlayer.CustomControls;
+using DQPlayer.Helpers;
+using DQPlayer.ResourceFiles;
 using static System.Windows.Interop.Imaging;
 using Size = System.Windows.Size;
 
@@ -14,7 +16,8 @@ namespace DQPlayer
 {
     public static class Settings
     {
-        public static HashSet<string> AllowedExtensions { get; }
+        public static FileExtensionPackage MediaPlayerExtensionPackage { get; }
+        public static FilePickerFilter MediaPlayerExtensionPackageFilter { get; }
 
         public static Size MinimumWindowSize { get; }
 
@@ -35,13 +38,15 @@ namespace DQPlayer
         {
             TimerTickUpdate = TimeSpan.FromSeconds(0.25);
             SkipSeconds = TimeSpan.FromSeconds(10);
-            AllowedExtensions = new HashSet<string>
-            {
-                ".mp3",
-                ".mkv",
-                ".mp4"
-            };
             MinimumWindowSize = new Size(600, 410);
+
+            MediaPlayerExtensionPackage = new FileExtensionPackage(Strings.MediaFiles, new HashSet<FileExtension>
+            {
+                new FileExtension(".mkv", Strings.MatrioshkaFile),
+                new FileExtension(".mp3", Strings.MusicFile),
+                new FileExtension(".mp4", Strings.MovieFile),
+            });
+            MediaPlayerExtensionPackageFilter = new FilePickerFilter(MediaPlayerExtensionPackage);
 
             var mediaTemplate = new ControlTemplate<MediaElement>()
                 .WithArgument(m => m.ScrubbingEnabled = true)
@@ -50,12 +55,12 @@ namespace DQPlayer
                 .WithArgument(m => m.Volume = 0);
             MediaPlayerTemplate = new ControlTemplateCreator<MediaElement>(mediaTemplate);
 
-            SpashScreenImage = ExtractImageSourceFromBitmap(ResourceFiles.Strings.SplashScreenImage);
-            PlayImage = ExtractImageSourceFromBitmap(ResourceFiles.Strings.PlayImage);
-            PauseImage = ExtractImageSourceFromBitmap(ResourceFiles.Strings.PauseImage);
-            SkipBack = ExtractImageSourceFromBitmap(ResourceFiles.Strings.SkipBackImage);
-            SkipForward = ExtractImageSourceFromBitmap(ResourceFiles.Strings.SkipForwardImage);
-            Stop = ExtractImageSourceFromBitmap(ResourceFiles.Strings.StopImage);
+            SpashScreenImage = ExtractImageSourceFromBitmap(Strings.SplashScreenImage);
+            PlayImage = ExtractImageSourceFromBitmap(Strings.PlayImage);
+            PauseImage = ExtractImageSourceFromBitmap(Strings.PauseImage);
+            SkipBack = ExtractImageSourceFromBitmap(Strings.SkipBackImage);
+            SkipForward = ExtractImageSourceFromBitmap(Strings.SkipForwardImage);
+            Stop = ExtractImageSourceFromBitmap(Strings.StopImage);
         }
 
         private static ImageSource ExtractImageSourceFromBitmap(Bitmap bitmap)

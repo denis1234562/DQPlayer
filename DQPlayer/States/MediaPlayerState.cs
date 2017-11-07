@@ -22,9 +22,9 @@ namespace DQPlayer.States
             _mediaServiceAction = mediaServiceAction;
         }
 
-        public void StateAction(IRegulatableMediaPlayer player)
+        public void StateAction(IRegulatableMediaService service)
         {
-            _mediaServiceAction?.Invoke(player.MediaController);
+            _mediaServiceAction?.Invoke(service);
         }
     }
 }

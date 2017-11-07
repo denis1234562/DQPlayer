@@ -70,6 +70,51 @@ namespace DQPlayer.ResourceFiles {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid file type..
+        /// </summary>
+        public static string InvalidFileType {
+            get {
+                return ResourceManager.GetString("InvalidFileType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Matrioshka file.
+        /// </summary>
+        public static string MatrioshkaFile {
+            get {
+                return ResourceManager.GetString("MatrioshkaFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Media files.
+        /// </summary>
+        public static string MediaFiles {
+            get {
+                return ResourceManager.GetString("MediaFiles", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Movie file.
+        /// </summary>
+        public static string MovieFile {
+            get {
+                return ResourceManager.GetString("MovieFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Music file.
+        /// </summary>
+        public static string MusicFile {
+            get {
+                return ResourceManager.GetString("MusicFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Pause.
         /// </summary>
         public static string Pause {

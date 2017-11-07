@@ -64,6 +64,7 @@ namespace DQPlayer.MVVMFiles.ViewModels
         public bool PlayerSourceState => MediaPlayer?.CurrentState != null &&
                                          !MediaPlayer.CurrentState.Equals(MediaPlayerStates.None);
 
+        //TODO REMOVE!
         public ImageSource IsPlaying
         {
             get

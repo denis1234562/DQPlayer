@@ -86,6 +86,10 @@
     <Compile Include="ControlTemplates\ControlTemplateCreator.cs" />
     <Compile Include="CustomControls\ThumbDragSlider.cs" />
     <Compile Include="Extensions.cs" />
+    <Compile Include="Helpers\FileExtension.cs" />
+    <Compile Include="Helpers\FileExtensionPackage.cs" />
+    <Compile Include="Helpers\FileDropHandler.cs" />
+    <Compile Include="Helpers\FilePickerFilter.cs" />
     <Compile Include="MVVMFiles\Converters\LeftTimeConverter.cs" />
     <Compile Include="MVVMFiles\Converters\SecondsToFormattedTimeSpan.cs" />
     <Compile Include="MVVMFiles\Converters\SecondsToTimeSpanConverter.cs" />
@@ -100,7 +104,7 @@
     <Compile Include="MVVMFiles\Commands\RelayCommand.cs" />
     <Compile Include="MVVMFiles\Converters\BaseConverter.cs" />
     <Compile Include="MVVMFiles\Converters\TimeSpanFormatConverter.cs" />
-    <Compile Include="States\PlayerState.cs" />
+    <Compile Include="States\BaseState.cs" />
     <Compile Include="States\MediaPlayerStates.cs" />
     <Compile Include="Properties\Annotations.cs" />
     <Compile Include="ResourceFiles\Strings.Designer.cs">
@@ -168,10 +172,10 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <None Include="bin\Debug\Assets\Pause.jpeg" />
+    <Resource Include="bin\Debug\Assets\Pause.jpeg" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="bin\Debug\Assets\Play.jpeg" />
+    <Resource Include="bin\Debug\Assets\Play.jpeg" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="bin\Debug\Assets\SkipBack.jpeg" />

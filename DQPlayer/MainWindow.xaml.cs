@@ -7,9 +7,11 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
 using DQPlayer.CustomControls;
+using DQPlayer.Helpers;
 using DQPlayer.MVVMFiles.Converters;
 using DQPlayer.MVVMFiles.Models.MediaPlayer;
 using DQPlayer.MVVMFiles.ViewModels;
+using DQPlayer.ResourceFiles;
 using DQPlayer.States;
 using Point = System.Windows.Point;
 
@@ -17,7 +19,9 @@ namespace DQPlayer
 {
     public partial class MainWindow
     {
-        private MediaPlayerState _lastState = MediaPlayerStates.Pause;
+        private readonly FileDropHandler _fileDropHandler = new FileDropHandler();
+
+        private MediaPlayerState _lastState = MediaPlayerStates.None;
 
         private Track _movieSkipSliderTrack;
 
@@ -93,6 +97,7 @@ namespace DQPlayer
 
         private void PlayNewPlayerSource(Uri source)
         {
+            imgSplashScreen.Visibility = Visibility.Collapsed;
             SetNewPlayerSource(source);
             ViewModel.MediaPlayer.SetMediaState(MediaPlayerStates.Play);
         }
@@ -112,32 +117,22 @@ namespace DQPlayer
         {
             var fileDialog = new OpenFileDialog
             {
-                Filter = $"Media files ({string.Join(",", Settings.AllowedExtensions.Select(ae => "*" + ae))})|" +
-                         $"{string.Join(";", Settings.AllowedExtensions.Select(ae => "*" + ae))}|" +
-                         "Matrioshka files (*.mkv)|*.mkv|" +
-                         "Music files (*.mp3)|*.mp3|" +
-                         "Movie files (*.mp4)|*.mp4"
+                Filter = Settings.MediaPlayerExtensionPackageFilter.Filter
             };
-            var shown = fileDialog.ShowDialog();
-            if (shown.HasValue && shown.Value)
+            if (fileDialog.ShowDialog().GetValueOrDefault())
             {
-                imgSplashScreen.Visibility = Visibility.Collapsed;
                 PlayNewPlayerSource(new Uri(fileDialog.FileName));
             }
         }
 
         private void Window_Drop(object sender, DragEventArgs e)
         {
-            var filePath = ((DataObject) e.Data).GetFileDropList()[0];
-            var fileExtension = filePath.Substring(filePath.LastIndexOf(".", StringComparison.Ordinal));
-            if (!Settings.AllowedExtensions.Contains(fileExtension))
+            if (_fileDropHandler.TryExtractDroppedItemUri(e, Settings.MediaPlayerExtensionPackage, out var uri))
             {
-                MessageBox.Show(this,
-                    $"Invalid file extension! Allowed file types are: {string.Join(",", Settings.AllowedExtensions)}",
-                    "Error");
+                PlayNewPlayerSource(uri);
                 return;
             }
-            PlayNewPlayerSource(new Uri(filePath));
+            MessageBox.Show($"{Strings.InvalidFileType}", "Error");
         }
 
         private void Player_OnMediaOpened(object sender, RoutedEventArgs e)

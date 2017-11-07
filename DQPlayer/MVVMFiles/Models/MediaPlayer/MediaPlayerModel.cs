@@ -48,7 +48,7 @@ namespace DQPlayer.MVVMFiles.Models.MediaPlayer
         public void SetMediaState(MediaPlayerState state)
         {
             CurrentState = state;
-            CurrentState.StateAction(this);
+            CurrentState.StateAction(MediaController);
         }
     }
 }

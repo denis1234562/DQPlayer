@@ -120,6 +120,21 @@
   <data name="Browse" xml:space="preserve">
     <value>Разгледай</value>
   </data>
+  <data name="InvalidFileType" xml:space="preserve">
+    <value>Невалиден тип файл.</value>
+  </data>
+  <data name="MatrioshkaFile" xml:space="preserve">
+    <value>Mатрьошка файл</value>
+  </data>
+  <data name="MediaFiles" xml:space="preserve">
+    <value>Медийни файлове</value>
+  </data>
+  <data name="MovieFile" xml:space="preserve">
+    <value>Филмов файл</value>
+  </data>
+  <data name="MusicFile" xml:space="preserve">
+    <value>Музикален файл</value>
+  </data>
   <data name="Pause" xml:space="preserve">
     <value>Пауза</value>
   </data>
