@@ -44,12 +44,12 @@ namespace DQPlayer.MVVMFiles.Models.MediaPlayer
 
         public void Rewind()
         {
-            SetNewPlayerPosition(Extensions.Max(_mediaElement.Position.Subtract(Settings.SkipSeconds), new TimeSpan(0)));
+            SetNewPlayerPosition(Extensions.GeneralExtensions.Max(_mediaElement.Position.Subtract(Settings.SkipSeconds), new TimeSpan(0)));
         }
 
         public void FastForward()
         {
-            SetNewPlayerPosition(Extensions.Min(_mediaElement.NaturalDuration.TimeSpan,
+            SetNewPlayerPosition(Extensions.GeneralExtensions.Min(_mediaElement.NaturalDuration.TimeSpan,
                 _mediaElement.Position.Add(Settings.SkipSeconds)));
         }
 
@@ -57,6 +57,12 @@ namespace DQPlayer.MVVMFiles.Models.MediaPlayer
         {
             _mediaElement.Position = newPosition;
             _media.MediaSlider.Value = newPosition;
+        }
+
+        public void SetNewPlayerSource(Uri source)
+        {
+            _mediaElement.Source = source;
+            _media.MediaSlider.Value = new TimeSpan(0);
         }
     }
 }

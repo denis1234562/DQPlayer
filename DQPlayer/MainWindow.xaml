@@ -10,6 +10,7 @@
         xmlns:ei="http://schemas.microsoft.com/expression/2010/interactions"
         xmlns:converters="clr-namespace:DQPlayer.MVVMFiles.Converters"
         xmlns:res="clr-namespace:DQPlayer.ResourceFiles"
+        xmlns:system="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
         Title="MainWindow" Height="410" Width="533.836" AllowDrop="True" Drop="Window_Drop"
         MinHeight="{Binding Source={x:Static local:Settings.MinimumWindowSize}, Path=Height}"
@@ -20,6 +21,9 @@
     </Window.DataContext>
 
     <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+        <system:Boolean x:Key="FalseValue">False</system:Boolean>
+        <system:Boolean x:Key="TrueValue">True</system:Boolean>
         <Style x:Key="TransparentStyle" TargetType="{x:Type Button}">
             <Setter Property="Template">
                 <Setter.Value>
@@ -155,18 +159,31 @@
                 <ia:InvokeCommandAction Command="{Binding LoadedCommand}" CommandParameter="{Binding ElementName=Window}"></ia:InvokeCommandAction>
             </ia:EventTrigger>
         </ia:Interaction.Triggers>
+        
         <MediaElement x:Name="Player" Margin="0,0,0,117"                    
                       MediaOpened="Player_OnMediaOpened" Stretch="Fill"
                       MediaEnded="Player_OnMediaEnded"
                       MouseDown="Player_OnMouseDown">
         </MediaElement>
-        
-        <Image Name="imgSplashScreen" Margin="0,0,0,117" Stretch="Fill" Source="pack://application:,,,/bin/Debug/Assets/SplashScreen.jpg"/>
 
-        <Image Name="imgChangePlayerState" HorizontalAlignment="Left" Height="40" Margin="10,0,0,10" VerticalAlignment="Bottom" Width="40"
-               IsEnabled="{Binding PlayerSourceState}"
-               Source="{Binding IsPlaying}"
-               MouseLeftButtonDown="imgChangePlayerState_OnMouseDown"/>
+        <Image Name="imgSplashScreen" Margin="0,0,0,117" Stretch="Fill" Source="pack://application:,,,/bin/Debug/Assets/SplashScreen.jpg"
+               Visibility="{Binding PlayerSourceState, Converter={converters:InverseBooleanToVisibilityConverter}}"/>
+
+        <Button Name="bPause" HorizontalAlignment="Left" Height="40" Margin="10,0,0,10" VerticalAlignment="Bottom" Width="40"
+                IsEnabled="{Binding PlayerSourceState}"
+                Command="{Binding PauseCommand}"
+                Style="{StaticResource TransparentStyle}"
+                Visibility="{Binding MediaPlayer, Converter={converters:MediaButtonsVisibilityConverter}, ConverterParameter={StaticResource FalseValue}}">
+            <Image Source="pack://application:,,,/bin/Debug/Assets/Pause.jpeg"/>
+        </Button>
+
+        <Button Name="bPlay" HorizontalAlignment="Left" Height="40" Margin="10,0,0,10" VerticalAlignment="Bottom" Width="40"
+                IsEnabled="{Binding PlayerSourceState}"
+                Command="{Binding PlayCommand}"
+                Style="{StaticResource TransparentStyle}"
+                Visibility="{Binding MediaPlayer, Converter={converters:MediaButtonsVisibilityConverter}, ConverterParameter={StaticResource TrueValue}}">
+            <Image Source="pack://application:,,,/bin/Debug/Assets/Play.jpeg"/>
+        </Button>
 
         <Button Name="bStop"  HorizontalAlignment="Left" Height="40" Margin="50,0,0,10" VerticalAlignment="Bottom" Width="40"
                 IsEnabled="{Binding PlayerSourceState}"

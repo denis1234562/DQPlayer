@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows.Data;
 using DQPlayer.CustomControls;
+using DQPlayer.Extensions;
 
 namespace DQPlayer.MVVMFiles.Converters
 {

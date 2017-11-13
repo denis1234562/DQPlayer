@@ -1,19 +1,15 @@
 ﻿using System;
 using System.Windows;
-using System.Windows.Controls;
 using Microsoft.Win32;
-using System.Linq;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
-using DQPlayer.CustomControls;
+using DQPlayer.Extensions;
 using DQPlayer.Helpers;
-using DQPlayer.MVVMFiles.Converters;
 using DQPlayer.MVVMFiles.Models.MediaPlayer;
 using DQPlayer.MVVMFiles.ViewModels;
 using DQPlayer.ResourceFiles;
 using DQPlayer.States;
-using Point = System.Windows.Point;
 
 namespace DQPlayer
 {
@@ -29,7 +25,7 @@ namespace DQPlayer
 
         public MediaPlayerModel MediaPlayer
         {
-            get => (MediaPlayerModel)GetValue(MediaPlayerProperty);
+            get => (MediaPlayerModel) GetValue(MediaPlayerProperty);
             set => SetValue(MediaPlayerProperty, value);
         }
 
@@ -55,7 +51,7 @@ namespace DQPlayer
         private void SetupBindings()
         {
             SetBinding(MediaPlayerProperty,
-                new Binding { Path = new PropertyPath("MediaPlayer"), Mode = BindingMode.OneWayToSource });
+                new Binding {Path = new PropertyPath("MediaPlayer"), Mode = BindingMode.OneWayToSource});
             MediaPlayer = new MediaPlayerModel(sMovieSkipSlider);
             MediaPlayer.MediaController = new RegulatableMediaService(Player, MediaPlayer);
         }
@@ -82,36 +78,9 @@ namespace DQPlayer
             WindowStyle = WindowStyle.SingleBorderWindow;
         }
 
-        private void SetPlayerPositionToCursor()
-        {
-            Point mousePosition = new Point(Mouse.GetPosition(sMovieSkipSlider).X, 0);
-            double simulatedValue = _movieSkipSliderTrack.SimulateTrackPosition(mousePosition);
-            ViewModel.MediaPlayer.MediaController.SetNewPlayerPosition(TimeSpan.FromSeconds(simulatedValue));
-        }
-
-        private void SetNewPlayerSource(Uri source)
-        {
-            Player.Source = source;
-            sMovieSkipSlider.Value = new TimeSpan(0);
-        }
-
-        private void PlayNewPlayerSource(Uri source)
-        {
-            imgSplashScreen.Visibility = Visibility.Collapsed;
-            SetNewPlayerSource(source);
-            ViewModel.MediaPlayer.SetMediaState(MediaPlayerStates.Play);
-        }
-
         #endregion
 
         #region Event Handlers
-
-        private void imgChangePlayerState_OnMouseDown(object sender, MouseButtonEventArgs e)
-        {
-            ViewModel.MediaPlayer.SetMediaState(Equals(ViewModel.MediaPlayer.CurrentState, MediaPlayerStates.Play)
-                ? MediaPlayerStates.Pause
-                : MediaPlayerStates.Play);
-        }
 
         private void bBrowse_Click(object sender, RoutedEventArgs e)
         {
@@ -121,7 +90,7 @@ namespace DQPlayer
             };
             if (fileDialog.ShowDialog().GetValueOrDefault())
             {
-                PlayNewPlayerSource(new Uri(fileDialog.FileName));
+                ViewModel.MediaPlayer.PlayNewPlayerSource(new Uri(fileDialog.FileName));
             }
         }
 
@@ -129,7 +98,7 @@ namespace DQPlayer
         {
             if (_fileDropHandler.TryExtractDroppedItemUri(e, Settings.MediaPlayerExtensionPackage, out var uri))
             {
-                PlayNewPlayerSource(uri);
+                ViewModel.MediaPlayer.PlayNewPlayerSource(uri);
                 return;
             }
             MessageBox.Show($"{Strings.InvalidFileType}", "Error");
@@ -138,7 +107,7 @@ namespace DQPlayer
         private void Player_OnMediaOpened(object sender, RoutedEventArgs e)
         {
             sMovieSkipSlider.SetBinding(RangeBase.MaximumProperty,
-                new Binding("TotalSeconds") {Source = Player.NaturalDuration.TimeSpan});           
+                new Binding("TotalSeconds") {Source = Player.NaturalDuration.TimeSpan});
         }
 
         private void Player_OnMediaEnded(object sender, RoutedEventArgs e)
@@ -175,7 +144,7 @@ namespace DQPlayer
 
         private void CurrentMovieTimeTimer_Tick(object sender, EventArgs e)
         {
-            sMovieSkipSlider.Value = sMovieSkipSlider.Value.Add(ViewModel.MediaPlayer.MediaPlayerTimer.Interval);            
+            sMovieSkipSlider.Value = sMovieSkipSlider.Value.Add(ViewModel.MediaPlayer.MediaPlayerTimer.Interval);
         }
 
         private void SMovieSkipSlider_OnLoaded(object sender, RoutedEventArgs e)
@@ -193,14 +162,14 @@ namespace DQPlayer
                 {
                     RoutedEvent = MouseLeftButtonDownEvent
                 };
-                SetPlayerPositionToCursor();
+                ViewModel.MediaPlayer.SetPlayerPositionToCursor();
                 _movieSkipSliderTrack.Thumb.RaiseEvent(args);
             }
         }
 
         private void Thumb_DragDelta(object sender, DragDeltaEventArgs e)
         {
-            SetPlayerPositionToCursor();
+            ViewModel.MediaPlayer.SetPlayerPositionToCursor();
         }
 
         private void SMovieSkipSlider_OnMouseEnter(object sender, MouseEventArgs e)
