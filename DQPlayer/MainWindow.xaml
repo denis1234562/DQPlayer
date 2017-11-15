@@ -12,7 +12,7 @@
         xmlns:res="clr-namespace:DQPlayer.ResourceFiles"
         xmlns:system="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
-        Title="MainWindow" Height="410" Width="533.836" AllowDrop="True" Drop="Window_Drop"
+        Title="MainWindow" Height="410" Width="533.836" AllowDrop="True" Drop="Window_Drop" 
         MinHeight="{Binding Source={x:Static local:Settings.MinimumWindowSize}, Path=Height}"
         MinWidth="{Binding Source={x:Static local:Settings.MinimumWindowSize}, Path=Width}"
         >
@@ -159,11 +159,15 @@
                 <ia:InvokeCommandAction Command="{Binding LoadedCommand}" CommandParameter="{Binding ElementName=Window}"></ia:InvokeCommandAction>
             </ia:EventTrigger>
         </ia:Interaction.Triggers>
-        
+
         <MediaElement x:Name="Player" Margin="0,0,0,117"                    
                       MediaOpened="Player_OnMediaOpened" Stretch="Fill"
-                      MediaEnded="Player_OnMediaEnded"
                       MouseDown="Player_OnMouseDown">
+            <ia:Interaction.Triggers>
+                <ia:EventTrigger EventName="MediaEnded">
+                    <ia:InvokeCommandAction Command="{Binding StopCommand}"></ia:InvokeCommandAction>
+                </ia:EventTrigger>
+            </ia:Interaction.Triggers>
         </MediaElement>
 
         <Image Name="imgSplashScreen" Margin="0,0,0,117" Stretch="Fill" Source="pack://application:,,,/bin/Debug/Assets/SplashScreen.jpg"
@@ -212,8 +216,9 @@
             <Image Source="pack://application:,,,/bin/Debug/Assets/SkipForward.jpeg"/>
         </Button>
 
-        <Button Name ="bBrowse" Content="{x:Static res:Strings.Browse}" Margin="0,0,10,10" VerticalAlignment="Bottom" 
-                Click="bBrowse_Click" HorizontalAlignment="Right" Width="76"/>
+        <Button Name ="bBrowse" Margin="0,0,10,10" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="76"
+                Content="{x:Static res:Strings.Browse}"
+                Command="{Binding BrowseCommand}" />
 
         <Slider Name="sVolumeSlider" Minimum="0" Maximum="1" HorizontalAlignment="Right" Margin="0,0,10,46" VerticalAlignment="Bottom" Width="100"
                 Style="{DynamicResource BasicSliderStyle}"

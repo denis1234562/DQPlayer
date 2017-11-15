@@ -8,6 +8,10 @@ using DQPlayer.Extensions;
 using DQPlayer.MVVMFiles.Commands;
 using DQPlayer.MVVMFiles.Models.MediaPlayer;
 using DQPlayer.States;
+using Microsoft.Win32;
+using DQPlayer.Helpers;
+using System.Windows;
+using DQPlayer.ResourceFiles;
 
 namespace DQPlayer.MVVMFiles.ViewModels
 {
@@ -34,6 +38,9 @@ namespace DQPlayer.MVVMFiles.ViewModels
         private readonly Lazy<RelayCommand> _fastForwardCommand;
         public RelayCommand FastForwardCommand => _fastForwardCommand.Value;
 
+        private readonly Lazy<RelayCommand> _browseCommand;
+        public RelayCommand BrowseCommand => _browseCommand.Value;
+
         public VideoPlayerViewModel()
         {
             _loadedCommand = CreateRelayCommand(OnLoadedCommand);
@@ -52,6 +59,7 @@ namespace DQPlayer.MVVMFiles.ViewModels
                 MediaPlayer.SetMediaState(MediaPlayerStates.FastForward);
                 MediaPlayer.SetMediaState(lastState);
             });
+            _browseCommand = CreateRelayCommand(() => OnBrowseCommand());
         }
 
         private static Lazy<RelayCommand> CreateRelayCommand(Action execute, Func<bool> canExecute = null)
@@ -63,7 +71,7 @@ namespace DQPlayer.MVVMFiles.ViewModels
         public MediaPlayerModel MediaPlayer { get; set; }
 
         public bool PlayerSourceState => MediaPlayer?.CurrentState != null &&
-                                         !MediaPlayer.CurrentState.Equals(MediaPlayerStates.None);
+                                           !MediaPlayer.CurrentState.Equals(MediaPlayerStates.None);
 
         private void OnLoadedCommand()
         {
@@ -78,6 +86,18 @@ namespace DQPlayer.MVVMFiles.ViewModels
                 OnPropertyChanged(nameof(PlayerSourceState));
                 //TODO replace this with proper binding
                 OnPropertyChanged(nameof(MediaPlayer));
+            }
+        }
+
+        private void OnBrowseCommand()
+        {
+            var fileDialog = new OpenFileDialog
+            {
+                Filter = Settings.MediaPlayerExtensionPackageFilter.Filter
+            };
+            if (fileDialog.ShowDialog().GetValueOrDefault())
+            {
+                MediaPlayer.PlayNewPlayerSource(new Uri(fileDialog.FileName));
             }
         }
 

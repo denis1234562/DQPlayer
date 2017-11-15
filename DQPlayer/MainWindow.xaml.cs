@@ -110,11 +110,6 @@ namespace DQPlayer
                 new Binding("TotalSeconds") {Source = Player.NaturalDuration.TimeSpan});
         }
 
-        private void Player_OnMediaEnded(object sender, RoutedEventArgs e)
-        {
-            ViewModel.MediaPlayer.SetMediaState(MediaPlayerStates.Stop);
-        }
-
         private void SMovieSkipSlider_OnDragStarted(object sender, DragStartedEventArgs e)
         {
             _lastState = ViewModel.MediaPlayer.CurrentState.SerializedClone();
