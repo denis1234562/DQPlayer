@@ -1,12 +1,15 @@
 using System.ComponentModel;
 using DQPlayer.Annotations;
 using DQPlayer.CustomControls;
+using DQPlayer.Extensions;
 using DQPlayer.States;
 
 namespace DQPlayer.MVVMFiles.Models.MediaPlayer
 {
-    public class MediaPlayerModel : INotifyPropertyChanged, IRegulatableMediaPlayer
+    public class MediaPlayerModel : INotifyPropertyChanged, IRegulatableMediaPlayer, IResumableState<MediaPlayerState>
     {
+        private MediaPlayerState _lastState;
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         public IRegulatableMediaService MediaController { get; set; }
@@ -34,7 +37,7 @@ namespace DQPlayer.MVVMFiles.Models.MediaPlayer
             MediaSlider = mediaSlider;
         }
 
-        public MediaPlayerModel(ThumbDragSlider mediaSlider) 
+        public MediaPlayerModel(ThumbDragSlider mediaSlider)
             : this(MediaPlayerStates.None, mediaSlider)
         {
         }
@@ -49,6 +52,22 @@ namespace DQPlayer.MVVMFiles.Models.MediaPlayer
         {
             CurrentState = state;
             CurrentState.StateAction(MediaController);
+        }
+
+        public void SerializeState(MediaPlayerState newState)
+        {
+            _lastState = CurrentState.SerializedClone();
+            SetMediaState(newState);
+        }
+
+        public void ResumeSerializedState()
+        {
+            if (_lastState == null)
+            {
+                return;
+            }
+            SetMediaState(_lastState);
+            _lastState = null;
         }
     }
 }

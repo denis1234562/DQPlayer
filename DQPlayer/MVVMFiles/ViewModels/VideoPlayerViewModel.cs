@@ -1,9 +1,6 @@
 using System;
 using System.ComponentModel;
-using System.Windows.Controls;
-using System.Windows.Media;
 using DQPlayer.Annotations;
-using DQPlayer.CustomControls;
 using DQPlayer.Extensions;
 using DQPlayer.MVVMFiles.Commands;
 using DQPlayer.MVVMFiles.Models.MediaPlayer;
@@ -11,6 +8,8 @@ using DQPlayer.States;
 using Microsoft.Win32;
 using DQPlayer.Helpers;
 using System.Windows;
+using System.Windows.Controls.Primitives;
+using System.Windows.Input;
 using DQPlayer.ResourceFiles;
 
 namespace DQPlayer.MVVMFiles.ViewModels
@@ -41,37 +40,85 @@ namespace DQPlayer.MVVMFiles.ViewModels
         private readonly Lazy<RelayCommand> _browseCommand;
         public RelayCommand BrowseCommand => _browseCommand.Value;
 
+        private readonly Lazy<RelayCommand> _sliderDragStartedCommand;
+        public RelayCommand SliderDragStartedCommand => _sliderDragStartedCommand.Value;
+
+        private readonly Lazy<RelayCommand> _sliderDragCompletedCommand;
+        public RelayCommand SliderDragCompletedCommand => _sliderDragCompletedCommand.Value;
+
+        private readonly Lazy<RelayCommand> _thumbDragDeltaCommand;
+        public RelayCommand ThumbDragDeltaCommand => _thumbDragDeltaCommand.Value;
+
+        private readonly Lazy<RelayCommand<MouseEventArgs>> _thumbMouseEnterCommand;
+        public RelayCommand<MouseEventArgs> ThumbMouseEnterCommand => _thumbMouseEnterCommand.Value;
+
+        private readonly Lazy<RelayCommand<DragEventArgs>> _windowFileDropCommand;
+        public RelayCommand<DragEventArgs> WindowFileDropCommand => _windowFileDropCommand.Value;
+
         public VideoPlayerViewModel()
         {
-            _loadedCommand = CreateRelayCommand(OnLoadedCommand);
-            _stopCommand = CreateRelayCommand(() => MediaPlayer.SetMediaState(MediaPlayerStates.Stop));
-            _pauseCommand = CreateRelayCommand(() => MediaPlayer.SetMediaState(MediaPlayerStates.Pause));
-            _playCommand = CreateRelayCommand(() => MediaPlayer.SetMediaState(MediaPlayerStates.Play));
-            _rewindCommand = CreateRelayCommand(() =>
+            _loadedCommand = CreateLazyRelayCommand(OnLoadedCommand);
+            _stopCommand = CreateLazyRelayCommand(() => MediaPlayer.SetMediaState(MediaPlayerStates.Stop));
+            _pauseCommand = CreateLazyRelayCommand(() => MediaPlayer.SetMediaState(MediaPlayerStates.Pause));
+            _playCommand = CreateLazyRelayCommand(() => MediaPlayer.SetMediaState(MediaPlayerStates.Play));
+            _rewindCommand = CreateLazyRelayCommand(() =>
             {
                 var lastState = MediaPlayer.CurrentState.SerializedClone();
                 MediaPlayer.SetMediaState(MediaPlayerStates.Rewind);
                 MediaPlayer.SetMediaState(lastState);
             });
-            _fastForwardCommand = CreateRelayCommand(() =>
+            _fastForwardCommand = CreateLazyRelayCommand(() =>
             {
                 var lastState = MediaPlayer.CurrentState.SerializedClone();
                 MediaPlayer.SetMediaState(MediaPlayerStates.FastForward);
                 MediaPlayer.SetMediaState(lastState);
             });
-            _browseCommand = CreateRelayCommand(() => OnBrowseCommand());
+            _browseCommand = CreateLazyRelayCommand(OnBrowseCommand);
+            _sliderDragStartedCommand = CreateLazyRelayCommand(() => MediaPlayer.SerializeState(MediaPlayerStates.Pause));
+            _sliderDragCompletedCommand = CreateLazyRelayCommand(() => MediaPlayer.ResumeSerializedState());
+            _thumbDragDeltaCommand = CreateLazyRelayCommand(OnThumbDragDeltaCommand);
+            _thumbMouseEnterCommand = CreateLazyRelayCommand<MouseEventArgs>(OnThumbMouseEnterCommand);
+            _windowFileDropCommand = CreateLazyRelayCommand<DragEventArgs>(OnWindowFileDrop);
         }
 
-        private static Lazy<RelayCommand> CreateRelayCommand(Action execute, Func<bool> canExecute = null)
-            => new Lazy<RelayCommand>(() => new RelayCommand(execute, canExecute));
+        private void OnWindowFileDrop(DragEventArgs e)
+        {
+            if (new FileDropHandler().TryExtractDroppedItemUri(e, Settings.MediaPlayerExtensionPackage, out var uri))
+            {
+                MediaPlayer.PlayNewPlayerSource(uri);
+                return;
+            }
+            MessageBox.Show($"{Strings.InvalidFileType}", "Error");
+        }
 
-        private static Lazy<RelayCommand<T>> CreateRelayCommand<T>(Action<T> execute, Func<T, bool> canExecute = null)
-            => new Lazy<RelayCommand<T>>(() => new RelayCommand<T>(execute, canExecute));
+        private void OnThumbMouseEnterCommand(MouseEventArgs e)
+        {
+            if (e.LeftButton == MouseButtonState.Pressed && e.MouseDevice.Captured == null)
+            {
+                var args = new MouseButtonEventArgs(e.MouseDevice, e.Timestamp, MouseButton.Left)
+                {
+                    RoutedEvent = UIElement.MouseLeftButtonDownEvent
+                };
+                MediaPlayer.SetPlayerPositionToCursor();
+                ((Thumb) e.Source).RaiseEvent(args);
+            }
+        }
+
+        private void OnThumbDragDeltaCommand()
+        {
+            MediaPlayer.SetPlayerPositionToCursor();
+        }
 
         public MediaPlayerModel MediaPlayer { get; set; }
 
         public bool PlayerSourceState => MediaPlayer?.CurrentState != null &&
                                            !MediaPlayer.CurrentState.Equals(MediaPlayerStates.None);
+
+        private static Lazy<RelayCommand> CreateLazyRelayCommand(Action execute, Func<bool> canExecute = null)
+            => new Lazy<RelayCommand>(() => new RelayCommand(execute, canExecute));
+
+        private static Lazy<RelayCommand<T>> CreateLazyRelayCommand<T>(Action<T> execute, Func<T, bool> canExecute = null)
+            => new Lazy<RelayCommand<T>>(() => new RelayCommand<T>(execute, canExecute));
 
         private void OnLoadedCommand()
         {
@@ -84,7 +131,7 @@ namespace DQPlayer.MVVMFiles.ViewModels
             if (e.PropertyName == nameof(MediaPlayer.CurrentState))
             {
                 OnPropertyChanged(nameof(PlayerSourceState));
-                //TODO replace this with proper binding
+                //TODO replace this with proper binding maybe?
                 OnPropertyChanged(nameof(MediaPlayer));
             }
         }

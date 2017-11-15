@@ -11,11 +11,18 @@
         xmlns:converters="clr-namespace:DQPlayer.MVVMFiles.Converters"
         xmlns:res="clr-namespace:DQPlayer.ResourceFiles"
         xmlns:system="clr-namespace:System;assembly=mscorlib"
+        xmlns:cmd="http://www.galasoft.ch/mvvmlight"
         mc:Ignorable="d"
-        Title="MainWindow" Height="410" Width="533.836" AllowDrop="True" Drop="Window_Drop" 
+        Title="MainWindow" Height="410" Width="533.836" AllowDrop="True"
         MinHeight="{Binding Source={x:Static local:Settings.MinimumWindowSize}, Path=Height}"
         MinWidth="{Binding Source={x:Static local:Settings.MinimumWindowSize}, Path=Width}"
         >
+    <ia:Interaction.Triggers>
+        <ia:EventTrigger EventName="Drop">
+            <cmd:EventToCommand Command="{Binding WindowFileDropCommand}" PassEventArgsToCommand="True"/>
+        </ia:EventTrigger>
+    </ia:Interaction.Triggers>
+
     <Window.DataContext>
         <viewModels:VideoPlayerViewModel/>
     </Window.DataContext>
@@ -142,7 +149,16 @@
                                         <RepeatButton Command="{x:Static Slider.IncreaseLarge}" Style="{StaticResource SliderRepeatButtonStyle}"/>
                                     </Track.IncreaseRepeatButton>
                                     <Track.Thumb>
-                                        <Thumb x:Name="Thumb" Style="{StaticResource HorizontalSliderThumbStyle}"/>
+                                        <Thumb x:Name="Thumb" Style="{StaticResource HorizontalSliderThumbStyle}">
+                                            <ia:Interaction.Triggers>
+                                                <ia:EventTrigger EventName="DragDelta">
+                                                    <ia:InvokeCommandAction Command="{Binding ThumbDragDeltaCommand}"/>
+                                                </ia:EventTrigger>
+                                                <ia:EventTrigger EventName="MouseEnter">
+                                                    <cmd:EventToCommand Command="{Binding ThumbMouseEnterCommand}" PassEventArgsToCommand="True"/>
+                                                </ia:EventTrigger>
+                                            </ia:Interaction.Triggers>
+                                        </Thumb>
                                     </Track.Thumb>
                                 </Track>
                             </Grid>
@@ -156,7 +172,7 @@
     <Grid AllowDrop="True">
         <ia:Interaction.Triggers>
             <ia:EventTrigger EventName="Loaded">
-                <ia:InvokeCommandAction Command="{Binding LoadedCommand}" CommandParameter="{Binding ElementName=Window}"></ia:InvokeCommandAction>
+                <ia:InvokeCommandAction Command="{Binding LoadedCommand}" CommandParameter="{Binding ElementName=Window}"/>
             </ia:EventTrigger>
         </ia:Interaction.Triggers>
 
@@ -165,7 +181,7 @@
                       MouseDown="Player_OnMouseDown">
             <ia:Interaction.Triggers>
                 <ia:EventTrigger EventName="MediaEnded">
-                    <ia:InvokeCommandAction Command="{Binding StopCommand}"></ia:InvokeCommandAction>
+                    <ia:InvokeCommandAction Command="{Binding StopCommand}"/>
                 </ia:EventTrigger>
             </ia:Interaction.Triggers>
         </MediaElement>
@@ -229,13 +245,17 @@
                 Style="{DynamicResource BasicSliderStyle}"
                 Value="{Binding ElementName=Player, Path=Position, Mode=OneWay, Converter={converters:SecondsToTimeSpanConverter}}"
                 Maximum="0"
-                DragStarted="SMovieSkipSlider_OnDragStarted"
-                DragCompleted="SMovieSkipSlider_OnDragCompleted"
-                Loaded="SMovieSkipSlider_OnLoaded"
                 MouseEnter="SMovieSkipSlider_OnMouseEnter"
                 MouseMove="SMovieSkipSlider_OnPreviewMouseMove"
                 MouseLeave="SMovieSkipSlider_OnMouseLeave">
-
+            <ia:Interaction.Triggers>
+                <ia:EventTrigger EventName="DragStarted">
+                    <ia:InvokeCommandAction Command="{Binding SliderDragStartedCommand}"/>
+                </ia:EventTrigger>
+                <ia:EventTrigger EventName="DragCompleted">
+                    <ia:InvokeCommandAction Command="{Binding SliderDragCompletedCommand}"/>
+                </ia:EventTrigger>
+            </ia:Interaction.Triggers>
         </customControls:ThumbDragSlider>
         <Label Name="lbMovieElapsedTime" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="-12,0,0,74" VerticalAlignment="Bottom" Width="67"
                Content="{Binding ElementName=sMovieSkipSlider, Path=Value, Converter={converters:SecondsToFormattedTimeSpan} }">

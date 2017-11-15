@@ -1,26 +1,16 @@
 ﻿using System;
 using System.Windows;
-using Microsoft.Win32;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
 using DQPlayer.Extensions;
-using DQPlayer.Helpers;
 using DQPlayer.MVVMFiles.Models.MediaPlayer;
 using DQPlayer.MVVMFiles.ViewModels;
-using DQPlayer.ResourceFiles;
-using DQPlayer.States;
 
 namespace DQPlayer
 {
     public partial class MainWindow
     {
-        private readonly FileDropHandler _fileDropHandler = new FileDropHandler();
-
-        private MediaPlayerState _lastState = MediaPlayerStates.None;
-
-        private Track _movieSkipSliderTrack;
-
         public VideoPlayerViewModel ViewModel => DataContext as VideoPlayerViewModel;
 
         public MediaPlayerModel MediaPlayer
@@ -40,13 +30,13 @@ namespace DQPlayer
             ViewModel.Loaded += ViewModel_Loaded;
         }
 
+        #region Startup Methods
+
         private void ViewModel_Loaded(IMediaService obj)
         {
             Player = Settings.MediaPlayerTemplate.CloneAndOverride(Player);
             SetupTimers();
         }
-
-        #region Startup Methods
 
         private void SetupBindings()
         {
@@ -82,44 +72,10 @@ namespace DQPlayer
 
         #region Event Handlers
 
-        private void bBrowse_Click(object sender, RoutedEventArgs e)
-        {
-            var fileDialog = new OpenFileDialog
-            {
-                Filter = Settings.MediaPlayerExtensionPackageFilter.Filter
-            };
-            if (fileDialog.ShowDialog().GetValueOrDefault())
-            {
-                ViewModel.MediaPlayer.PlayNewPlayerSource(new Uri(fileDialog.FileName));
-            }
-        }
-
-        private void Window_Drop(object sender, DragEventArgs e)
-        {
-            if (_fileDropHandler.TryExtractDroppedItemUri(e, Settings.MediaPlayerExtensionPackage, out var uri))
-            {
-                ViewModel.MediaPlayer.PlayNewPlayerSource(uri);
-                return;
-            }
-            MessageBox.Show($"{Strings.InvalidFileType}", "Error");
-        }
-
         private void Player_OnMediaOpened(object sender, RoutedEventArgs e)
         {
             sMovieSkipSlider.SetBinding(RangeBase.MaximumProperty,
                 new Binding("TotalSeconds") {Source = Player.NaturalDuration.TimeSpan});
-        }
-
-        private void SMovieSkipSlider_OnDragStarted(object sender, DragStartedEventArgs e)
-        {
-            _lastState = ViewModel.MediaPlayer.CurrentState.SerializedClone();
-            ViewModel.MediaPlayer.SetMediaState(MediaPlayerStates.Pause);
-        }
-
-        private void SMovieSkipSlider_OnDragCompleted(object sender, DragCompletedEventArgs e)
-        {
-            ViewModel.MediaPlayer.SetMediaState(_lastState);
-            ViewModel.MediaPlayer.MediaController.SetNewPlayerPosition(sMovieSkipSlider.Value);
         }
 
         private void Player_OnMouseDown(object sender, MouseButtonEventArgs e)
@@ -142,31 +98,6 @@ namespace DQPlayer
             sMovieSkipSlider.Value = sMovieSkipSlider.Value.Add(ViewModel.MediaPlayer.MediaPlayerTimer.Interval);
         }
 
-        private void SMovieSkipSlider_OnLoaded(object sender, RoutedEventArgs e)
-        {
-            _movieSkipSliderTrack = sMovieSkipSlider.GetElementFromTemplate<Track>("PART_Track");
-            _movieSkipSliderTrack.Thumb.DragDelta += Thumb_DragDelta;
-            _movieSkipSliderTrack.Thumb.MouseEnter += Thumb_MouseEnter;
-        }
-
-        private void Thumb_MouseEnter(object sender, MouseEventArgs e)
-        {
-            if (e.LeftButton == MouseButtonState.Pressed && e.MouseDevice.Captured == null)
-            {
-                var args = new MouseButtonEventArgs(e.MouseDevice, e.Timestamp, MouseButton.Left)
-                {
-                    RoutedEvent = MouseLeftButtonDownEvent
-                };
-                ViewModel.MediaPlayer.SetPlayerPositionToCursor();
-                _movieSkipSliderTrack.Thumb.RaiseEvent(args);
-            }
-        }
-
-        private void Thumb_DragDelta(object sender, DragDeltaEventArgs e)
-        {
-            ViewModel.MediaPlayer.SetPlayerPositionToCursor();
-        }
-
         private void SMovieSkipSlider_OnMouseEnter(object sender, MouseEventArgs e)
         {
             lbTimeTooltip.Visibility = Visibility.Visible;
@@ -175,7 +106,7 @@ namespace DQPlayer
 
         private void SMovieSkipSlider_OnPreviewMouseMove(object sender, MouseEventArgs e)
         {
-            double simulatedPosition = _movieSkipSliderTrack.SimulateTrackPosition(e.GetPosition(sMovieSkipSlider));
+            double simulatedPosition = sMovieSkipSlider.GetElementFromTemplate<Track>("PART_Track").SimulateTrackPosition(e.GetPosition(sMovieSkipSlider));
             lbTimeTooltip.AddToLeftMargin(Mouse.GetPosition(sMovieSkipSlider).X - lbTimeTooltip.Margin.Left + 35);
             lbTimeTooltip.Content = TimeSpan.FromSeconds(simulatedPosition).ToShortString();
         }
