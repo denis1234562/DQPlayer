@@ -100,6 +100,7 @@
     <Compile Include="Extensions\GeneralExtensions.cs" />
     <Compile Include="Extensions\IRegulatableMediaPlayerExtensions.cs" />
     <Compile Include="Extensions\StringBuilderExtensions.cs" />
+    <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Extensions\TimespanExtensions.cs" />
     <Compile Include="Extensions\UIElementsExtensions.cs" />
     <Compile Include="Helpers\FileExtension.cs" />

@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel;
+using System.Linq;
 using DQPlayer.Annotations;
 using DQPlayer.Extensions;
 using DQPlayer.MVVMFiles.Commands;
@@ -76,37 +77,9 @@ namespace DQPlayer.MVVMFiles.ViewModels
             _browseCommand = CreateLazyRelayCommand(OnBrowseCommand);
             _sliderDragStartedCommand = CreateLazyRelayCommand(() => MediaPlayer.SerializeState(MediaPlayerStates.Pause));
             _sliderDragCompletedCommand = CreateLazyRelayCommand(() => MediaPlayer.ResumeSerializedState());
-            _thumbDragDeltaCommand = CreateLazyRelayCommand(OnThumbDragDeltaCommand);
+            _thumbDragDeltaCommand = CreateLazyRelayCommand(() => MediaPlayer.SetPlayerPositionToCursor());
             _thumbMouseEnterCommand = CreateLazyRelayCommand<MouseEventArgs>(OnThumbMouseEnterCommand);
-            _windowFileDropCommand = CreateLazyRelayCommand<DragEventArgs>(OnWindowFileDrop);
-        }
-
-        private void OnWindowFileDrop(DragEventArgs e)
-        {
-            if (new FileDropHandler().TryExtractDroppedItemUri(e, Settings.MediaPlayerExtensionPackage, out var uri))
-            {
-                MediaPlayer.PlayNewPlayerSource(uri);
-                return;
-            }
-            MessageBox.Show($"{Strings.InvalidFileType}", "Error");
-        }
-
-        private void OnThumbMouseEnterCommand(MouseEventArgs e)
-        {
-            if (e.LeftButton == MouseButtonState.Pressed && e.MouseDevice.Captured == null)
-            {
-                var args = new MouseButtonEventArgs(e.MouseDevice, e.Timestamp, MouseButton.Left)
-                {
-                    RoutedEvent = UIElement.MouseLeftButtonDownEvent
-                };
-                MediaPlayer.SetPlayerPositionToCursor();
-                ((Thumb) e.Source).RaiseEvent(args);
-            }
-        }
-
-        private void OnThumbDragDeltaCommand()
-        {
-            MediaPlayer.SetPlayerPositionToCursor();
+            _windowFileDropCommand = CreateLazyRelayCommand<DragEventArgs>(OnWindowFileDropCommand);
         }
 
         public MediaPlayerModel MediaPlayer { get; set; }
@@ -120,10 +93,10 @@ namespace DQPlayer.MVVMFiles.ViewModels
         private static Lazy<RelayCommand<T>> CreateLazyRelayCommand<T>(Action<T> execute, Func<T, bool> canExecute = null)
             => new Lazy<RelayCommand<T>>(() => new RelayCommand<T>(execute, canExecute));
 
-        private void OnLoadedCommand()
+        [NotifyPropertyChangedInvocator]
+        protected virtual void OnPropertyChanged([System.Runtime.CompilerServices.CallerMemberName] string propName = null)
         {
-            MediaPlayer.PropertyChanged += MediaPlayerOnPropertyChanged;
-            Loaded?.Invoke(MediaPlayer.MediaController);
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
         }
 
         private void MediaPlayerOnPropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -134,6 +107,12 @@ namespace DQPlayer.MVVMFiles.ViewModels
                 //TODO replace this with proper binding maybe?
                 OnPropertyChanged(nameof(MediaPlayer));
             }
+        }
+
+        private void OnLoadedCommand()
+        {
+            MediaPlayer.PropertyChanged += MediaPlayerOnPropertyChanged;
+            Loaded?.Invoke(MediaPlayer.MediaController);
         }
 
         private void OnBrowseCommand()
@@ -148,10 +127,27 @@ namespace DQPlayer.MVVMFiles.ViewModels
             }
         }
 
-        [NotifyPropertyChangedInvocator]
-        protected virtual void OnPropertyChanged([System.Runtime.CompilerServices.CallerMemberName] string propName = null)
+        private void OnWindowFileDropCommand(DragEventArgs e)
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
+            if (FileDropHandler.TryExtractDroppedItemsUri(e, Settings.MediaPlayerExtensionPackage, out var uris))
+            {
+                MediaPlayer.PlayNewPlayerSource(uris.First());
+                return;
+            }
+            MessageBox.Show($"{Strings.InvalidFileType}", "Error");
+        }
+
+        private void OnThumbMouseEnterCommand(MouseEventArgs e)
+        {
+            if (e.LeftButton == MouseButtonState.Pressed && e.MouseDevice.Captured == null)
+            {
+                var args = new MouseButtonEventArgs(e.MouseDevice, e.Timestamp, MouseButton.Left)
+                {
+                    RoutedEvent = UIElement.MouseLeftButtonDownEvent
+                };
+                MediaPlayer.SetPlayerPositionToCursor();
+                ((Thumb)e.Source).RaiseEvent(args);
+            }
         }
     }
 }

@@ -1,23 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Windows;
+using DQPlayer.Extensions;
 
 namespace DQPlayer.Helpers
 {
-    public class FileDropHandler
+    public static class FileDropHandler
     {
-        public bool TryExtractDroppedItemUri(DragEventArgs e, IEnumerable<FileExtension> extensions, out Uri fileUri)
-        {
-            string filePath = ((DataObject) e.Data).GetFileDropList()[0];
-            var fileExtension = filePath.Substring(filePath.LastIndexOf(".", StringComparison.Ordinal));
-            fileUri = extensions != null && !extensions.Select(fe => fe.Extension).Contains(fileExtension) ? null : new Uri(filePath);
-            return fileUri != null;
+        public static bool TryExtractDroppedItemsUri(DragEventArgs e, IEnumerable<FileExtension> extensions, out IEnumerable<Uri> fileUris)
+        {                     
+            IEnumerable<string> filePaths = ((DataObject)e.Data).GetFileDropList().Cast<string>();
+            IEnumerable<string> validFiles = filePaths.Where(f => extensions.Select(fe => fe.Extension).Contains(f.GetFileExtension()));
+            fileUris = validFiles.Select(f => new Uri(f));
+            return validFiles.Any();
         }
 
-        public bool TryExtractDroppedItemUri(DragEventArgs e, out Uri fileUri)
+        public static bool TryExtractDroppedItemsUri(DragEventArgs e, out IEnumerable<Uri> fileUris)
         {
-            return TryExtractDroppedItemUri(e, null, out fileUri);
+            return TryExtractDroppedItemsUri(e, null, out fileUris);
         }
     }
 }
