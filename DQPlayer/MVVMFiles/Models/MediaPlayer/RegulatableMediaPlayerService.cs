@@ -1,14 +1,15 @@
 using System;
 using System.Windows.Controls;
+using DQPlayer.Extensions;
 
 namespace DQPlayer.MVVMFiles.Models.MediaPlayer
 {
-    public class RegulatableMediaService : IRegulatableMediaService
+    public class RegulatableMediaPlayerService : IRegulatableMediaService
     {
         private readonly IRegulatableMediaPlayer _media;
         private readonly MediaElement _mediaElement;
 
-        public RegulatableMediaService(MediaElement mediaElement, IRegulatableMediaPlayer media)
+        public RegulatableMediaPlayerService(MediaElement mediaElement, IRegulatableMediaPlayer media)
         {
             _media = media;
             _mediaElement = mediaElement;
@@ -44,19 +45,22 @@ namespace DQPlayer.MVVMFiles.Models.MediaPlayer
 
         public void Rewind()
         {
-            SetNewPlayerPosition(Extensions.GeneralExtensions.Max(_mediaElement.Position.Subtract(Settings.SkipSeconds), new TimeSpan(0)));
+            SetNewPlayerPosition(GeneralExtensions.Max(_mediaElement.Position.Subtract(Settings.SkipSeconds), new TimeSpan(0)));
         }
 
         public void FastForward()
         {
-            SetNewPlayerPosition(Extensions.GeneralExtensions.Min(_mediaElement.NaturalDuration.TimeSpan,
+            SetNewPlayerPosition(GeneralExtensions.Min(_mediaElement.NaturalDuration.TimeSpan,
                 _mediaElement.Position.Add(Settings.SkipSeconds)));
         }
 
         public void SetNewPlayerPosition(TimeSpan newPosition)
         {
             _mediaElement.Position = newPosition;
-            _media.MediaSlider.Value = newPosition;
+            if (_media.MediaSlider.Value != _mediaElement.Position)
+            {
+                _media.MediaSlider.Value = _mediaElement.Position;
+            }
         }
 
         public void SetNewPlayerSource(Uri source)

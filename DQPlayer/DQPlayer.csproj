@@ -119,7 +119,7 @@
     <Compile Include="MVVMFiles\Models\MediaPlayer\IRegulatableMediaService.cs" />
     <Compile Include="MVVMFiles\Models\MediaPlayer\IResumableState.cs" />
     <Compile Include="MVVMFiles\Models\MediaPlayer\MediaPlayerModel.cs" />
-    <Compile Include="MVVMFiles\Models\MediaPlayer\RegulatableMediaService.cs" />
+    <Compile Include="MVVMFiles\Models\MediaPlayer\RegulatableMediaPlayerService.cs" />
     <Compile Include="States\MediaPlayerState.cs" />
     <Compile Include="MVVMFiles\Commands\RelayCommand.cs" />
     <Compile Include="MVVMFiles\Converters\BaseConverter.cs" />

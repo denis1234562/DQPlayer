@@ -43,7 +43,7 @@ namespace DQPlayer
             SetBinding(MediaPlayerProperty,
                 new Binding {Path = new PropertyPath("MediaPlayer"), Mode = BindingMode.OneWayToSource});
             MediaPlayer = new MediaPlayerModel(sMovieSkipSlider);
-            MediaPlayer.MediaController = new RegulatableMediaService(Player, MediaPlayer);
+            MediaPlayer.MediaController = new RegulatableMediaPlayerService(Player, MediaPlayer);
         }
 
         private void SetupTimers()

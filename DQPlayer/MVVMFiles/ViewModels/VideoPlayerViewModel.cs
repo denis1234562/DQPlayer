@@ -145,7 +145,6 @@ namespace DQPlayer.MVVMFiles.ViewModels
                 {
                     RoutedEvent = UIElement.MouseLeftButtonDownEvent
                 };
-                MediaPlayer.SetPlayerPositionToCursor();
                 ((Thumb)e.Source).RaiseEvent(args);
             }
         }

@@ -24,7 +24,6 @@ namespace DQPlayer.CustomControls
 
         protected override void OnThumbDragDelta(DragDeltaEventArgs e)
         {
-            base.OnThumbDragDelta(e);
             DragDelta?.Invoke(this, e);
         }
 

@@ -35,6 +35,12 @@ namespace DQPlayer.MVVMFiles.Models.MediaPlayer
             MediaPlayerTimer = new IntermissionTimer();
             CurrentState = state;
             MediaSlider = mediaSlider;
+            MediaSlider.DragStarted += MediaSlider_DragStarted;
+        }
+
+        private void MediaSlider_DragStarted(object sender, System.Windows.Controls.Primitives.DragStartedEventArgs e)
+        {
+            this.SetPlayerPositionToCursor();
         }
 
         public MediaPlayerModel(ThumbDragSlider mediaSlider)

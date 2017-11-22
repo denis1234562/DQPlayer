@@ -13,7 +13,7 @@
         xmlns:system="clr-namespace:System;assembly=mscorlib"
         xmlns:cmd="http://www.galasoft.ch/mvvmlight"
         mc:Ignorable="d"
-        Title="MainWindow" Height="410" Width="533.836" AllowDrop="True"
+        Title="MainWindow" Height="410" Width="534" AllowDrop="True"
         MinHeight="{Binding Source={x:Static local:Settings.MinimumWindowSize}, Path=Height}"
         MinWidth="{Binding Source={x:Static local:Settings.MinimumWindowSize}, Path=Width}"
         >
@@ -28,7 +28,6 @@
     </Window.DataContext>
 
     <Window.Resources>
-        <BooleanToVisibilityConverter x:Key="BoolToVis" />
         <system:Boolean x:Key="FalseValue">False</system:Boolean>
         <system:Boolean x:Key="TrueValue">True</system:Boolean>
         <Style x:Key="TransparentStyle" TargetType="{x:Type Button}">
@@ -151,6 +150,50 @@
                                     <Track.Thumb>
                                         <Thumb x:Name="Thumb" Style="{StaticResource HorizontalSliderThumbStyle}">
                                             <ia:Interaction.Triggers>
+                                                <ia:EventTrigger EventName="MouseEnter">
+                                                    <cmd:EventToCommand Command="{Binding ThumbMouseEnterCommand}" PassEventArgsToCommand="True"/>
+                                                </ia:EventTrigger>
+                                            </ia:Interaction.Triggers>
+                                        </Thumb>
+                                    </Track.Thumb>
+                                </Track>
+                            </Grid>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="StylisedSliderAndThumb" TargetType="{x:Type Slider}">
+            <Setter Property="Stylus.IsPressAndHoldEnabled" Value="false"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="#FFC4C4C4"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Slider}">
+                        <Border BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" SnapsToDevicePixels="true">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto" MinHeight="{TemplateBinding MinHeight}"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <TickBar x:Name="TopTick" Fill="{TemplateBinding Foreground}" Height="4" Placement="Top" Grid.Row="0" Visibility="Collapsed"/>
+                                <TickBar x:Name="BottomTick" Fill="{TemplateBinding Foreground}" Height="4" Placement="Bottom" Grid.Row="2" Visibility="Collapsed"/>
+                                <Border x:Name="TrackBackground" BorderBrush="{StaticResource HorizontalSliderTrackNormalBorder}" BorderThickness="1" Background="{StaticResource HorizontalSliderTrackNormalBackground}" CornerRadius="2" Height="6.0" Margin="0,0" Grid.Row="1" VerticalAlignment="Center">
+                                    <Canvas Margin="0,-1">
+                                        <Rectangle x:Name="PART_SelectionRange" Fill="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" Height="6.0" Stroke="{DynamicResource {x:Static SystemColors.ControlDarkDarkBrushKey}}" StrokeThickness="1.0" Visibility="Hidden"/>
+                                    </Canvas>
+                                </Border>
+                                <Track x:Name="PART_Track" Grid.Row="1">
+                                    <Track.DecreaseRepeatButton>
+                                        <RepeatButton Command="{x:Static Slider.DecreaseLarge}" Style="{StaticResource SliderRepeatButtonStyle}"/>
+                                    </Track.DecreaseRepeatButton>
+                                    <Track.IncreaseRepeatButton>
+                                        <RepeatButton Command="{x:Static Slider.IncreaseLarge}" Style="{StaticResource SliderRepeatButtonStyle}"/>
+                                    </Track.IncreaseRepeatButton>
+                                    <Track.Thumb>
+                                        <Thumb x:Name="Thumb" Style="{StaticResource HorizontalSliderThumbStyle}">
+                                            <ia:Interaction.Triggers>
                                                 <ia:EventTrigger EventName="DragDelta">
                                                     <ia:InvokeCommandAction Command="{Binding ThumbDragDeltaCommand}"/>
                                                 </ia:EventTrigger>
@@ -237,12 +280,13 @@
                 Command="{Binding BrowseCommand}" />
 
         <Slider Name="sVolumeSlider" Minimum="0" Maximum="1" HorizontalAlignment="Right" Margin="0,0,10,46" VerticalAlignment="Bottom" Width="100"
+                IsMoveToPointEnabled="True"
                 Style="{DynamicResource BasicSliderStyle}"
                 Value="{Binding ElementName=Player, Path=Volume}"/>
 
         <customControls:ThumbDragSlider x:Name="sMovieSkipSlider" Height="22" Margin="65,0,65,74" VerticalAlignment="Bottom" IsMoveToPointEnabled="True"
                 IsEnabled="{Binding PlayerSourceState}"
-                Style="{DynamicResource BasicSliderStyle}"
+                Style="{DynamicResource StylisedSliderAndThumb}"
                 Value="{Binding ElementName=Player, Path=Position, Mode=OneWay, Converter={converters:SecondsToTimeSpanConverter}}"
                 Maximum="0"
                 MouseEnter="SMovieSkipSlider_OnMouseEnter"
@@ -269,3 +313,4 @@
         <Label Name="lbTimeTooltip" Content="01:20:34" Visibility="Hidden" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" HorizontalAlignment="Left" Margin="124,0,0,95" VerticalAlignment="Bottom" Height="23" FontSize="12" Width="57"/>
     </Grid>
 </Window>
+
