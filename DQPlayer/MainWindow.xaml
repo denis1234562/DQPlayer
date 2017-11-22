@@ -13,7 +13,7 @@
         xmlns:system="clr-namespace:System;assembly=mscorlib"
         xmlns:cmd="http://www.galasoft.ch/mvvmlight"
         mc:Ignorable="d"
-        Title="MainWindow" Height="410" Width="534" AllowDrop="True"
+        Title="DQPlayer" Height="410" Width="534" AllowDrop="True"
         MinHeight="{Binding Source={x:Static local:Settings.MinimumWindowSize}, Path=Height}"
         MinWidth="{Binding Source={x:Static local:Settings.MinimumWindowSize}, Path=Width}"
         >
@@ -275,16 +275,16 @@
             <Image Source="pack://application:,,,/bin/Debug/Assets/SkipForward.jpeg"/>
         </Button>
 
-        <Button Name ="bBrowse" Margin="0,0,10,10" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="76"
+        <Button Name ="bBrowse" Margin="170,0,0,10" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="44"
                 Content="{x:Static res:Strings.Browse}"
-                Command="{Binding BrowseCommand}" />
+                Command="{Binding BrowseCommand}" Height="40" />
 
-        <Slider Name="sVolumeSlider" Minimum="0" Maximum="1" HorizontalAlignment="Right" Margin="0,0,10,46" VerticalAlignment="Bottom" Width="100"
+        <Slider Name="sVolumeSlider" Minimum="0" Maximum="1" HorizontalAlignment="Right" Margin="0,0,10,17" VerticalAlignment="Bottom" Width="100"
                 IsMoveToPointEnabled="True"
                 Style="{DynamicResource BasicSliderStyle}"
                 Value="{Binding ElementName=Player, Path=Volume}"/>
 
-        <customControls:ThumbDragSlider x:Name="sMovieSkipSlider" Height="22" Margin="65,0,65,74" VerticalAlignment="Bottom" IsMoveToPointEnabled="True"
+        <customControls:ThumbDragSlider x:Name="sMovieSkipSlider" Height="22" Margin="60,0,60,60" VerticalAlignment="Bottom" IsMoveToPointEnabled="True"
                 IsEnabled="{Binding PlayerSourceState}"
                 Style="{DynamicResource StylisedSliderAndThumb}"
                 Value="{Binding ElementName=Player, Path=Position, Mode=OneWay, Converter={converters:SecondsToTimeSpanConverter}}"
@@ -301,16 +301,18 @@
                 </ia:EventTrigger>
             </ia:Interaction.Triggers>
         </customControls:ThumbDragSlider>
-        <Label Name="lbMovieElapsedTime" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="-12,0,0,74" VerticalAlignment="Bottom" Width="67"
+        <Label Name="lbMovieElapsedTime" HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="0,0,0,60" VerticalAlignment="Bottom" Width="55"
                Content="{Binding ElementName=sMovieSkipSlider, Path=Value, Converter={converters:SecondsToFormattedTimeSpan} }">
         </Label>
-        <Label Name="lbMovieTimeLeft" HorizontalContentAlignment="Left" HorizontalAlignment="Right" Margin="0,0,-7,74" VerticalAlignment="Bottom" Width="67">
+        <Label Name="lbMovieTimeLeft" HorizontalContentAlignment="Left" HorizontalAlignment="Right" Margin="0,0,0,60" VerticalAlignment="Bottom" Width="60">
             <Label.Content>
                 <Binding ElementName="sMovieSkipSlider" Path="Value" Converter="{converters:LeftTimeConverter}"
                          ConverterParameter="{x:Reference sMovieSkipSlider}" Mode="OneWay"/>
             </Label.Content>
         </Label>
-        <Label Name="lbTimeTooltip" Content="01:20:34" Visibility="Hidden" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" HorizontalAlignment="Left" Margin="124,0,0,95" VerticalAlignment="Bottom" Height="23" FontSize="12" Width="57"/>
+        <Label Name="lbTimeTooltip" Visibility="Hidden"  HorizontalContentAlignment="Center" HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                   Margin="120,0,0,87" Height="28" FontSize="12" BorderThickness="1" BorderBrush="Black">
+        </Label>
     </Grid>
 </Window>
 

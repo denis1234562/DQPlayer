@@ -213,6 +213,5 @@
   <ItemGroup>
     <Resource Include="bin\Debug\Assets\SplashScreen.jpg" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
