@@ -224,7 +224,7 @@
                       MouseDown="Player_OnMouseDown">
             <ia:Interaction.Triggers>
                 <ia:EventTrigger EventName="MediaEnded">
-                    <ia:InvokeCommandAction Command="{Binding StopCommand}"/>
+                    <ia:InvokeCommandAction Command="{Binding MediaEndedCommand}"/>
                 </ia:EventTrigger>
             </ia:Interaction.Triggers>
         </MediaElement>
@@ -275,7 +275,10 @@
             <Image Source="pack://application:,,,/bin/Debug/Assets/SkipForward.jpeg"/>
         </Button>
 
-        <Button Name ="bBrowse" Margin="0,0,10,10" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="76"
+        <Button Name="bPlayList" Content="PlayList" HorizontalAlignment="Right" Margin="0,0,91,10" VerticalAlignment="Bottom" Width="75"
+                Command="{Binding PlayListCommand}"/>
+
+            <Button Name ="bBrowse" Margin="0,0,10,10" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="76"
                 Content="{x:Static res:Strings.Browse}"
                 Command="{Binding BrowseCommand}" />
 
@@ -310,7 +313,7 @@
                          ConverterParameter="{x:Reference sMovieSkipSlider}" Mode="OneWay"/>
             </Label.Content>
         </Label>
-        <Label Name="lbTimeTooltip" Content="01:20:34" Visibility="Hidden" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" HorizontalAlignment="Left" Margin="124,0,0,95" VerticalAlignment="Bottom" Height="23" FontSize="12" Width="57"/>
+        <Label Name="lbTimeTooltip" Content="01:20:34" Visibility="Hidden" VerticalContentAlignment="Top" HorizontalContentAlignment="Center" HorizontalAlignment="Left" Margin="124,0,0,95" VerticalAlignment="Bottom" Height="23" FontSize="12" Width="57"/>       
     </Grid>
 </Window>
 

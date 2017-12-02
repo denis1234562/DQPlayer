@@ -6,6 +6,7 @@ using System.Windows.Input;
 using DQPlayer.Extensions;
 using DQPlayer.MVVMFiles.Models.MediaPlayer;
 using DQPlayer.MVVMFiles.ViewModels;
+using DQPlayer.MVVMFiles.View;
 
 namespace DQPlayer
 {
@@ -35,6 +36,7 @@ namespace DQPlayer
         private void ViewModel_Loaded(IMediaService obj)
         {
             Player = Settings.MediaPlayerTemplate.CloneAndOverride(Player);
+            PlayList temp = new PlayList();
             SetupTimers();
         }
 

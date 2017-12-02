@@ -107,6 +107,7 @@
     <Compile Include="Helpers\FileExtensionPackage.cs" />
     <Compile Include="Helpers\FileDropHandler.cs" />
     <Compile Include="Helpers\FilePickerFilter.cs" />
+    <Compile Include="IWindowService.cs" />
     <Compile Include="MVVMFiles\Converters\InverseBooleanToVisibilityConverter.cs" />
     <Compile Include="MVVMFiles\Converters\LeftTimeConverter.cs" />
     <Compile Include="MVVMFiles\Converters\MediaButtonsVisibilityConverter.cs" />
@@ -120,6 +121,11 @@
     <Compile Include="MVVMFiles\Models\MediaPlayer\IResumableState.cs" />
     <Compile Include="MVVMFiles\Models\MediaPlayer\MediaPlayerModel.cs" />
     <Compile Include="MVVMFiles\Models\MediaPlayer\RegulatableMediaPlayerService.cs" />
+    <Compile Include="MVVMFiles\Models\PlayList\MovieFiles.cs" />
+    <Compile Include="MVVMFiles\ViewModels\PlayListViewModel.cs" />
+    <Compile Include="MVVMFiles\View\PlayList.xaml.cs">
+      <DependentUpon>PlayList.xaml</DependentUpon>
+    </Compile>
     <Compile Include="States\MediaPlayerState.cs" />
     <Compile Include="MVVMFiles\Commands\RelayCommand.cs" />
     <Compile Include="MVVMFiles\Converters\BaseConverter.cs" />
@@ -134,6 +140,7 @@
     </Compile>
     <Compile Include="Settings.cs" />
     <Compile Include="MVVMFiles\ViewModels\VideoPlayerViewModel.cs" />
+    <Compile Include="WindowService.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -146,6 +153,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="MVVMFiles\View\PlayList.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">
@@ -213,6 +224,19 @@
   <ItemGroup>
     <Resource Include="bin\Debug\Assets\SplashScreen.jpg" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="System\Collections\ObjectModel\" />
+  </ItemGroup>
+  <ItemGroup>
+    <COMReference Include="Shell32">
+      <Guid>{50A7E9B0-70EF-11D1-B75A-00A0C90564FE}</Guid>
+      <VersionMajor>1</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>tlbimp</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </COMReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

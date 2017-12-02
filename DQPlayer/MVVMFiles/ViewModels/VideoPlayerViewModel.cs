@@ -12,6 +12,7 @@ using System.Windows;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using DQPlayer.ResourceFiles;
+using System.Collections.Generic;
 
 namespace DQPlayer.MVVMFiles.ViewModels
 {
@@ -19,6 +20,8 @@ namespace DQPlayer.MVVMFiles.ViewModels
     {
         public event PropertyChangedEventHandler PropertyChanged;
         public event Action<IMediaService> Loaded;
+        public event Action<IEnumerable<Uri>> MediaFileDropped;
+        public event Action<Uri> MediaFileBrowsed;
 
         private readonly Lazy<RelayCommand> _loadedCommand;
         public RelayCommand LoadedCommand => _loadedCommand.Value;
@@ -56,6 +59,16 @@ namespace DQPlayer.MVVMFiles.ViewModels
         private readonly Lazy<RelayCommand<DragEventArgs>> _windowFileDropCommand;
         public RelayCommand<DragEventArgs> WindowFileDropCommand => _windowFileDropCommand.Value;
 
+        private readonly Lazy<RelayCommand> _playListCommand;
+        public RelayCommand PlayListCommand => _playListCommand.Value;
+
+        private readonly Lazy<RelayCommand> _mediaEndedCommand;
+        public RelayCommand MediaEndedCommand => _mediaEndedCommand.Value;
+
+        private readonly PlayListViewModel playListViewModel;
+
+        public WindowService WindowService;
+
         public VideoPlayerViewModel()
         {
             _loadedCommand = CreateLazyRelayCommand(OnLoadedCommand);
@@ -80,6 +93,11 @@ namespace DQPlayer.MVVMFiles.ViewModels
             _thumbDragDeltaCommand = CreateLazyRelayCommand(() => MediaPlayer.SetPlayerPositionToCursor());
             _thumbMouseEnterCommand = CreateLazyRelayCommand<MouseEventArgs>(OnThumbMouseEnterCommand);
             _windowFileDropCommand = CreateLazyRelayCommand<DragEventArgs>(OnWindowFileDropCommand);
+            _playListCommand = CreateLazyRelayCommand(OnPlayListCommand);
+            _mediaEndedCommand = CreateLazyRelayCommand(OnMediaEnded);
+            playListViewModel = new PlayListViewModel(this);
+            WindowService = new WindowService();
+            WindowService.ShowWindow(playListViewModel);
         }
 
         public MediaPlayerModel MediaPlayer { get; set; }
@@ -124,7 +142,13 @@ namespace DQPlayer.MVVMFiles.ViewModels
             if (fileDialog.ShowDialog().GetValueOrDefault())
             {
                 MediaPlayer.PlayNewPlayerSource(new Uri(fileDialog.FileName));
+                OnMediaFileBrowsed(new Uri(fileDialog.FileName));
             }
+        }
+
+        private void OnMediaFileBrowsed(Uri uri)
+        {
+            MediaFileBrowsed?.Invoke(uri);
         }
 
         private void OnWindowFileDropCommand(DragEventArgs e)
@@ -132,9 +156,15 @@ namespace DQPlayer.MVVMFiles.ViewModels
             if (FileDropHandler.TryExtractDroppedItemsUri(e, Settings.MediaPlayerExtensionPackage, out var uris))
             {
                 MediaPlayer.PlayNewPlayerSource(uris.First());
+                OnMediaFileDropped(uris);
                 return;
             }
             MessageBox.Show($"{Strings.InvalidFileType}", "Error");
+        }
+
+        private void OnMediaFileDropped(IEnumerable<Uri> uris)
+        {
+            MediaFileDropped?.Invoke(uris);
         }
 
         private void OnThumbMouseEnterCommand(MouseEventArgs e)
@@ -147,6 +177,23 @@ namespace DQPlayer.MVVMFiles.ViewModels
                 };
                 ((Thumb)e.Source).RaiseEvent(args);
             }
+        }
+
+        private void OnPlayListCommand()
+        {
+            if (WindowService.PlayListView.Visibility == Visibility.Hidden)
+            {
+                WindowService.PlayListView.Show();
+            }
+            else
+            {
+                WindowService.PlayListView.Hide();
+            }
+        }
+        ///TO DO
+        private void OnMediaEnded()
+        {
+           MediaPlayer.SetMediaState(MediaPlayerStates.Stop);
         }
     }
 }
