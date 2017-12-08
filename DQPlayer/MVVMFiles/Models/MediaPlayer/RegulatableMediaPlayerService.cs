@@ -1,10 +1,10 @@
 using System;
 using System.Windows.Controls;
-using DQPlayer.Extensions;
+using DQPlayer.Helpers.Extensions;
 
 namespace DQPlayer.MVVMFiles.Models.MediaPlayer
 {
-    public class RegulatableMediaPlayerService : IRegulatableMediaService
+    public class RegulatableMediaPlayerService : IRegulatableMediaService, IRegulatableMediaServiceNotifier
     {
         private readonly IRegulatableMediaPlayer _media;
         private readonly MediaElement _mediaElement;
@@ -28,12 +28,14 @@ namespace DQPlayer.MVVMFiles.Models.MediaPlayer
         {
             _mediaElement.Play();
             SetTimer();
+            OnMediaPlayed();
         }
 
         public void Pause()
         {
             _mediaElement.Pause();
             SetTimer();
+            OnMediaPaused();
         }
 
         public void Stop()
@@ -41,17 +43,24 @@ namespace DQPlayer.MVVMFiles.Models.MediaPlayer
             _mediaElement.Stop();
             SetTimer();
             _media.MediaSlider.Value = new TimeSpan(0);
+            OnMediaStopped();
         }
 
         public void Rewind()
         {
-            SetNewPlayerPosition(GeneralExtensions.Max(_mediaElement.Position.Subtract(Settings.SkipSeconds), new TimeSpan(0)));
+            var position = GeneralExtensions.Max(_mediaElement.Position.Subtract(Settings.SkipSeconds),
+                new TimeSpan(0));
+            SetNewPlayerPosition(position);
+            OnMediaRewinded(position);
         }
 
         public void FastForward()
         {
-            SetNewPlayerPosition(GeneralExtensions.Min(_mediaElement.NaturalDuration.TimeSpan,
-                _mediaElement.Position.Add(Settings.SkipSeconds)));
+            var position = GeneralExtensions.Min(_mediaElement.NaturalDuration.TimeSpan,
+                _mediaElement.Position.Add(Settings.SkipSeconds));
+            Console.WriteLine(position);
+            SetNewPlayerPosition(position);
+            OnMediaFastForwarded(position);
         }
 
         public void SetNewPlayerPosition(TimeSpan newPosition)
@@ -61,6 +70,7 @@ namespace DQPlayer.MVVMFiles.Models.MediaPlayer
             {
                 _media.MediaSlider.Value = _mediaElement.Position;
             }
+            //TODO skip to positon
         }
 
         public void SetNewPlayerSource(Uri source)
@@ -68,5 +78,43 @@ namespace DQPlayer.MVVMFiles.Models.MediaPlayer
             _mediaElement.Source = source;
             _media.MediaSlider.Value = new TimeSpan(0);
         }
+
+        #region Implementation of IMediaServiceNotifier
+
+        public event Action<object> MediaPlayed;
+        public event Action<object> MediaPaused;
+        public event Action<object> MediaStopped;
+
+        private void OnMediaPlayed()
+        {
+            MediaPlayed?.Invoke(_mediaElement);
+        }
+
+        private void OnMediaPaused()
+        {
+            MediaPaused?.Invoke(_mediaElement);
+        }
+
+        private void OnMediaStopped()
+        {
+            MediaStopped?.Invoke(_mediaElement);
+        }
+        #endregion
+
+        #region Implementation of IRegulatableMediaServiceNotifier
+
+        public event Action<object, TimeSpan> MediaRewinded;
+        public event Action<object, TimeSpan> MediaFastForwarded;
+
+        private void OnMediaRewinded(TimeSpan time)
+        {
+            MediaRewinded?.Invoke(_mediaElement, time);
+        }
+
+        private void OnMediaFastForwarded(TimeSpan time)
+        {
+            MediaFastForwarded?.Invoke(_mediaElement, time);
+        }
+        #endregion
     }
 }

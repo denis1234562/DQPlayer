@@ -21,19 +21,31 @@ namespace DQPlayer
         private Task _task;
 
         public TimeSpan Elapsed => _sw.Elapsed;
+        private Stopwatch _intervalTickedTime;
 
         private bool _hasScheduledIntermission;
 
         public IntermissionTimer()
         {
             _sw = new Stopwatch();
+            _intervalTickedTime = new Stopwatch();
+             Tick += IntermissionTimer_Tick;
             Cancelation();
+        }
+
+        private void IntermissionTimer_Tick(object sender, EventArgs e)
+        {
+            if (sender == this)
+            {
+                _intervalTickedTime = Stopwatch.StartNew();
+            }
         }
 
         public new void Start()
         {
             base.Start();
-            _sw.Restart();
+            _sw.Start();
+            _intervalTickedTime = Stopwatch.StartNew();
         }
 
         public new void Stop()
@@ -64,6 +76,7 @@ namespace DQPlayer
             }
             base.Stop();
             _sw.Stop();
+            _intervalTickedTime.Stop();
             _hasScheduledIntermission = true;
         }
 
@@ -74,9 +87,8 @@ namespace DQPlayer
                 _task = Task.Run(async () =>
                 {
                     _sw.Start();
-                    var value = (int)(_sw.Elapsed.TotalMilliseconds / Interval.TotalMilliseconds);
-                    var scheduledIntermissionTime = Math.Abs((int)((value + 1) * Interval.TotalMilliseconds -
-                                                                   _sw.Elapsed.TotalMilliseconds));
+                    var scheduledIntermissionTime =
+                        Math.Abs((int) (Interval - _intervalTickedTime.Elapsed).TotalMilliseconds);
                     if (_cancelationToken.IsCancellationRequested)
                     {
                         Cancelation();

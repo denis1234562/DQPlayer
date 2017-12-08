@@ -55,9 +55,6 @@
     <Reference Include="envdte80, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
-    <Reference Include="ExtendedDotNet">
-      <HintPath>..\..\Projects\Libraries\ExtendedDotNet\ExtendedDotNet\ExtendedDotNet\bin\Debug\ExtendedDotNet.dll</HintPath>
-    </Reference>
     <Reference Include="GalaSoft.MvvmLight, Version=5.3.0.19026, Culture=neutral, PublicKeyToken=e7570ab207bcb616, processorArchitecture=MSIL">
       <HintPath>..\packages\MvvmLightLibs.5.3.0.0\lib\net45\GalaSoft.MvvmLight.dll</HintPath>
     </Reference>
@@ -94,19 +91,28 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Benchmarking.cs" />
-    <Compile Include="ControlTemplates\ControlTemplate.cs" />
-    <Compile Include="ControlTemplates\ControlTemplateCreator.cs" />
-    <Compile Include="CustomControls\ThumbDragSlider.cs" />
-    <Compile Include="Extensions\GeneralExtensions.cs" />
-    <Compile Include="Extensions\IRegulatableMediaPlayerExtensions.cs" />
-    <Compile Include="Extensions\StringBuilderExtensions.cs" />
-    <Compile Include="Extensions\StringExtensions.cs" />
-    <Compile Include="Extensions\TimespanExtensions.cs" />
-    <Compile Include="Extensions\UIElementsExtensions.cs" />
-    <Compile Include="Helpers\FileExtension.cs" />
-    <Compile Include="Helpers\FileExtensionPackage.cs" />
-    <Compile Include="Helpers\FileDropHandler.cs" />
-    <Compile Include="Helpers\FilePickerFilter.cs" />
+    <Compile Include="Helpers\ControlTemplates\ControlTemplate.cs" />
+    <Compile Include="Helpers\ControlTemplates\ControlTemplateCreator.cs" />
+    <Compile Include="Helpers\CustomCollections\ICircularList.cs" />
+    <Compile Include="Helpers\CustomCollections\ObservableCircularList.cs" />
+    <Compile Include="Helpers\CustomControls\ThumbDragSlider.cs" />
+    <Compile Include="Helpers\Extensions\CollectionsExtensions\CircularListExtensions.cs" />
+    <Compile Include="Helpers\Extensions\GeneralExtensions.cs" />
+    <Compile Include="Helpers\Extensions\IRegulatableMediaPlayerExtensions.cs" />
+    <Compile Include="Helpers\Extensions\StringBuilderExtensions.cs" />
+    <Compile Include="Helpers\Extensions\StringExtensions.cs" />
+    <Compile Include="Helpers\Extensions\TimespanExtensions.cs" />
+    <Compile Include="Helpers\Extensions\UIElementsExtensions.cs" />
+    <Compile Include="Helpers\CustomCollections\CircularList.cs" />
+    <Compile Include="Helpers\FileManagement\FileExtension.cs" />
+    <Compile Include="Helpers\FileManagement\FileExtensionPackage.cs" />
+    <Compile Include="Helpers\FileManagement\FileDropHandler.cs" />
+    <Compile Include="Helpers\FileManagement\FilePickerFilter.cs" />
+    <Compile Include="Helpers\IInterval.cs" />
+    <Compile Include="Helpers\SubtitlesManagement\SubtitleHandler.cs" />
+    <Compile Include="Helpers\SubtitlesManagement\SubtitleInterval.cs" />
+    <Compile Include="Helpers\SubtitlesManagement\SubtitleReader.cs" />
+    <Compile Include="Helpers\SubtitlesManagement\SubtitleSegment.cs" />
     <Compile Include="MVVMFiles\Converters\InverseBooleanToVisibilityConverter.cs" />
     <Compile Include="MVVMFiles\Converters\LeftTimeConverter.cs" />
     <Compile Include="MVVMFiles\Converters\MediaButtonsVisibilityConverter.cs" />
@@ -115,11 +121,14 @@
     <Compile Include="MVVMFiles\Models\MediaPlayer\IMediaPlayer.cs" />
     <Compile Include="MVVMFiles\Models\MediaPlayer\IMediaService.cs" />
     <Compile Include="IntermissionTimer.cs" />
+    <Compile Include="MVVMFiles\Models\MediaPlayer\IMediaServiceNotifier.cs" />
     <Compile Include="MVVMFiles\Models\MediaPlayer\IRegulatableMediaPlayer.cs" />
     <Compile Include="MVVMFiles\Models\MediaPlayer\IRegulatableMediaService.cs" />
+    <Compile Include="MVVMFiles\Models\MediaPlayer\IRegulatableMediaServiceNotifier.cs" />
     <Compile Include="MVVMFiles\Models\MediaPlayer\IResumableState.cs" />
     <Compile Include="MVVMFiles\Models\MediaPlayer\MediaPlayerModel.cs" />
     <Compile Include="MVVMFiles\Models\MediaPlayer\RegulatableMediaPlayerService.cs" />
+    <Compile Include="Properties\Annotations1.cs" />
     <Compile Include="States\MediaPlayerState.cs" />
     <Compile Include="MVVMFiles\Commands\RelayCommand.cs" />
     <Compile Include="MVVMFiles\Converters\BaseConverter.cs" />
@@ -213,5 +222,6 @@
   <ItemGroup>
     <Resource Include="bin\Debug\Assets\SplashScreen.jpg" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

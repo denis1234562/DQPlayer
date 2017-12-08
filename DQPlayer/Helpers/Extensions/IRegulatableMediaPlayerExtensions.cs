@@ -5,7 +5,7 @@ using System.Windows.Input;
 using DQPlayer.MVVMFiles.Models.MediaPlayer;
 using DQPlayer.States;
 
-namespace DQPlayer.Extensions
+namespace DQPlayer.Helpers.Extensions
 {
     public static class IRegulatableMediaPlayerExtensions
     {

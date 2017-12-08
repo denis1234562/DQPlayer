@@ -3,7 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 
-namespace DQPlayer.Extensions
+namespace DQPlayer.Helpers.Extensions
 {
     public static class UIElementsExtensions
     {

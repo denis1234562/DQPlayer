@@ -1,7 +1,7 @@
 using System;
 using System.Text;
 
-namespace DQPlayer.Extensions
+namespace DQPlayer.Helpers.Extensions
 {
     public static class TimespanExtensions
     {

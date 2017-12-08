@@ -141,4 +141,7 @@
   <data name="Resume" xml:space="preserve">
     <value>Продължи</value>
   </data>
+  <data name="SubtitleFile" xml:space="preserve">
+    <value>Субтитри файл</value>
+  </data>
 </root>

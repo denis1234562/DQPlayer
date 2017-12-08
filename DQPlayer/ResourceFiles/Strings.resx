@@ -160,4 +160,7 @@
   <data name="InvalidFileType" xml:space="preserve">
     <value>Invalid file type.</value>
   </data>
+  <data name="SubtitleFile" xml:space="preserve">
+    <value>Subtitle file</value>
+  </data>
 </root>

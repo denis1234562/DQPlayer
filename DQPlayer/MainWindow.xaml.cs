@@ -1,9 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
-using DQPlayer.Extensions;
+using DQPlayer.Helpers.Extensions;
+using DQPlayer.Helpers.SubtitlesManagement;
 using DQPlayer.MVVMFiles.Models.MediaPlayer;
 using DQPlayer.MVVMFiles.ViewModels;
 
@@ -28,6 +33,7 @@ namespace DQPlayer
             InitializeComponent();
             SetupBindings();
             ViewModel.Loaded += ViewModel_Loaded;
+
         }
 
         #region Startup Methods
@@ -36,6 +42,55 @@ namespace DQPlayer
         {
             Player = Settings.MediaPlayerTemplate.CloneAndOverride(Player);
             SetupTimers();
+            ViewModel.Show += ViewModel_Show;
+            ViewModel.Hide += ViewModel_Hide;
+        }
+
+        private Dictionary<SubtitleSegment, Label[]> _currentlyShownSubtitles = new Dictionary<SubtitleSegment, Label[]>();
+        private void ViewModel_Show(SubtitleHandler handler, SubtitleSegment segment)
+        {
+            if (_currentlyShownSubtitles.ContainsKey(segment))
+            {
+                return;
+            }
+            var lines = gridSubs.Children.Cast<Viewbox>().Select(vb => (Label) vb.Child).ToArray();
+            var splitedLines = segment.Content.Split(new []{'\n'}, StringSplitOptions.RemoveEmptyEntries);
+            for (int i = 0; i < lines.Length; i++)
+            {
+                if (string.IsNullOrEmpty((string) lines[i].Content))
+                {
+                    if (splitedLines.Length == 1)
+                    {
+                        lines[i].Content = segment.Content;
+                        _currentlyShownSubtitles.Add(segment, new[] {lines[i]});
+                        break;
+                    }
+                    int count = 1;
+                    while (count < splitedLines.Length && string.IsNullOrEmpty((string) lines[++i].Content))
+                    {
+                        count++;
+                    }
+                    var elements = lines.Skip(i - count - 1).Take(count).ToArray();
+                    _currentlyShownSubtitles.Add(segment, elements);
+                    for (int j = 0; j < splitedLines.Length; j++)
+                    {
+                        elements[j].Content = splitedLines[splitedLines.Length -1 - j];
+                    }
+                    break;
+                }
+            }
+        }
+
+        private void ViewModel_Hide(SubtitleHandler handler, SubtitleSegment segment)
+        {
+            if (_currentlyShownSubtitles.TryGetValue(segment, out var value))
+            {
+                foreach (var line in value)
+                {
+                    Dispatcher.Invoke(() => line.Content = string.Empty);
+                }
+                _currentlyShownSubtitles.Remove(segment);
+            }
         }
 
         private void SetupBindings()

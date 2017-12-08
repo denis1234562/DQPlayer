@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using DQPlayer.ControlTemplates;
-using DQPlayer.CustomControls;
 using DQPlayer.Helpers;
+using DQPlayer.Helpers.ControlTemplates;
+using DQPlayer.Helpers.FileManagement;
 using DQPlayer.ResourceFiles;
 using static System.Windows.Interop.Imaging;
 using Size = System.Windows.Size;
@@ -21,30 +22,65 @@ namespace DQPlayer
 
         public static Size MinimumWindowSize { get; }
 
-        public static ImageSource SpashScreenImage { get; }
-        public static ImageSource PlayImage { get; }
-        public static ImageSource PauseImage { get; }
-        public static ImageSource SkipBack { get; }
-        public static ImageSource SkipForward { get; }
-        public static ImageSource Stop { get; }
-
         public static TimeSpan SkipSeconds { get; }
 
         public static TimeSpan TimerTickUpdate { get; }
 
         public static ControlTemplateCreator<MediaElement> MediaPlayerTemplate { get; }
 
+        public static string SubtitleSeparationString => @"-->";
+
+        private static readonly string[] _timeSpanStringFormats;
+
+        public static Encoding Cyrillic { get; }
+
         static Settings()
         {
             TimerTickUpdate = TimeSpan.FromSeconds(0.25);
             SkipSeconds = TimeSpan.FromSeconds(10);
             MinimumWindowSize = new Size(600, 410);
+            _timeSpanStringFormats = new[]
+            {
+                @"h\:m\:s",
+                @"h\:m\:s\:f",
+                @"h\:m\:s\:ff",
+                @"h\:m\:s\:fff",
+                @"h\:m\:ss",
+                @"h\:m\:ss\:f",
+                @"h\:m\:ss\:ff",
+                @"h\:m\:ss\:fff",
+                @"h\:mm\:s",
+                @"h\:mm\:s\:f",
+                @"h\:mm\:s\:ff",
+                @"h\:mm\:s\:fff",
+                @"h\:mm\:ss",
+                @"h\:mm\:ss\:f",
+                @"h\:mm\:ss\:ff",
+                @"h\:mm\:ss\:fff",
+                @"hh\:m\:s",
+                @"hh\:m\:s\:f",
+                @"hh\:m\:s\:ff",
+                @"hh\:m\:s\:fff",
+                @"hh\:m\:ss",
+                @"hh\:m\:ss\:f",
+                @"hh\:m\:ss\:ff",
+                @"hh\:m\:ss\:fff",
+                @"hh\:mm\:s",
+                @"hh\:mm\:s\:f",
+                @"hh\:mm\:s\:ff",
+                @"hh\:mm\:s\:fff",
+                @"hh\:mm\:ss",
+                @"hh\:mm\:ss\:f",
+                @"hh\:mm\:ss\:ff",
+                @"hh\:mm\:ss\:fff",
+            };
 
             MediaPlayerExtensionPackage = new FileExtensionPackage(Strings.MediaFiles, new HashSet<FileExtension>
             {
                 new FileExtension(".mkv", Strings.MatrioshkaFile),
                 new FileExtension(".mp3", Strings.MusicFile),
                 new FileExtension(".mp4", Strings.MovieFile),
+                new FileExtension(".srt", Strings.MovieFile),
             });
             MediaPlayerExtensionPackageFilter = new FilePickerFilter(MediaPlayerExtensionPackage);
 
@@ -54,14 +90,10 @@ namespace DQPlayer
                 .WithArgument(m => m.UnloadedBehavior = MediaState.Manual)
                 .WithArgument(m => m.Volume = 0);
             MediaPlayerTemplate = new ControlTemplateCreator<MediaElement>(mediaTemplate);
-
-            SpashScreenImage = ExtractImageSourceFromBitmap(Strings.SplashScreenImage);
-            PlayImage = ExtractImageSourceFromBitmap(Strings.PlayImage);
-            PauseImage = ExtractImageSourceFromBitmap(Strings.PauseImage);
-            SkipBack = ExtractImageSourceFromBitmap(Strings.SkipBackImage);
-            SkipForward = ExtractImageSourceFromBitmap(Strings.SkipForwardImage);
-            Stop = ExtractImageSourceFromBitmap(Strings.StopImage);
+            Cyrillic = Encoding.GetEncoding("Windows-1251");
         }
+
+        public static string[] GetTimeSpanStringFormats() => _timeSpanStringFormats;
 
         private static ImageSource ExtractImageSourceFromBitmap(Bitmap bitmap)
         {

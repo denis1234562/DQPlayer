@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 
-namespace DQPlayer.Extensions
+namespace DQPlayer.Helpers.Extensions
 {
     public static class GeneralExtensions
     {

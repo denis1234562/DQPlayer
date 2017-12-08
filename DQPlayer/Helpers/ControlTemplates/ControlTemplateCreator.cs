@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows;
 
-namespace DQPlayer.ControlTemplates
+namespace DQPlayer.Helpers.ControlTemplates
 {
     public class ControlTemplateCreator<TSource>
         where TSource : UIElement

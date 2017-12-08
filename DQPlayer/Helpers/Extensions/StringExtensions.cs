@@ -1,6 +1,6 @@
 using System;
 
-namespace DQPlayer.Extensions
+namespace DQPlayer.Helpers.Extensions
 {
     public static class StringExtensions
     {

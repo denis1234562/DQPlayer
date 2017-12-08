@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace DQPlayer.Helpers
+namespace DQPlayer.Helpers.FileManagement
 {
     public class FileExtensionPackage : ISet<FileExtension>
     {

@@ -1,8 +1,6 @@
 using System;
 using System.ComponentModel;
 using System.Linq;
-using DQPlayer.Annotations;
-using DQPlayer.Extensions;
 using DQPlayer.MVVMFiles.Commands;
 using DQPlayer.MVVMFiles.Models.MediaPlayer;
 using DQPlayer.States;
@@ -11,6 +9,10 @@ using DQPlayer.Helpers;
 using System.Windows;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
+using DQPlayer.Helpers.Extensions;
+using DQPlayer.Helpers.FileManagement;
+using DQPlayer.Helpers.SubtitlesManagement;
+using DQPlayer.Properties;
 using DQPlayer.ResourceFiles;
 
 namespace DQPlayer.MVVMFiles.ViewModels
@@ -74,12 +76,12 @@ namespace DQPlayer.MVVMFiles.ViewModels
                 MediaPlayer.SetMediaState(MediaPlayerStates.FastForward);
                 MediaPlayer.SetMediaState(lastState);
             });
-            _browseCommand = CreateLazyRelayCommand(OnBrowseCommand);
             _sliderDragStartedCommand = CreateLazyRelayCommand(() => MediaPlayer.SerializeState(MediaPlayerStates.Pause));
             _sliderDragCompletedCommand = CreateLazyRelayCommand(() => MediaPlayer.ResumeSerializedState());
             _thumbDragDeltaCommand = CreateLazyRelayCommand(() => MediaPlayer.SetPlayerPositionToCursor());
             _thumbMouseEnterCommand = CreateLazyRelayCommand<MouseEventArgs>(OnThumbMouseEnterCommand);
             _windowFileDropCommand = CreateLazyRelayCommand<DragEventArgs>(OnWindowFileDropCommand);
+            _browseCommand = CreateLazyRelayCommand(OnBrowseCommand);
         }
 
         public MediaPlayerModel MediaPlayer { get; set; }
@@ -127,11 +129,31 @@ namespace DQPlayer.MVVMFiles.ViewModels
             }
         }
 
+        public event Action<SubtitleHandler, SubtitleSegment> Show;
+        public event Action<SubtitleHandler, SubtitleSegment> Hide;
         private void OnWindowFileDropCommand(DragEventArgs e)
         {
             if (FileDropHandler.TryExtractDroppedItemsUri(e, Settings.MediaPlayerExtensionPackage, out var uris))
             {
-                MediaPlayer.PlayNewPlayerSource(uris.First());
+                //TODO fix
+                var firstElement = uris.First();
+                if (uris.Count() == 1 && firstElement.AbsolutePath.GetFileExtension() == ".srt")
+                {
+                    if (!Equals(MediaPlayer.CurrentState, MediaPlayerStates.None))
+                    {
+                        var a = new SubtitleHandler().WithEncoding(Settings.Cyrillic)
+                            .IsStartable(MediaPlayer.CurrentState.IsRunning).Build(firstElement.AbsolutePath,
+                                MediaPlayer.MediaSlider.Value, (IRegulatableMediaServiceNotifier) MediaPlayer.MediaController);
+                        a.DisplaySubtitle += (handler, segment) => Show?.Invoke(handler, segment);
+                        a.HideSubtitle += (handler, segment) => Hide?.Invoke(handler, segment);
+                    }
+                    else
+                    {
+                        //load in playlist
+                    }
+                    return;
+                }
+                MediaPlayer.PlayNewPlayerSource(firstElement);
                 return;
             }
             MessageBox.Show($"{Strings.InvalidFileType}", "Error");

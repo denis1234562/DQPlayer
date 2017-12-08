@@ -2,7 +2,7 @@
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 
-namespace DQPlayer.CustomControls
+namespace DQPlayer.Helpers.CustomControls
 {
     public class ThumbDragSlider : Slider
     {

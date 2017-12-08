@@ -1,4 +1,4 @@
-using DQPlayer.CustomControls;
+using DQPlayer.Helpers.CustomControls;
 using DQPlayer.States;
 
 namespace DQPlayer.MVVMFiles.Models.MediaPlayer

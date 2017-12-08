@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace DQPlayer.Helpers
+namespace DQPlayer.Helpers.FileManagement
 {
     public class FilePickerFilter
     {

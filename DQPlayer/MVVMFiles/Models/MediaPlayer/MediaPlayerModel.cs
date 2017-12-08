@@ -1,7 +1,8 @@
+using System;
 using System.ComponentModel;
-using DQPlayer.Annotations;
-using DQPlayer.CustomControls;
-using DQPlayer.Extensions;
+using DQPlayer.Helpers.CustomControls;
+using DQPlayer.Helpers.Extensions;
+using DQPlayer.Properties;
 using DQPlayer.States;
 
 namespace DQPlayer.MVVMFiles.Models.MediaPlayer

@@ -4,7 +4,6 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:DQPlayer"
-        xmlns:customControls="clr-namespace:DQPlayer.CustomControls"
         xmlns:viewModels="clr-namespace:DQPlayer.MVVMFiles.ViewModels"
         xmlns:ia="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
         xmlns:ei="http://schemas.microsoft.com/expression/2010/interactions"
@@ -12,6 +11,7 @@
         xmlns:res="clr-namespace:DQPlayer.ResourceFiles"
         xmlns:system="clr-namespace:System;assembly=mscorlib"
         xmlns:cmd="http://www.galasoft.ch/mvvmlight"
+        xmlns:customControls="clr-namespace:DQPlayer.Helpers.CustomControls"
         mc:Ignorable="d"
         Title="DQPlayer" Height="410" Width="534" AllowDrop="True"
         MinHeight="{Binding Source={x:Static local:Settings.MinimumWindowSize}, Path=Height}"
@@ -313,6 +313,50 @@
         <Label Name="lbTimeTooltip" Visibility="Hidden"  HorizontalContentAlignment="Center" HorizontalAlignment="Left" VerticalAlignment="Bottom"
                    Margin="120,0,0,87" Height="28" FontSize="12" BorderThickness="1" BorderBrush="Black">
         </Label>
+        <Grid Name="gridSubs" Margin="0,0,0,118" Height="Auto" VerticalAlignment="Stretch">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="10*"/>
+                <RowDefinition Height="10*"/>
+                <RowDefinition Height="10*"/>
+                <RowDefinition Height="10*"/>
+                <RowDefinition Height="10*"/>
+                <RowDefinition Height="10*"/>
+                <RowDefinition Height="10*"/>
+                <RowDefinition Height="10*"/>
+                <RowDefinition Height="10*"/>
+            </Grid.RowDefinitions>
+            <Viewbox StretchDirection="Both" Stretch="Uniform" Grid.Row="8">
+                <Label HorizontalContentAlignment="Center" FontSize="32" Foreground="White" >
+
+
+                </Label>
+            </Viewbox>
+
+            <Viewbox StretchDirection="Both" Stretch="Uniform" Grid.Row="7">
+                <Label HorizontalContentAlignment="Center" FontSize="32" Foreground="White"></Label>
+            </Viewbox>
+            <Viewbox StretchDirection="Both" Stretch="Uniform" Grid.Row="6">
+                <Label HorizontalContentAlignment="Center" FontSize="32" Foreground="White"></Label>
+            </Viewbox>
+            <Viewbox StretchDirection="Both" Stretch="Uniform" Grid.Row="5">
+                <Label HorizontalContentAlignment="Center" FontSize="32" Foreground="White"></Label>
+            </Viewbox>
+            <Viewbox StretchDirection="Both" Stretch="Uniform" Grid.Row="4">
+                <Label HorizontalContentAlignment="Center" FontSize="32" Foreground="White"></Label>
+            </Viewbox>
+            <Viewbox StretchDirection="Both" Stretch="Uniform" Grid.Row="3">
+                <Label HorizontalContentAlignment="Center" FontSize="32" Foreground="White"></Label>
+            </Viewbox>
+            <Viewbox StretchDirection="Both" Stretch="Uniform" Grid.Row="2">
+                <Label HorizontalContentAlignment="Center" FontSize="32" Foreground="White"></Label>
+            </Viewbox>
+            <Viewbox StretchDirection="Both" Stretch="Uniform" Grid.Row="1">
+                <Label HorizontalContentAlignment="Center" FontSize="32" Foreground="White"></Label>
+            </Viewbox>
+            <Viewbox StretchDirection="Both" Stretch="Uniform" Grid.Row="0">
+                <Label HorizontalContentAlignment="Center" FontSize="32" Foreground="White"></Label>
+            </Viewbox>
+        </Grid>
     </Grid>
 </Window>
 

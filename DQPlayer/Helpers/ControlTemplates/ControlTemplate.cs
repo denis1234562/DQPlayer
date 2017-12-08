@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Windows;
 
-namespace DQPlayer.ControlTemplates
+namespace DQPlayer.Helpers.ControlTemplates
 {
     public class ControlTemplate<TSource>
         where TSource : UIElement

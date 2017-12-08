@@ -1,4 +1,4 @@
-namespace DQPlayer.Helpers
+namespace DQPlayer.Helpers.FileManagement
 {
     public class FileExtension
     {
