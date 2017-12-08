@@ -11,6 +11,7 @@ using DQPlayer.Helpers.Extensions;
 using DQPlayer.Helpers.SubtitlesManagement;
 using DQPlayer.MVVMFiles.Models.MediaPlayer;
 using DQPlayer.MVVMFiles.ViewModels;
+using DQPlayer.MVVMFiles.View;
 
 namespace DQPlayer
 {
@@ -41,6 +42,7 @@ namespace DQPlayer
         private void ViewModel_Loaded(IMediaService obj)
         {
             Player = Settings.MediaPlayerTemplate.CloneAndOverride(Player);
+            PlayList temp = new PlayList();
             SetupTimers();
             ViewModel.Show += ViewModel_Show;
             ViewModel.Hide += ViewModel_Hide;

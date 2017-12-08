@@ -1,0 +1,52 @@
+﻿<Window x:Class="DQPlayer.MVVMFiles.View.PlayList"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:DQPlayer.MVVMFiles.View"
+        xmlns:viewModels="clr-namespace:DQPlayer.MVVMFiles.ViewModels"
+        xmlns:ia="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+        xmlns:cmd="http://www.galasoft.ch/mvvmlight"
+        xmlns:converters="clr-namespace:DQPlayer.MVVMFiles.Converters"
+        mc:Ignorable="d"
+        Title="PlayList" Height="398" Width="532" Closing="Window_Closing" AllowDrop="True">
+    
+    <ia:Interaction.Triggers>
+        <ia:EventTrigger EventName="Drop">
+            <cmd:EventToCommand Command="{Binding WindowFileDropCommand}" PassEventArgsToCommand="True"/>
+        </ia:EventTrigger>
+    </ia:Interaction.Triggers>
+
+    <Window.DataContext>
+        <viewModels:PlayListViewModel/>
+    </Window.DataContext>
+    <Grid>
+        <Button Name="bBrowse" Content="Browse" 
+                Margin="0,0,10,10" HorizontalAlignment="Right" VerticalAlignment="Bottom" 
+                Width="75"                
+                Command="{Binding BrowseCommand}"/>
+
+        <Button Name="bRemove" Content="Remove" 
+                Margin="0,0,90,10" HorizontalAlignment="Right" VerticalAlignment="Bottom" 
+                Width="75"
+                Command="{Binding RemoveCommand}"
+                CommandParameter="{Binding ElementName=ListView}" />
+
+        <Button Name="bClearAll" Content="Clear All" 
+                Margin="0,0,170,10" HorizontalAlignment="Right"  VerticalAlignment="Bottom"
+                Width="75"
+                Command="{Binding ClearAllCommand}"/>
+
+        <ListView Name="ListView" Margin="0,0,0,35" ItemsSource="{Binding MovieFiles}">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Header="Title" Width="270"
+                                    DisplayMemberBinding="{Binding Title}"/>
+
+                    <GridViewColumn Header="Time" Width="114"
+                                    DisplayMemberBinding="{Binding Time, Converter={converters:TimeSpanFormatConverter}}"/>
+                </GridView>
+            </ListView.View>
+        </ListView>
+    </Grid>
+</Window>
