@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using DQPlayer.MVVMFiles.Commands;
@@ -95,6 +96,11 @@ namespace DQPlayer.MVVMFiles.ViewModels
         private static Lazy<RelayCommand<T>> CreateLazyRelayCommand<T>(Action<T> execute, Func<T, bool> canExecute = null)
             => new Lazy<RelayCommand<T>>(() => new RelayCommand<T>(execute, canExecute));
 
+        public event Action<SubtitleHandler, SubtitleSegment> Show;
+        public event Action<SubtitleHandler, SubtitleSegment> Hide;
+
+        private SubtitleHandler _currentSubtitleHandler;
+
         [NotifyPropertyChangedInvocator]
         protected virtual void OnPropertyChanged([System.Runtime.CompilerServices.CallerMemberName] string propName = null)
         {
@@ -125,38 +131,57 @@ namespace DQPlayer.MVVMFiles.ViewModels
             };
             if (fileDialog.ShowDialog().GetValueOrDefault())
             {
-                MediaPlayer.PlayNewPlayerSource(new Uri(fileDialog.FileName));
+                ProcessInputFiles(new Uri(fileDialog.FileName).AsEnumerable());
             }
         }
 
-        public event Action<SubtitleHandler, SubtitleSegment> Show;
-        public event Action<SubtitleHandler, SubtitleSegment> Hide;
         private void OnWindowFileDropCommand(DragEventArgs e)
         {
             if (FileDropHandler.TryExtractDroppedItemsUri(e, Settings.MediaPlayerExtensionPackage, out var uris))
             {
-                //TODO fix
-                var firstElement = uris.First();
-                if (uris.Count() == 1 && firstElement.AbsolutePath.GetFileExtension() == ".srt")
-                {
-                    if (!Equals(MediaPlayer.CurrentState, MediaPlayerStates.None))
-                    {
-                        var a = new SubtitleHandler().WithEncoding(Settings.Cyrillic)
-                            .IsStartable(MediaPlayer.CurrentState.IsRunning).Build(firstElement.AbsolutePath,
-                                MediaPlayer.MediaSlider.Value, (IRegulatableMediaServiceNotifier) MediaPlayer.MediaController);
-                        a.DisplaySubtitle += (handler, segment) => Show?.Invoke(handler, segment);
-                        a.HideSubtitle += (handler, segment) => Hide?.Invoke(handler, segment);
-                    }
-                    else
-                    {
-                        //load in playlist
-                    }
-                    return;
-                }
-                MediaPlayer.PlayNewPlayerSource(firstElement);
+                ProcessInputFiles(uris);
                 return;
             }
             MessageBox.Show($"{Strings.InvalidFileType}", "Error");
+        }
+
+        private void ProcessInputFiles(IEnumerable<Uri> files)
+        {
+            if (_currentSubtitleHandler != null)
+            {
+                _currentSubtitleHandler.DisplaySubtitle -= OnDisplaySubtitle;
+                _currentSubtitleHandler.HideSubtitle -= OnHideSubtitle;
+            }
+            var firstElement = files.First();
+            if (files.Count() == 1 && firstElement.AbsolutePath.GetFileExtension() == ".srt")
+            {
+                if (!Equals(MediaPlayer.CurrentState, MediaPlayerStates.None))
+                {
+                    _currentSubtitleHandler = new SubtitleHandler();
+                    _currentSubtitleHandler.DisplaySubtitle += OnDisplaySubtitle;
+                    _currentSubtitleHandler.HideSubtitle += OnHideSubtitle;
+                    _currentSubtitleHandler.WithEncoding(Settings.Cyrillic)
+                        .IsStartable(MediaPlayer.CurrentState.IsRunning).Build(firstElement.AbsolutePath,
+                            MediaPlayer.MediaSlider.Value,
+                            (IRegulatableMediaServiceNotifier)MediaPlayer.MediaController);
+                }
+                else
+                {
+                    //load in playlist
+                }
+                return;
+            }
+            MediaPlayer.PlayNewPlayerSource(firstElement);
+        }
+
+        private void OnHideSubtitle(SubtitleHandler handler, SubtitleSegment segment)
+        {
+            Hide?.Invoke(handler, segment);
+        }
+
+        private void OnDisplaySubtitle(SubtitleHandler handler, SubtitleSegment segment)
+        {
+            Show?.Invoke(handler, segment);
         }
 
         private void OnThumbMouseEnterCommand(MouseEventArgs e)

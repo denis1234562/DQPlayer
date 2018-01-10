@@ -63,11 +63,10 @@ namespace DQPlayer.Helpers.SubtitlesManagement
         }
         private void SetupNotifierSubscriptions(IRegulatableMediaServiceNotifier notifier)
         {
-            notifier.MediaFastForwarded += (o, span) => ResyncSubtitles(span);
-            notifier.MediaRewinded += (o, span) => ResyncSubtitles(span);
+            notifier.MediaPositionChanged += (o, span) => ResyncSubtitles(span);
             notifier.MediaPlayed += OnMediaPlayed;
             notifier.MediaPaused += OnMediaPaused;
-            notifier.MediaStopped += OnMediaStopped;
+            notifier.MediaStopped += OnMediaStopped;         
         }
 
         private void OnMediaStopped(object sender)
@@ -78,8 +77,8 @@ namespace DQPlayer.Helpers.SubtitlesManagement
 
         private void OnMediaPlayed(object sender)
         {
-            var mediaElement = sender as MediaElement;
-            Resume(mediaElement.Position);
+            //TODO 1 sec delay
+            Resume((TimeSpan) sender);
         }
 
         private void OnMediaPaused(object sender)
@@ -95,6 +94,8 @@ namespace DQPlayer.Helpers.SubtitlesManagement
 
         private void Resume(TimeSpan span)
         {
+            //TODO 1 sec delay exactly 1 sec
+            _cancellationToken = new CancellationTokenSource();
             ScheduleSubtitleHidingAll(span);
             _subtitleDisplayTracker.Resume();
         }
@@ -127,7 +128,10 @@ namespace DQPlayer.Helpers.SubtitlesManagement
                     OnHideSubtitle(subtitle);
                     _currentlyShownSubtitles.Remove(subtitle);
                 }
-                catch (TaskCanceledException) { }
+                catch (TaskCanceledException)
+                {
+                    Console.WriteLine("Task cancelled");
+                }
             });
         }
 
@@ -136,7 +140,7 @@ namespace DQPlayer.Helpers.SubtitlesManagement
             foreach (var subtitle in _currentlyShownSubtitles)
             {
                 ScheduleSubtitleHiding(subtitle,
-                    GeneralExtensions.Max(new TimeSpan(0), subtitle.SubtitleInterval.End - interval));
+                    GeneralExtensions.Max(new TimeSpan(0), subtitle.SubtitleInterval.End.Subtract(interval)));
             }
         }
 
@@ -160,13 +164,17 @@ namespace DQPlayer.Helpers.SubtitlesManagement
                 if (time < _subtitles[i].SubtitleInterval.End)
                 {
                     ForceHidingAllSubtitles();
-                    ShowSubtitle(_subtitles[i], _subtitles[i].SubtitleInterval.End - time);
-
-                    if (i + 1 < _subtitles.Count)
+                    if (time > _subtitles[i].SubtitleInterval.Start)
                     {
-                        _subtitleDisplayTracker.Interval = _subtitles[i + 1].SubtitleInterval.Start - time;
+                        ShowSubtitle(_subtitles[i], _subtitles[i].SubtitleInterval.End - time);
+                        if (i + 1 < _subtitles.Count)
+                        {
+                            _subtitleDisplayTracker.Interval = _subtitles[i + 1].SubtitleInterval.Start - time;
+                        }
+                        _subtitles.SetCurrent(i + 1);
+                        break;
                     }
-                    //TODO might need to set current to i + 1;
+                    _subtitleDisplayTracker.Interval = _subtitles[i].SubtitleInterval.Start - time;
                     _subtitles.SetCurrent(i);
                     break;
                 }

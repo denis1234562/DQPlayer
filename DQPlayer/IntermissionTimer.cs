@@ -9,13 +9,28 @@ namespace DQPlayer
 {
     public class IntermissionTimer : DispatcherTimer
     {
+        public new TimeSpan Interval
+        {
+            get => base.Interval;
+            set
+            {
+                base.Interval = value;
+                if (_intervalTickedTime.IsRunning)
+                {
+                    _intervalTickedTime.Restart();
+                    return;
+                }
+                _intervalTickedTime.Reset();
+            }
+        }
+
         private readonly Stopwatch _sw;
 
         private MulticastDelegate _tickEventHandlers;
         private MulticastDelegate tickEventHandlers =>
             _tickEventHandlers ?? (_tickEventHandlers = (MulticastDelegate)typeof(DispatcherTimer)
                 .GetField("Tick", BindingFlags.Instance | BindingFlags.NonPublic)
-                .GetValue(this));
+                ?.GetValue(this));
 
         private CancellationTokenSource _cancelationToken;
         private Task _task;
@@ -87,6 +102,7 @@ namespace DQPlayer
                 _task = Task.Run(async () =>
                 {
                     _sw.Start();
+                    _intervalTickedTime.Start();
                     var scheduledIntermissionTime =
                         Math.Abs((int) (Interval - _intervalTickedTime.Elapsed).TotalMilliseconds);
                     if (_cancelationToken.IsCancellationRequested)
@@ -94,7 +110,13 @@ namespace DQPlayer
                         Cancelation();
                         return;
                     }
-                    await Task.Delay(scheduledIntermissionTime, _cancelationToken.Token).ContinueWith(t => { });
+                    try
+                    {
+                        await Task.Delay(scheduledIntermissionTime, _cancelationToken.Token);
+                    }
+                    catch (TaskCanceledException)
+                    {
+                    }
                     if (_cancelationToken.IsCancellationRequested)
                     {
                         Cancelation();
@@ -103,7 +125,7 @@ namespace DQPlayer
                     foreach (var handler in tickEventHandlers.GetInvocationList())
                     {
                         Dispatcher.Invoke(() => handler.Method.Invoke(handler.Target,
-                            new object[] { this, EventArgs.Empty }));
+                            new object[] {this, EventArgs.Empty}));
                     }
                     Start();
                     _hasScheduledIntermission = false;

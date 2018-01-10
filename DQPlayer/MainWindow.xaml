@@ -313,27 +313,26 @@
         <Label Name="lbTimeTooltip" Visibility="Hidden"  HorizontalContentAlignment="Center" HorizontalAlignment="Left" VerticalAlignment="Bottom"
                    Margin="120,0,0,87" Height="28" FontSize="12" BorderThickness="1" BorderBrush="Black">
         </Label>
-        <Grid Name="gridSubs" Margin="0,0,0,118" Height="Auto" VerticalAlignment="Stretch">
+        <Grid Name="gridSubs" Margin="0,0,0,118" Height="Auto" VerticalAlignment="Stretch" IsHitTestVisible="false">
             <Grid.RowDefinitions>
-                <RowDefinition Height="10*"/>
-                <RowDefinition Height="10*"/>
-                <RowDefinition Height="10*"/>
-                <RowDefinition Height="10*"/>
-                <RowDefinition Height="10*"/>
-                <RowDefinition Height="10*"/>
-                <RowDefinition Height="10*"/>
-                <RowDefinition Height="10*"/>
-                <RowDefinition Height="10*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
             <Viewbox StretchDirection="Both" Stretch="Uniform" Grid.Row="8">
-                <Label HorizontalContentAlignment="Center" FontSize="32" Foreground="White" >
-
-
+                <Label HorizontalContentAlignment="Center" FontSize="32" Foreground="White">
                 </Label>
             </Viewbox>
 
             <Viewbox StretchDirection="Both" Stretch="Uniform" Grid.Row="7">
-                <Label HorizontalContentAlignment="Center" FontSize="32" Foreground="White"></Label>
+                <Label HorizontalContentAlignment="Center" FontSize="32" Foreground="White">
+                </Label>
             </Viewbox>
             <Viewbox StretchDirection="Both" Stretch="Uniform" Grid.Row="6">
                 <Label HorizontalContentAlignment="Center" FontSize="32" Foreground="White"></Label>
@@ -357,6 +356,7 @@
                 <Label HorizontalContentAlignment="Center" FontSize="32" Foreground="White"></Label>
             </Viewbox>
         </Grid>
+
     </Grid>
 </Window>
 

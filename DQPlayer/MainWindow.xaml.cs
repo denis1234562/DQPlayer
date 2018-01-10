@@ -11,7 +11,6 @@ using DQPlayer.Helpers.Extensions;
 using DQPlayer.Helpers.SubtitlesManagement;
 using DQPlayer.MVVMFiles.Models.MediaPlayer;
 using DQPlayer.MVVMFiles.ViewModels;
-using DQPlayer.MVVMFiles.View;
 
 namespace DQPlayer
 {
@@ -34,7 +33,6 @@ namespace DQPlayer
             InitializeComponent();
             SetupBindings();
             ViewModel.Loaded += ViewModel_Loaded;
-
         }
 
         #region Startup Methods
@@ -42,42 +40,41 @@ namespace DQPlayer
         private void ViewModel_Loaded(IMediaService obj)
         {
             Player = Settings.MediaPlayerTemplate.CloneAndOverride(Player);
-            PlayList temp = new PlayList();
             SetupTimers();
             ViewModel.Show += ViewModel_Show;
             ViewModel.Hide += ViewModel_Hide;
         }
 
-        private Dictionary<SubtitleSegment, Label[]> _currentlyShownSubtitles = new Dictionary<SubtitleSegment, Label[]>();
+        private readonly Dictionary<SubtitleSegment, IEnumerable<Label>> _currentlyShownSubtitles =
+            new Dictionary<SubtitleSegment, IEnumerable<Label>>();
+
         private void ViewModel_Show(SubtitleHandler handler, SubtitleSegment segment)
         {
+            //TODO move to separate class
             if (_currentlyShownSubtitles.ContainsKey(segment))
             {
                 return;
             }
             var lines = gridSubs.Children.Cast<Viewbox>().Select(vb => (Label) vb.Child).ToArray();
-            var splitedLines = segment.Content.Split(new []{'\n'}, StringSplitOptions.RemoveEmptyEntries);
+            var splitedLines = segment.Content.Split(new[] {'\n'}, StringSplitOptions.RemoveEmptyEntries)
+                .Select(l => l.Replace("\r", string.Empty)).ToArray();
             for (int i = 0; i < lines.Length; i++)
             {
                 if (string.IsNullOrEmpty((string) lines[i].Content))
                 {
-                    if (splitedLines.Length == 1)
+                    if (splitedLines.Length != 1)
                     {
-                        lines[i].Content = segment.Content;
-                        _currentlyShownSubtitles.Add(segment, new[] {lines[i]});
+                        var availableLines = lines.Where(l => string.IsNullOrEmpty((string) l.Content))
+                            .Take(splitedLines.Length).ToArray();
+                        for (int j = 0; j < availableLines.Length; j++)
+                        {
+                            availableLines[j].Content = splitedLines[splitedLines.Length - 1 - j];
+                        }
+                        _currentlyShownSubtitles.Add(segment, availableLines);
                         break;
                     }
-                    int count = 1;
-                    while (count < splitedLines.Length && string.IsNullOrEmpty((string) lines[++i].Content))
-                    {
-                        count++;
-                    }
-                    var elements = lines.Skip(i - count - 1).Take(count).ToArray();
-                    _currentlyShownSubtitles.Add(segment, elements);
-                    for (int j = 0; j < splitedLines.Length; j++)
-                    {
-                        elements[j].Content = splitedLines[splitedLines.Length -1 - j];
-                    }
+                    lines[i].Content = splitedLines[0];
+                    _currentlyShownSubtitles.Add(segment, new[] {lines[i]});
                     break;
                 }
             }
@@ -85,6 +82,7 @@ namespace DQPlayer
 
         private void ViewModel_Hide(SubtitleHandler handler, SubtitleSegment segment)
         {
+            Dispatcher.Invoke(() => Console.WriteLine($"HIDING {sMovieSkipSlider.Value}"));
             if (_currentlyShownSubtitles.TryGetValue(segment, out var value))
             {
                 foreach (var line in value)
@@ -152,7 +150,7 @@ namespace DQPlayer
 
         private void CurrentMovieTimeTimer_Tick(object sender, EventArgs e)
         {
-            sMovieSkipSlider.Value = sMovieSkipSlider.Value.Add(ViewModel.MediaPlayer.MediaPlayerTimer.Interval);
+            sMovieSkipSlider.Value = Player.Position;
         }
 
         private void SMovieSkipSlider_OnMouseEnter(object sender, MouseEventArgs e)

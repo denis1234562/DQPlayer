@@ -27,8 +27,8 @@ namespace DQPlayer.MVVMFiles.Models.MediaPlayer
         public void Play()
         {
             _mediaElement.Play();
-            SetTimer();
             OnMediaPlayed();
+            SetTimer();
         }
 
         public void Pause()
@@ -51,16 +51,13 @@ namespace DQPlayer.MVVMFiles.Models.MediaPlayer
             var position = GeneralExtensions.Max(_mediaElement.Position.Subtract(Settings.SkipSeconds),
                 new TimeSpan(0));
             SetNewPlayerPosition(position);
-            OnMediaRewinded(position);
         }
 
         public void FastForward()
         {
             var position = GeneralExtensions.Min(_mediaElement.NaturalDuration.TimeSpan,
                 _mediaElement.Position.Add(Settings.SkipSeconds));
-            Console.WriteLine(position);
             SetNewPlayerPosition(position);
-            OnMediaFastForwarded(position);
         }
 
         public void SetNewPlayerPosition(TimeSpan newPosition)
@@ -70,7 +67,7 @@ namespace DQPlayer.MVVMFiles.Models.MediaPlayer
             {
                 _media.MediaSlider.Value = _mediaElement.Position;
             }
-            //TODO skip to positon
+            OnMediaPositionChanged(newPosition);
         }
 
         public void SetNewPlayerSource(Uri source)
@@ -87,7 +84,7 @@ namespace DQPlayer.MVVMFiles.Models.MediaPlayer
 
         private void OnMediaPlayed()
         {
-            MediaPlayed?.Invoke(_mediaElement);
+            MediaPlayed?.Invoke(_mediaElement.Position);
         }
 
         private void OnMediaPaused()
@@ -103,18 +100,13 @@ namespace DQPlayer.MVVMFiles.Models.MediaPlayer
 
         #region Implementation of IRegulatableMediaServiceNotifier
 
-        public event Action<object, TimeSpan> MediaRewinded;
-        public event Action<object, TimeSpan> MediaFastForwarded;
+        public event Action<object, TimeSpan> MediaPositionChanged;
 
-        private void OnMediaRewinded(TimeSpan time)
+        private void OnMediaPositionChanged(TimeSpan time)
         {
-            MediaRewinded?.Invoke(_mediaElement, time);
+            MediaPositionChanged?.Invoke(_mediaElement, time);
         }
 
-        private void OnMediaFastForwarded(TimeSpan time)
-        {
-            MediaFastForwarded?.Invoke(_mediaElement, time);
-        }
         #endregion
     }
 }

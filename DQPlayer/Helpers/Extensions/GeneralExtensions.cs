@@ -78,5 +78,10 @@ namespace DQPlayer.Helpers.Extensions
                 return (T)formatter.Deserialize(stream);
             }
         }
+
+        public static IEnumerable<T> AsEnumerable<T>(this T item)
+        {
+            yield return item;
+        }
     }
 }
