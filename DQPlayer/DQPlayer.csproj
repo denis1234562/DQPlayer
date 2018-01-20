@@ -95,6 +95,7 @@
     <Compile Include="Helpers\ControlTemplates\ControlTemplateCreator.cs" />
     <Compile Include="Helpers\CustomCollections\ICircularList.cs" />
     <Compile Include="Helpers\CustomCollections\ObservableCircularList.cs" />
+    <Compile Include="Helpers\CustomControls\OutlinedLabel.cs" />
     <Compile Include="Helpers\CustomControls\ThumbDragSlider.cs" />
     <Compile Include="Helpers\Extensions\CollectionsExtensions\CircularListExtensions.cs" />
     <Compile Include="Helpers\Extensions\GeneralExtensions.cs" />

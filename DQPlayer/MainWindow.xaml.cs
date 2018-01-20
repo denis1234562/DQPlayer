@@ -1,12 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
+using System.Globalization;
 using System.Linq;
+using System.Net.Mime;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
+using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Media;
+using DQPlayer.Helpers.CustomControls;
 using DQPlayer.Helpers.Extensions;
 using DQPlayer.Helpers.SubtitlesManagement;
 using DQPlayer.MVVMFiles.Models.MediaPlayer;
@@ -45,8 +51,8 @@ namespace DQPlayer
             ViewModel.Hide += ViewModel_Hide;
         }
 
-        private readonly Dictionary<SubtitleSegment, IEnumerable<Label>> _currentlyShownSubtitles =
-            new Dictionary<SubtitleSegment, IEnumerable<Label>>();
+        private readonly Dictionary<SubtitleSegment, IEnumerable<OutlinedLabel>> _currentlyShownSubtitles =
+            new Dictionary<SubtitleSegment, IEnumerable<OutlinedLabel>>();
 
         private void ViewModel_Show(SubtitleHandler handler, SubtitleSegment segment)
         {
@@ -55,26 +61,27 @@ namespace DQPlayer
             {
                 return;
             }
-            var lines = gridSubs.Children.Cast<Viewbox>().Select(vb => (Label) vb.Child).ToArray();
+            //var lines = gridSubs.Children.Cast<Viewbox>().Select(vb => (OutlinedLabel) vb.Child).ToArray();
+            var lines = gridSubs.Children.Cast<OutlinedLabel>().ToArray();
             var splitedLines = segment.Content.Split(new[] {'\n'}, StringSplitOptions.RemoveEmptyEntries)
                 .Select(l => l.Replace("\r", string.Empty)).ToArray();
-            for (int i = 0; i < lines.Length; i++)
+            foreach (var line in lines)
             {
-                if (string.IsNullOrEmpty((string) lines[i].Content))
+                if (string.IsNullOrEmpty(line.Text))
                 {
                     if (splitedLines.Length != 1)
                     {
-                        var availableLines = lines.Where(l => string.IsNullOrEmpty((string) l.Content))
+                        var availableLines = lines.Where(l => string.IsNullOrEmpty(l.Text))
                             .Take(splitedLines.Length).ToArray();
                         for (int j = 0; j < availableLines.Length; j++)
                         {
-                            availableLines[j].Content = splitedLines[splitedLines.Length - 1 - j];
+                            availableLines[j].Text = splitedLines[splitedLines.Length - 1 - j];
                         }
                         _currentlyShownSubtitles.Add(segment, availableLines);
                         break;
                     }
-                    lines[i].Content = splitedLines[0];
-                    _currentlyShownSubtitles.Add(segment, new[] {lines[i]});
+                    line.Text = splitedLines[0];
+                    _currentlyShownSubtitles.Add(segment, new[] {line});
                     break;
                 }
             }
@@ -82,12 +89,11 @@ namespace DQPlayer
 
         private void ViewModel_Hide(SubtitleHandler handler, SubtitleSegment segment)
         {
-            Dispatcher.Invoke(() => Console.WriteLine($"HIDING {sMovieSkipSlider.Value}"));
             if (_currentlyShownSubtitles.TryGetValue(segment, out var value))
             {
                 foreach (var line in value)
                 {
-                    Dispatcher.Invoke(() => line.Content = string.Empty);
+                    Dispatcher.Invoke(() => line.Text = string.Empty);
                 }
                 _currentlyShownSubtitles.Remove(segment);
             }

@@ -149,11 +149,12 @@ namespace DQPlayer.MVVMFiles.ViewModels
         {
             if (_currentSubtitleHandler != null)
             {
+                _currentSubtitleHandler.ForceHidingAllSubtitles();
                 _currentSubtitleHandler.DisplaySubtitle -= OnDisplaySubtitle;
                 _currentSubtitleHandler.HideSubtitle -= OnHideSubtitle;
             }
             var firstElement = files.First();
-            if (files.Count() == 1 && firstElement.AbsolutePath.GetFileExtension() == ".srt")
+            if (firstElement.AbsolutePath.GetFileExtension() == ".srt")
             {
                 if (!Equals(MediaPlayer.CurrentState, MediaPlayerStates.None))
                 {

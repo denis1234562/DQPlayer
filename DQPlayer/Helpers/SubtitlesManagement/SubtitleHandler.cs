@@ -144,7 +144,7 @@ namespace DQPlayer.Helpers.SubtitlesManagement
             }
         }
 
-        private void ForceHidingAllSubtitles()
+        public void ForceHidingAllSubtitles()
         {
             _cancellationToken.Cancel(false);
             lock (_currentlyShownSubtitles)
