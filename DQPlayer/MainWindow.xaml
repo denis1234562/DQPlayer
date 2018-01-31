@@ -13,7 +13,7 @@
         xmlns:cmd="http://www.galasoft.ch/mvvmlight"
         xmlns:customControls="clr-namespace:DQPlayer.Helpers.CustomControls"
         mc:Ignorable="d"
-        Title="DQPlayer" Height="410" Width="534" AllowDrop="True"
+        Title="DQPlayer" Height="580" Width="709" AllowDrop="True"
         MinHeight="{Binding Source={x:Static local:Settings.MinimumWindowSize}, Path=Height}"
         MinWidth="{Binding Source={x:Static local:Settings.MinimumWindowSize}, Path=Width}"
         >
@@ -225,7 +225,7 @@
                       MouseDown="Player_OnMouseDown">
             <ia:Interaction.Triggers>
                 <ia:EventTrigger EventName="MediaEnded">
-                    <ia:InvokeCommandAction Command="{Binding StopCommand}"/>
+                    <ia:InvokeCommandAction Command="{Binding MediaEndedCommand}"/>
                 </ia:EventTrigger>
             </ia:Interaction.Triggers>
         </MediaElement>
@@ -269,16 +269,38 @@
             <Image Source="pack://application:,,,/bin/Debug/Assets/SkipBack.jpeg"/>
         </Button>
 
-        <Button Name="bFastForward" HorizontalAlignment="Left" Height="40" Margin="130,0,0,10" VerticalAlignment="Bottom" Width="40"
+        <Button Name="bMovePrevious" HorizontalAlignment="Left" Height="40" Margin="130,0,0,10" VerticalAlignment="Bottom" Width="40"
+                IsEnabled="{Binding PlayerSourceState}"
+                Command="{Binding MovePreviousCommand}"
+                Style="{StaticResource TransparentStyle}">
+            <Image Source="pack://application:,,,/bin/Debug/Assets/MovePrevious.jpeg"/>
+        </Button>
+
+        <Button Name="bMoveNext" HorizontalAlignment="Left" Height="40" Margin="170,0,0,10" VerticalAlignment="Bottom" Width="40"
+                IsEnabled="{Binding PlayerSourceState}"
+                Command="{Binding MoveNextCommand}"
+                Style="{StaticResource TransparentStyle}">
+            <Image Source="pack://application:,,,/bin/Debug/Assets/MoveNext.jpeg"/>
+        </Button>
+
+        <Button Name="bFastForward" HorizontalAlignment="Left" Height="40" Margin="210,0,0,10" VerticalAlignment="Bottom" Width="40"
                 IsEnabled="{Binding PlayerSourceState}"
                 Command="{Binding FastForwardCommand}"
                 Style="{StaticResource TransparentStyle}">
             <Image Source="pack://application:,,,/bin/Debug/Assets/SkipForward.jpeg"/>
         </Button>
 
-        <Button Name ="bBrowse" Margin="170,0,0,10" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="44"
+        <Button Name ="bBrowse" Margin="260,0,0,10" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="44"
                 Content="{x:Static res:Strings.Browse}"
                 Command="{Binding BrowseCommand}" Height="40" />
+
+        <Button Name="bPlayList" HorizontalAlignment="Left" Margin="309,0,0,10" VerticalAlignment="Bottom"  Width="44" Height="40"
+                Content="{x:Static res:Strings.PlayList}"
+                Command="{Binding PlayListCommand}"/>
+
+        <CheckBox Content="Repeat" HorizontalAlignment="Left" Margin="367,0,0,24" VerticalAlignment="Bottom"
+                  IsEnabled="{Binding PlayerSourceState}"
+                  IsChecked="{Binding Repeat}"/>
 
         <Slider Name="sVolumeSlider" Minimum="0" Maximum="1" HorizontalAlignment="Right" Margin="0,0,10,17" VerticalAlignment="Bottom" Width="100"
                 IsMoveToPointEnabled="True"
@@ -336,7 +358,7 @@
             <customControls:OutlinedLabel Grid.Row="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" TextAlignment="Center" TextColor="White" OutlineBrush="Black" FontWeight="Bold" FontSize="32" Thickness="0.5"/>
             <customControls:OutlinedLabel Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" TextAlignment="Center" TextColor="White" OutlineBrush="Black" FontWeight="Bold" FontSize="32" Thickness="0.5"/>
             <customControls:OutlinedLabel Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" TextAlignment="Center" TextColor="White" OutlineBrush="Black" FontWeight="Bold" FontSize="32" Thickness="0.5"/>
-            </Grid>
+        </Grid>
     </Grid>
 </Window>
 

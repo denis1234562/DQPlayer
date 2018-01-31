@@ -1,0 +1,80 @@
+﻿<Window x:Class="DQPlayer.PlayList"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:DQPlayer"
+        xmlns:viewModels="clr-namespace:DQPlayer.MVVMFiles.ViewModels"
+        xmlns:playListModel="clr-namespace:DQPlayer.MVVMFiles.Models.PlayList"
+        xmlns:converters="clr-namespace:DQPlayer.MVVMFiles.Converters"
+        xmlns:ia="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+        xmlns:cmd="http://www.galasoft.ch/mvvmlight"
+        mc:Ignorable="d"
+        Title="PlayList" Height="415.333" Width="512" Closing="Window_Closing"
+        MinHeight="{Binding Source={x:Static local:Settings.MinimumWindowSize}, Path=Height}"
+        MinWidth="{Binding Source={x:Static local:Settings.MinimumWindowSize}, Path=Width}">
+
+    <Window.DataContext>
+        <viewModels:PlayListViewModel/>
+    </Window.DataContext>
+
+    <Grid>
+        <ListView Name="lvListView" Margin="0,0,0,35" AllowDrop="True" ItemsSource="{Binding FilesCollection}">
+            <ia:Interaction.Triggers>
+            <ia:EventTrigger EventName="Drop">
+                <cmd:EventToCommand Command="{Binding ListViewFileDrop}" PassEventArgsToCommand="True"/>
+            </ia:EventTrigger>
+            <ia:EventTrigger EventName="MouseDoubleClick">
+                <cmd:EventToCommand Command="{Binding ListViewDoubleClickCommand}" PassEventArgsToCommand="True"/>
+            </ia:EventTrigger>
+        </ia:Interaction.Triggers>
+
+        <ListView.ContextMenu>
+            <ContextMenu>
+                <MenuItem Header="Remove" Command="{Binding RemoveCommand}" CommandParameter="{x:Reference Name=lvListView}"/>
+
+                <MenuItem Header="Add File"  Command="{Binding BrowseCommand}"/>
+
+                <MenuItem Header="Clear All"  Command="{Binding ClearAllCommand}"/>
+            </ContextMenu>
+        </ListView.ContextMenu>
+
+        <ListView.ItemContainerStyle>
+            <Style TargetType="ListViewItem">
+                <Style.Triggers>
+                    <Trigger Property="IsSelected" Value="True">
+                        <Setter Property="Background" Value="Yellow"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+        </ListView.ItemContainerStyle>
+
+        <ListView.View>
+            <GridView>
+                <GridView.Columns>
+                    <GridViewColumn Header="Title" Width="350" DisplayMemberBinding="{Binding Title}"/>
+
+                        <GridViewColumn Header="Time" Width="114" 
+                                        DisplayMemberBinding="{Binding Time, Converter={converters:TimeSpanFormatConverter}}"/>
+                    </GridView.Columns>
+            </GridView>
+        </ListView.View>
+      </ListView>
+
+
+        <Button Name="bClearAll" Content="Clear All" Margin="0,0,170,10" HorizontalAlignment="Right"  VerticalAlignment="Bottom" Width="75"               
+                Command="{Binding ClearAllCommand}"/>
+        
+        <Button Name="bBrowse" Content="Browse"  Margin="0,0,10,10" HorizontalAlignment="Right" VerticalAlignment="Bottom"  Width="75"                
+                Command="{Binding BrowseCommand}"/>
+
+        <Button Name="bRemove" Content="Remove"  Margin="0,0,90,10" HorizontalAlignment="Right" VerticalAlignment="Bottom"  Width="75"
+                Command="{Binding RemoveCommand}"
+                CommandParameter="{x:Reference Name=lvListView}"/>
+
+        <Label Name="lbMoviesTime" Content="Playlist time /"  HorizontalAlignment="Left" Margin="0,0,0,5" VerticalAlignment="Bottom" Height="25"/>
+
+        <Label Name="lbPlayListMoviesTime" HorizontalAlignment="Left" Margin="80,0,0,5" VerticalAlignment="Bottom" Width="77"
+               Content="{Binding FilesDuration}" Height="25"/>
+    </Grid>
+</Window>

@@ -15,6 +15,7 @@ using DQPlayer.Helpers.FileManagement;
 using DQPlayer.Helpers.SubtitlesManagement;
 using DQPlayer.Properties;
 using DQPlayer.ResourceFiles;
+using DQPlayer.MVVMFiles.Models.PlayList;
 
 namespace DQPlayer.MVVMFiles.ViewModels
 {
@@ -22,6 +23,8 @@ namespace DQPlayer.MVVMFiles.ViewModels
     {
         public event PropertyChangedEventHandler PropertyChanged;
         public event Action<IMediaService> Loaded;
+        public event Action<IEnumerable<Uri>> MediaInputNewFiles;
+        public event Action<FileInformation> MediaPlayedNewSource;
 
         private readonly Lazy<RelayCommand> _loadedCommand;
         public RelayCommand LoadedCommand => _loadedCommand.Value;
@@ -59,6 +62,18 @@ namespace DQPlayer.MVVMFiles.ViewModels
         private readonly Lazy<RelayCommand<DragEventArgs>> _windowFileDropCommand;
         public RelayCommand<DragEventArgs> WindowFileDropCommand => _windowFileDropCommand.Value;
 
+        private readonly Lazy<RelayCommand> _playListCommand;
+        public RelayCommand PlayListCommand => _playListCommand.Value;
+
+        private readonly Lazy<RelayCommand> _moveNextCommand;
+        public RelayCommand MoveNextCommand => _moveNextCommand.Value;
+
+        private readonly Lazy<RelayCommand> _movePreviousCommand;
+        public RelayCommand MovePreviousCommand => _movePreviousCommand.Value;
+
+        private readonly Lazy<RelayCommand> _mediaEndedCommand;
+        public RelayCommand MediaEndedCommand => _mediaEndedCommand.Value;
+
         public VideoPlayerViewModel()
         {
             _loadedCommand = CreateLazyRelayCommand(OnLoadedCommand);
@@ -83,6 +98,30 @@ namespace DQPlayer.MVVMFiles.ViewModels
             _thumbMouseEnterCommand = CreateLazyRelayCommand<MouseEventArgs>(OnThumbMouseEnterCommand);
             _windowFileDropCommand = CreateLazyRelayCommand<DragEventArgs>(OnWindowFileDropCommand);
             _browseCommand = CreateLazyRelayCommand(OnBrowseCommand);
+            _playListCommand = CreateLazyRelayCommand(OnPlayListCommand);
+            _moveNextCommand = CreateLazyRelayCommand(OnMoveNextCommand);
+            _movePreviousCommand = CreateLazyRelayCommand(OnMovePreviousCommand);
+            _mediaEndedCommand = CreateLazyRelayCommand(OnMediaEndedCommand);
+
+            //Replace
+            _playListViewModel = new PlayListViewModel(this);
+            PlayListView.DataContext = _playListViewModel;
+            _playListViewModel.PlayListRemovedItem += OnPlayListRemovedItems;
+            _playListViewModel.PlayListFileDoubleClicked += OnPlayListFileDoubleClicked;
+        }
+
+        private readonly PlayListViewModel _playListViewModel;
+        public PlayList PlayListView = new PlayList();
+
+        private bool _repeat;
+        public bool Repeat
+        {
+            get { return _repeat; }
+            set
+            {
+                _repeat = value;
+                OnPropertyChanged();
+            }
         }
 
         public MediaPlayerModel MediaPlayer { get; set; }
@@ -100,6 +139,8 @@ namespace DQPlayer.MVVMFiles.ViewModels
         public event Action<SubtitleHandler, SubtitleSegment> Hide;
 
         private SubtitleHandler _currentSubtitleHandler;
+
+        private FileInformation _currentFileInformation;
 
         [NotifyPropertyChangedInvocator]
         protected virtual void OnPropertyChanged([System.Runtime.CompilerServices.CallerMemberName] string propName = null)
@@ -147,6 +188,7 @@ namespace DQPlayer.MVVMFiles.ViewModels
 
         private void ProcessInputFiles(IEnumerable<Uri> files)
         {
+            MediaInputNewFiles(files);
             if (_currentSubtitleHandler != null)
             {
                 _currentSubtitleHandler.ForceHidingAllSubtitles();
@@ -166,13 +208,9 @@ namespace DQPlayer.MVVMFiles.ViewModels
                             MediaPlayer.MediaSlider.Value,
                             (IRegulatableMediaServiceNotifier)MediaPlayer.MediaController);
                 }
-                else
-                {
-                    //load in playlist
-                }
                 return;
             }
-            MediaPlayer.PlayNewPlayerSource(firstElement);
+            ChangeMediaPlayerSource(_playListViewModel.FilesCollection.Current);
         }
 
         private void OnHideSubtitle(SubtitleHandler handler, SubtitleSegment segment)
@@ -195,6 +233,82 @@ namespace DQPlayer.MVVMFiles.ViewModels
                 };
                 ((Thumb)e.Source).RaiseEvent(args);
             }
+        }
+
+        private void OnPlayListCommand()
+        {
+            if (PlayListView.Visibility != Visibility.Visible)
+            {
+                PlayListView.Show();
+            }
+            else
+            {
+                PlayListView.Hide();
+            }
+
+        }
+
+        private void OnMoveNextCommand()
+        {
+            if (_playListViewModel.FilesCollection.Count > 1)
+            {
+                ChangeMediaPlayerSource(_playListViewModel.ChangeCurrent(() => _playListViewModel.FilesCollection.MoveNext()));
+            }
+        }
+
+        private void OnMovePreviousCommand()
+        {
+            if (_playListViewModel.FilesCollection.Count > 1)
+            {
+                ChangeMediaPlayerSource(_playListViewModel.ChangeCurrent(() => _playListViewModel.FilesCollection.MovePrevious()));
+            }
+        }
+
+        private void ChangeMediaPlayerSource(FileInformation newSource)
+        {
+            MediaPlayer.SetMediaState(MediaPlayerStates.Stop);
+            MediaPlayer.PlayNewPlayerSource(newSource.FilePath);
+            _currentFileInformation = newSource;
+            OnMediaPlayedNewSource(newSource);
+        }
+
+        private void OnMediaEndedCommand()
+        {
+            if (_playListViewModel.FilesCollection.Last().Equals(_currentFileInformation) && !Repeat)
+            {
+                ChangeMediaPlayerSource(_playListViewModel.ChangeCurrent(() => _playListViewModel.FilesCollection.MoveNext()));
+                MediaPlayer.SetMediaState(MediaPlayerStates.Stop);
+                return;
+            }
+            ChangeMediaPlayerSource(_playListViewModel.ChangeCurrent(() => _playListViewModel.FilesCollection.MoveNext()));
+        }
+
+        private void OnMediaPlayedNewSource(FileInformation file)
+        {        
+            MediaPlayedNewSource?.Invoke(file);
+        }
+
+        private void OnMediaInputFiles(IEnumerable<Uri> files)
+        {
+            MediaInputNewFiles?.Invoke(files);
+        }
+
+        private void OnPlayListRemovedItems(FileInformation file)
+        {
+            if (_currentFileInformation != null && _currentFileInformation.Equals(file))
+            {
+                _playListViewModel.FilesCollection.Reset();
+                if (_playListViewModel.FilesCollection.Count != 0)
+                {
+                    ChangeMediaPlayerSource(_playListViewModel.FilesCollection.Current);
+                }
+                MediaPlayer.SetMediaState(MediaPlayerStates.Stop);
+            }
+        }
+
+        private void OnPlayListFileDoubleClicked(FileInformation file)
+        {
+            ChangeMediaPlayerSource(file);
         }
     }
 }

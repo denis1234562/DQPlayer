@@ -163,4 +163,7 @@
   <data name="SubtitleFile" xml:space="preserve">
     <value>Subtitle file</value>
   </data>
+  <data name="PlayList" xml:space="preserve">
+    <value>PlayList</value>
+  </data>
 </root>
