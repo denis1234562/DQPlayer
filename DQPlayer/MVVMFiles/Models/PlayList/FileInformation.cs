@@ -1,16 +1,32 @@
-﻿using DQPlayer.Helpers.Extensions;
+﻿using DQPlayer.Annotations;
+using DQPlayer.Helpers.Extensions;
 using System;
+using System.ComponentModel;
 using System.IO;
 using System.Windows;
 
 namespace DQPlayer.MVVMFiles.Models.PlayList
 {
-    public class FileInformation : IEquatable<FileInformation>
+    public class FileInformation : DependencyObject , INotifyPropertyChanged
     {
         public string Title { get; }
         public TimeSpan Time { get; }
         public Uri FilePath { get; }
-        public bool IsPlaying { get; set; } = false;
+
+        public static readonly DependencyProperty IsPlayingProperty =
+            DependencyProperty.Register(nameof(IsPlaying), typeof(bool), typeof(FileInformation),
+                new PropertyMetadata(null));
+
+        private bool _isPlaying = false;
+        public bool IsPlaying
+        {
+            get => (bool)GetValue(IsPlayingProperty);
+            set
+            {
+                SetValue(IsPlayingProperty, value);
+                OnPropertyChanged();
+            }
+        } 
 
         public FileInformation(Uri uri)
         {
@@ -23,13 +39,11 @@ namespace DQPlayer.MVVMFiles.Models.PlayList
             Title = Path.GetFileNameWithoutExtension(uri.AbsolutePath);
         }
 
-        public bool Equals(FileInformation other)
+        public event PropertyChangedEventHandler PropertyChanged;
+        [NotifyPropertyChangedInvocator]
+        protected virtual void OnPropertyChanged([System.Runtime.CompilerServices.CallerMemberName] string propName = null)
         {
-            if (other == null)
-            {
-                return false;
-            }
-            return ReferenceEquals(this,other);
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
         }
     }
 }

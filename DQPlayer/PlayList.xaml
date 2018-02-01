@@ -19,7 +19,7 @@
     </Window.DataContext>
 
     <Grid>
-        <ListView Name="lvListView" Margin="0,0,0,35" AllowDrop="True" ItemsSource="{Binding FilesCollection}">
+        <ListView Name="lvListView" Margin="0,0,0,35" AllowDrop="True" ItemsSource="{Binding FilesCollection}"> 
             <ia:Interaction.Triggers>
             <ia:EventTrigger EventName="Drop">
                 <cmd:EventToCommand Command="{Binding ListViewFileDrop}" PassEventArgsToCommand="True"/>
@@ -29,25 +29,26 @@
             </ia:EventTrigger>
         </ia:Interaction.Triggers>
 
-        <ListView.ContextMenu>
-            <ContextMenu>
-                <MenuItem Header="Remove" Command="{Binding RemoveCommand}" CommandParameter="{x:Reference Name=lvListView}"/>
+            <ListView.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Remove" Command="{Binding RemoveCommand}" CommandParameter="{x:Reference Name=lvListView}"/>
 
-                <MenuItem Header="Add File"  Command="{Binding BrowseCommand}"/>
+                    <MenuItem Header="Add File"  Command="{Binding BrowseCommand}"/>
 
-                <MenuItem Header="Clear All"  Command="{Binding ClearAllCommand}"/>
-            </ContextMenu>
-        </ListView.ContextMenu>
+                    <MenuItem Header="Clear All"  Command="{Binding ClearAllCommand}"/>
+                </ContextMenu>
+            </ListView.ContextMenu>
 
-        <ListView.ItemContainerStyle>
-            <Style TargetType="ListViewItem">
-                <Style.Triggers>
-                    <Trigger Property="IsSelected" Value="True">
-                        <Setter Property="Background" Value="Yellow"/>
-                    </Trigger>
-                </Style.Triggers>
-            </Style>
-        </ListView.ItemContainerStyle>
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="IsSelected" Value="{Binding TestProperty}"/>
+                    <Style.Triggers>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter Property="Background" Value="Yellow"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </ListView.ItemContainerStyle>
 
         <ListView.View>
             <GridView>

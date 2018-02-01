@@ -23,6 +23,7 @@ namespace DQPlayer.MVVMFiles.ViewModels
         public event PropertyChangedEventHandler PropertyChanged;
         public event Action<FileInformation> PlayListRemovedItem;
         public event Action<FileInformation> PlayListFileDoubleClicked;
+        public event Action<object> Loaded;
 
         private readonly Lazy<RelayCommand<DragEventArgs>> _listViewFileDrop;
         public RelayCommand<DragEventArgs> ListViewFileDrop => _listViewFileDrop.Value;
@@ -39,6 +40,9 @@ namespace DQPlayer.MVVMFiles.ViewModels
         private readonly Lazy<RelayCommand> _browseCommand;
         public RelayCommand BrowseCommand => _browseCommand.Value;
 
+        private readonly Lazy<RelayCommand> _loadedCommand;
+        public RelayCommand LoadedCommand => _loadedCommand.Value;
+
         public ObservableCircularList<FileInformation> FilesCollection { get; set; }
 
         private TimeSpan _filesDuration;
@@ -51,6 +55,8 @@ namespace DQPlayer.MVVMFiles.ViewModels
                 OnPropertyChanged();
             }
         }
+
+        public bool TestProperty { get; set; } = true;
 
         private readonly VideoPlayerViewModel _videoPlayerViewModel;
 
@@ -68,6 +74,12 @@ namespace DQPlayer.MVVMFiles.ViewModels
             _browseCommand = CreateLazyRelayCommand(OnBrowseCommand);
             FilesCollection = new ObservableCircularList<FileInformation>();
             _filesDuration = new TimeSpan();
+            _loadedCommand = CreateLazyRelayCommand(OnLoadedCommand);
+        }
+
+        private void OnLoadedCommand()
+        {
+            OnLoaded(this);
         }
 
         private static Lazy<RelayCommand> CreateLazyRelayCommand(Action execute, Func<bool> canExecute = null)
@@ -80,6 +92,11 @@ namespace DQPlayer.MVVMFiles.ViewModels
         protected virtual void OnPropertyChanged([System.Runtime.CompilerServices.CallerMemberName] string propName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
+        }
+
+        private void OnLoaded(object obj)
+        {
+            Loaded?.Invoke(obj);
         }
 
         private FileInformation _lastPlayedFile;

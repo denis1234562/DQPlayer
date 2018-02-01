@@ -105,13 +105,14 @@ namespace DQPlayer.MVVMFiles.ViewModels
 
             //Replace
             _playListViewModel = new PlayListViewModel(this);
-            PlayListView.DataContext = _playListViewModel;
             _playListViewModel.PlayListRemovedItem += OnPlayListRemovedItems;
             _playListViewModel.PlayListFileDoubleClicked += OnPlayListFileDoubleClicked;
+            PlayListView = new PlayList();
+            PlayListView.DataContext = _playListViewModel;
         }
 
         private readonly PlayListViewModel _playListViewModel;
-        public PlayList PlayListView = new PlayList();
+        public PlayList PlayListView;
 
         private bool _repeat;
         public bool Repeat
