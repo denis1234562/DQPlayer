@@ -34,9 +34,9 @@ namespace DQPlayer.MVVMFiles.Models.PlayList
             {
                 throw new ArgumentException(nameof(uri));
             }
-            Time = uri.AbsolutePath.GetFileDuration();
+            Time = uri.OriginalString.GetFileDuration();
             FilePath = uri;
-            Title = Path.GetFileNameWithoutExtension(uri.AbsolutePath);
+            Title = Path.GetFileNameWithoutExtension(uri.OriginalString);
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

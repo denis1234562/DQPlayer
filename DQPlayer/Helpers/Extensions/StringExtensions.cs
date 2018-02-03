@@ -1,6 +1,8 @@
 using Shell32;
 using System;
 using System.IO;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace DQPlayer.Helpers.Extensions
 {
