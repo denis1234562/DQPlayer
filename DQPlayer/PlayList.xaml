@@ -19,15 +19,15 @@
     </Window.DataContext>
 
     <Grid>
-        <ListView Name="lvListView" Margin="0,0,0,35" AllowDrop="True" ItemsSource="{Binding FilesCollection}"> 
+        <ListView Name="lvListView" Margin="0,0,0,35" AllowDrop="True" ItemsSource="{Binding FilesCollection}">
             <ia:Interaction.Triggers>
-            <ia:EventTrigger EventName="Drop">
-                <cmd:EventToCommand Command="{Binding ListViewFileDrop}" PassEventArgsToCommand="True"/>
-            </ia:EventTrigger>
-            <ia:EventTrigger EventName="MouseDoubleClick">
-                <cmd:EventToCommand Command="{Binding ListViewDoubleClickCommand}" PassEventArgsToCommand="True"/>
-            </ia:EventTrigger>
-        </ia:Interaction.Triggers>
+                <ia:EventTrigger EventName="Drop">
+                    <cmd:EventToCommand Command="{Binding ListViewFileDrop}" PassEventArgsToCommand="True"/>
+                </ia:EventTrigger>
+                <ia:EventTrigger EventName="MouseDoubleClick">
+                    <cmd:EventToCommand Command="{Binding ListViewDoubleClickCommand}" PassEventArgsToCommand="True"/>
+                </ia:EventTrigger>
+            </ia:Interaction.Triggers>
 
             <ListView.ContextMenu>
                 <ContextMenu>
@@ -41,26 +41,25 @@
 
             <ListView.ItemContainerStyle>
                 <Style TargetType="ListViewItem">
-                    <Setter Property="IsSelected" Value="{Binding TestProperty}"/>
                     <Style.Triggers>
-                        <Trigger Property="IsSelected" Value="True">
-                            <Setter Property="Background" Value="Yellow"/>
-                        </Trigger>
+                        <DataTrigger Binding="{Binding IsPlaying}" Value="True">
+                            <Setter Property="Background" Value="Yellow" />
+                        </DataTrigger>
                     </Style.Triggers>
                 </Style>
             </ListView.ItemContainerStyle>
 
-        <ListView.View>
-            <GridView>
-                <GridView.Columns>
-                    <GridViewColumn Header="Title" Width="350" DisplayMemberBinding="{Binding Title}"/>
+            <ListView.View>
+                <GridView>
+                    <GridView.Columns>
+                        <GridViewColumn Header="Title" Width="350" DisplayMemberBinding="{Binding Title}"/>
 
                         <GridViewColumn Header="Time" Width="114" 
                                         DisplayMemberBinding="{Binding Time, Converter={converters:TimeSpanFormatConverter}}"/>
                     </GridView.Columns>
-            </GridView>
-        </ListView.View>
-      </ListView>
+                </GridView>
+            </ListView.View>
+        </ListView>
 
 
         <Button Name="bClearAll" Content="Clear All" Margin="0,0,170,10" HorizontalAlignment="Right"  VerticalAlignment="Bottom" Width="75"               

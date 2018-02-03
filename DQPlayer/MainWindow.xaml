@@ -218,7 +218,7 @@
                 <ia:InvokeCommandAction Command="{Binding LoadedCommand}" CommandParameter="{Binding ElementName=Window}"/>
             </ia:EventTrigger>
         </ia:Interaction.Triggers>
-        <customControls:OutlinedLabel Text="123123123123123123 kavaliтет" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" TextAlignment="Center" TextColor="White" OutlineBrush="Black" FontWeight="Bold" FontSize="32" Thickness="0.5"/>
+        <customControls:OutlinedLabel HorizontalAlignment="Stretch" VerticalAlignment="Stretch" TextAlignment="Center" TextColor="White" OutlineBrush="Black" FontWeight="Bold" FontSize="32" Thickness="0.5"/>
 
         <MediaElement x:Name="Player" Margin="0,0,0,117"                    
                       MediaOpened="Player_OnMediaOpened" Stretch="Fill"

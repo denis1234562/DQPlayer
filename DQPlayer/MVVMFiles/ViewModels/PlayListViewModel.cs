@@ -25,22 +25,22 @@ namespace DQPlayer.MVVMFiles.ViewModels
         public event Action<FileInformation> PlayListFileDoubleClicked;
         public event Action<object> Loaded;
 
-        private readonly Lazy<RelayCommand<DragEventArgs>> _listViewFileDrop;
+        private  Lazy<RelayCommand<DragEventArgs>> _listViewFileDrop;
         public RelayCommand<DragEventArgs> ListViewFileDrop => _listViewFileDrop.Value;
 
-        private readonly Lazy<RelayCommand<MouseButtonEventArgs>> _listViewDoubleClickCommand;
+        private  Lazy<RelayCommand<MouseButtonEventArgs>> _listViewDoubleClickCommand;
         public RelayCommand<MouseButtonEventArgs> ListViewDoubleClickCommand => _listViewDoubleClickCommand.Value;
 
-        private readonly Lazy<RelayCommand> _clearAllCommand;
+        private  Lazy<RelayCommand> _clearAllCommand;
         public RelayCommand ClearAllCommand => _clearAllCommand.Value;
 
-        private readonly Lazy<RelayCommand<ListView>> _removeCommand;
+        private  Lazy<RelayCommand<ListView>> _removeCommand;
         public RelayCommand<ListView> RemoveCommand => _removeCommand.Value;
 
-        private readonly Lazy<RelayCommand> _browseCommand;
+        private  Lazy<RelayCommand> _browseCommand;
         public RelayCommand BrowseCommand => _browseCommand.Value;
 
-        private readonly Lazy<RelayCommand> _loadedCommand;
+        private  Lazy<RelayCommand> _loadedCommand;
         public RelayCommand LoadedCommand => _loadedCommand.Value;
 
         public ObservableCircularList<FileInformation> FilesCollection { get; set; }
@@ -53,20 +53,40 @@ namespace DQPlayer.MVVMFiles.ViewModels
             {
                 _filesDuration = value;
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(TestProperty));
             }
         }
 
-        public bool TestProperty { get; set; } = true;
+        public bool TestProperty
+        {
+            get
+            {
+                return _testProperty;
+            }
+            set
+            {
+                _testProperty = value;
+            }
+        }
 
         private readonly VideoPlayerViewModel _videoPlayerViewModel;
 
-        public PlayListViewModel() { }
+        public PlayListViewModel()
+        {
+            StartUp();
+            TestProperty = true;
+        }
 
         public PlayListViewModel(VideoPlayerViewModel videoPlayerViewModel)
         {
             _videoPlayerViewModel = videoPlayerViewModel;
             _videoPlayerViewModel.MediaInputNewFiles += OnMediaInputNewFiles;
             _videoPlayerViewModel.MediaPlayedNewSource += OnMediaPlayedNewSource;
+            StartUp();
+        }
+
+        private void StartUp()
+        {
             _listViewFileDrop = CreateLazyRelayCommand<DragEventArgs>(OnListViewFileDropCommand);
             _listViewDoubleClickCommand = CreateLazyRelayCommand<MouseButtonEventArgs>(OnListViewDoubleClickCommand);
             _removeCommand = CreateLazyRelayCommand<ListView>(OnRemoveCommand);
@@ -100,6 +120,7 @@ namespace DQPlayer.MVVMFiles.ViewModels
         }
 
         private FileInformation _lastPlayedFile;
+        private bool _testProperty = true;
 
         private void OnListViewFileDropCommand(DragEventArgs e)
         {

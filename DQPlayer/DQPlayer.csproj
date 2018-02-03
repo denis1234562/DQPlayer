@@ -228,9 +228,6 @@
     <Resource Include="bin\Debug\Assets\Stop.jpeg" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="bin\Debug\Assets\Player.jpg" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="bin\Debug\Assets\SplashScreen.jpg" />
   </ItemGroup>
   <ItemGroup>
