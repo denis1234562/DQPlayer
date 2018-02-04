@@ -10,8 +10,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -23,7 +21,6 @@ namespace DQPlayer.MVVMFiles.ViewModels
         public event PropertyChangedEventHandler PropertyChanged;
         public event Action<FileInformation> PlayListRemovedItem;
         public event Action<FileInformation> PlayListFileDoubleClicked;
-        public event Action<object> Loaded;
 
         private  Lazy<RelayCommand<DragEventArgs>> _listViewFileDrop;
         public RelayCommand<DragEventArgs> ListViewFileDrop => _listViewFileDrop.Value;
@@ -40,41 +37,26 @@ namespace DQPlayer.MVVMFiles.ViewModels
         private  Lazy<RelayCommand> _browseCommand;
         public RelayCommand BrowseCommand => _browseCommand.Value;
 
-        private  Lazy<RelayCommand> _loadedCommand;
-        public RelayCommand LoadedCommand => _loadedCommand.Value;
-
         public ObservableCircularList<FileInformation> FilesCollection { get; set; }
 
         private TimeSpan _filesDuration;
         public TimeSpan FilesDuration
         {
-            get { return _filesDuration; }
+            get => _filesDuration;
             set
             {
                 _filesDuration = value;
                 OnPropertyChanged();
-                OnPropertyChanged(nameof(TestProperty));
-            }
-        }
-
-        public bool TestProperty
-        {
-            get
-            {
-                return _testProperty;
-            }
-            set
-            {
-                _testProperty = value;
             }
         }
 
         private readonly VideoPlayerViewModel _videoPlayerViewModel;
 
+        private FileInformation _lastPlayedFile;
+
         public PlayListViewModel()
         {
             StartUp();
-            TestProperty = true;
         }
 
         public PlayListViewModel(VideoPlayerViewModel videoPlayerViewModel)
@@ -94,12 +76,6 @@ namespace DQPlayer.MVVMFiles.ViewModels
             _browseCommand = CreateLazyRelayCommand(OnBrowseCommand);
             FilesCollection = new ObservableCircularList<FileInformation>();
             _filesDuration = new TimeSpan();
-            _loadedCommand = CreateLazyRelayCommand(OnLoadedCommand);
-        }
-
-        private void OnLoadedCommand()
-        {
-            OnLoaded(this);
         }
 
         private static Lazy<RelayCommand> CreateLazyRelayCommand(Action execute, Func<bool> canExecute = null)
@@ -114,25 +90,13 @@ namespace DQPlayer.MVVMFiles.ViewModels
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
         }
 
-        private void OnLoaded(object obj)
-        {
-            Loaded?.Invoke(obj);
-        }
-
-        private FileInformation _lastPlayedFile;
-        private bool _testProperty = true;
-
         private void OnListViewFileDropCommand(DragEventArgs e)
         {
             if (FileDropHandler.TryExtractDroppedItemsUri(e, Settings.MediaPlayerExtensionPackage, out var uris))
             {
-                foreach (var uri in uris)
-                {
-                    if (uri.AbsolutePath.GetFileExtension() != ".srt")
-                    {
-                        FilesCollection.Add(new FileInformation(uri));
-                    }
-                }
+                FilesCollection.AddRange(uris
+                    .Where(uri => uri.OriginalString.GetFileExtension() != ".srt")
+                    .Select(uri => new FileInformation(uri)));
                 UpdateMoviesDuration();
             }
         }
@@ -161,23 +125,23 @@ namespace DQPlayer.MVVMFiles.ViewModels
 
         private void OnRemoveCommand(ListView listView)
         {
-            if (listView.SelectedItems.Count != 0)
-            {                
-                while (listView.SelectedItems.Count != 0)
-                {
-                    FileInformation temp = (FileInformation)listView.SelectedItems[0];
-                    int indexOfSelectedFile = FilesCollection.IndexOf(temp);
-                    if (FilesCollection.IndexOf(_lastPlayedFile) > indexOfSelectedFile)
-                    {
-                        FilesCollection.MovePrevious();
-                    }
-                    FilesCollection.RemoveAt(indexOfSelectedFile);
-                    OnPlayListRemovedItems(temp);
-                }
-                UpdateMoviesDuration();
+            if (listView.SelectedItems.Count == 0)
+            {
+                MessageBox.Show("Please select a file to remove.");
                 return;
-            }           
-            MessageBox.Show("Select a File!");
+            }
+            while (listView.SelectedItems.Count != 0)
+            {
+                FileInformation temp = (FileInformation) listView.SelectedItems[0];
+                int indexOfSelectedFile = FilesCollection.IndexOf(temp);
+                if (FilesCollection.IndexOf(_lastPlayedFile) > indexOfSelectedFile)
+                {
+                    FilesCollection.MovePrevious();
+                }
+                FilesCollection.RemoveAt(indexOfSelectedFile);
+                OnPlayListRemovedItems(temp);
+            }
+            UpdateMoviesDuration();
         }
 
         private void OnBrowseCommand()
@@ -204,12 +168,9 @@ namespace DQPlayer.MVVMFiles.ViewModels
         private void OnMediaInputNewFiles(IEnumerable<Uri> files)
         {
             List<Uri> filteredFiles = new List<Uri>(files);
-            filteredFiles.RemoveAll(f => f.AbsolutePath.GetFileExtension() == ".srt");
+            filteredFiles.RemoveAll(f => f.OriginalString.GetFileExtension() == ".srt");
 
-            foreach (var file in filteredFiles)
-            {
-                FilesCollection.Add(new FileInformation(file));
-            }
+            FilesCollection.AddRange(filteredFiles.Select(f => new FileInformation(f)));
             if (filteredFiles.Count != 0)
             {
                 FilesCollection.SetCurrent(FilesCollection.Count - filteredFiles.Count);
@@ -224,10 +185,7 @@ namespace DQPlayer.MVVMFiles.ViewModels
         private void UpdateMoviesDuration()
         {
             TimeSpan duration = new TimeSpan();
-            foreach (var item in FilesCollection)
-            {
-                duration += item.Time;
-            }
+            duration = FilesCollection.Aggregate(duration, (current, item) => current + item.Time);
             FilesDuration = duration;
         }
 

@@ -289,11 +289,6 @@ namespace DQPlayer.MVVMFiles.ViewModels
             MediaPlayedNewSource?.Invoke(file);
         }
 
-        private void OnMediaInputFiles(IEnumerable<Uri> files)
-        {
-            MediaInputNewFiles?.Invoke(files);
-        }
-
         private void OnPlayListRemovedItems(FileInformation file)
         {
             if (_currentFileInformation != null && _currentFileInformation.Equals(file))

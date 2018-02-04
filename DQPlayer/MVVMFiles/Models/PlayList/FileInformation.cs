@@ -17,7 +17,6 @@ namespace DQPlayer.MVVMFiles.Models.PlayList
             DependencyProperty.Register(nameof(IsPlaying), typeof(bool), typeof(FileInformation),
                 new PropertyMetadata(null));
 
-        private bool _isPlaying = false;
         public bool IsPlaying
         {
             get => (bool)GetValue(IsPlayingProperty);
@@ -32,7 +31,7 @@ namespace DQPlayer.MVVMFiles.Models.PlayList
         {
             if (uri == null)
             {
-                throw new ArgumentException(nameof(uri));
+                throw new ArgumentNullException(nameof(uri));
             }
             Time = uri.OriginalString.GetFileDuration();
             FilePath = uri;

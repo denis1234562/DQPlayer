@@ -119,7 +119,6 @@
     <Compile Include="MVVMFiles\Converters\MediaButtonsVisibilityConverter.cs" />
     <Compile Include="MVVMFiles\Converters\SecondsToFormattedTimeSpan.cs" />
     <Compile Include="MVVMFiles\Converters\SecondsToTimeSpanConverter.cs" />
-    <Compile Include="MVVMFiles\Converters\TestConverter.cs" />
     <Compile Include="MVVMFiles\Models\MediaPlayer\IMediaPlayer.cs" />
     <Compile Include="MVVMFiles\Models\MediaPlayer\IMediaService.cs" />
     <Compile Include="IntermissionTimer.cs" />

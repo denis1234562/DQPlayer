@@ -28,7 +28,8 @@ namespace DQPlayer
 
         public static ControlTemplateCreator<MediaElement> MediaPlayerTemplate { get; }
 
-        public static string SubtitleSeparationString => @"-->";
+        public const string SubtitleSeparationString = @"-->";
+        public const string SubtitleExtensionString = @".srt";
 
         private static readonly string[] _timeSpanStringFormats;
 

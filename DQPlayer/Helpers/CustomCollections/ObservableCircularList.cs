@@ -33,6 +33,18 @@ namespace DQPlayer.Helpers.CustomCollections
         {           
         }
 
+        public void AddRange(IEnumerable<T> items)
+        {
+            if (items == null)
+            {
+                throw new ArgumentNullException(nameof(items));
+            }
+            foreach (var item in items)
+            {
+                Add(item);
+            }
+        }
+
         #region INotifyCollectionChanged implementation
         /// <summary>
         /// Helper to raise CollectionChanged event to any listeners
