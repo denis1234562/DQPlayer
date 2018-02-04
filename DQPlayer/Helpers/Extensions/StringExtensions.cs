@@ -1,8 +1,6 @@
 using Shell32;
 using System;
 using System.IO;
-using System.Text;
-using System.Text.RegularExpressions;
 
 namespace DQPlayer.Helpers.Extensions
 {
@@ -16,7 +14,7 @@ namespace DQPlayer.Helpers.Extensions
 
         public static TimeSpan GetFileDuration(this string FilePath)
         {
-            if (FilePath.GetFileExtension() != ".srt")
+            if (FilePath.GetFileExtension() != Settings.SubtitleExtensionString)
             {
                 Shell shell = new Shell();
                 Folder folder = shell.NameSpace(Path.GetDirectoryName(FilePath));

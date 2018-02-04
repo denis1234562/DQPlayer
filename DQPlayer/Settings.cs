@@ -81,7 +81,7 @@ namespace DQPlayer
                 new FileExtension(".mkv", Strings.MatrioshkaFile),
                 new FileExtension(".mp3", Strings.MusicFile),
                 new FileExtension(".mp4", Strings.MovieFile),
-                new FileExtension(".srt", Strings.MovieFile),
+                new FileExtension(SubtitleExtensionString, Strings.MovieFile),
             });
             MediaPlayerExtensionPackageFilter = new FilePickerFilter(MediaPlayerExtensionPackage);
 

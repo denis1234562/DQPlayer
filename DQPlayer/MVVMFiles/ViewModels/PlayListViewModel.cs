@@ -95,7 +95,7 @@ namespace DQPlayer.MVVMFiles.ViewModels
             if (FileDropHandler.TryExtractDroppedItemsUri(e, Settings.MediaPlayerExtensionPackage, out var uris))
             {
                 FilesCollection.AddRange(uris
-                    .Where(uri => uri.OriginalString.GetFileExtension() != ".srt")
+                    .Where(uri => uri.OriginalString.GetFileExtension() != Settings.SubtitleExtensionString)
                     .Select(uri => new FileInformation(uri)));
                 UpdateMoviesDuration();
             }
@@ -152,7 +152,7 @@ namespace DQPlayer.MVVMFiles.ViewModels
             };
             if (fileDialog.ShowDialog().GetValueOrDefault())
             {
-                if (fileDialog.FileName.GetFileExtension() != ".srt")
+                if (fileDialog.FileName.GetFileExtension() != Settings.SubtitleExtensionString)
                 {
                     FilesCollection.Add(new FileInformation(new Uri(fileDialog.FileName)));
                     UpdateMoviesDuration();
@@ -168,7 +168,7 @@ namespace DQPlayer.MVVMFiles.ViewModels
         private void OnMediaInputNewFiles(IEnumerable<Uri> files)
         {
             List<Uri> filteredFiles = new List<Uri>(files);
-            filteredFiles.RemoveAll(f => f.OriginalString.GetFileExtension() == ".srt");
+            filteredFiles.RemoveAll(f => f.OriginalString.GetFileExtension() == Settings.SubtitleExtensionString);
 
             FilesCollection.AddRange(filteredFiles.Select(f => new FileInformation(f)));
             if (filteredFiles.Count != 0)
