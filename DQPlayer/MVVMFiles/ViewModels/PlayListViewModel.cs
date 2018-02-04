@@ -92,21 +92,38 @@ namespace DQPlayer.MVVMFiles.ViewModels
 
         private void OnListViewFileDropCommand(DragEventArgs e)
         {
-            if (FileDropHandler.TryExtractDroppedItemsUri(e, Settings.MediaPlayerExtensionPackage, out var uris))
+            if (FileDropHandler.ExtractDroppedItemsUri(e, Settings.MediaPlayerExtensionPackage, out var uris))
             {
-                FilesCollection.AddRange(uris
-                    .Where(uri => uri.OriginalString.GetFileExtension() != Settings.SubtitleExtensionString)
-                    .Select(uri => new FileInformation(uri)));
-                UpdateMoviesDuration();
+                AddMediaFilesToPlaylist(uris.Select(uri => uri.OriginalString));
             }
+        }
+
+        private void OnBrowseCommand()
+        {
+            var fileDialog = new OpenFileDialog
+            {
+                Filter = Settings.MediaPlayerExtensionPackageFilter.Filter,
+                Multiselect = true
+            };
+            if (fileDialog.ShowDialog().GetValueOrDefault())
+            {
+                AddMediaFilesToPlaylist(fileDialog.FileNames);
+            }
+        }
+
+        private void AddMediaFilesToPlaylist(IEnumerable<string> fileNames)
+        {
+            FilesCollection.AddRange(fileNames
+                .Where(name => name.GetFileExtension() != Settings.SubtitleExtensionString)
+                .Select(name => new FileInformation(new Uri(name))));
+            UpdateMoviesDuration();
         }
 
         private void OnListViewDoubleClickCommand(MouseButtonEventArgs e)
         {
             if (e.ChangedButton == MouseButton.Left)
             {
-                FileInformation item = ((FrameworkElement)e.OriginalSource).DataContext as FileInformation;
-                if (item != null)
+                if (((FrameworkElement)e.OriginalSource).DataContext is FileInformation item)
                 {
                     OnPlayListFileDoubleClicked(item);
                 }
@@ -142,22 +159,6 @@ namespace DQPlayer.MVVMFiles.ViewModels
                 OnPlayListRemovedItems(temp);
             }
             UpdateMoviesDuration();
-        }
-
-        private void OnBrowseCommand()
-        {
-            var fileDialog = new OpenFileDialog
-            {
-                Filter = Settings.MediaPlayerExtensionPackageFilter.Filter
-            };
-            if (fileDialog.ShowDialog().GetValueOrDefault())
-            {
-                if (fileDialog.FileName.GetFileExtension() != Settings.SubtitleExtensionString)
-                {
-                    FilesCollection.Add(new FileInformation(new Uri(fileDialog.FileName)));
-                    UpdateMoviesDuration();
-                }
-            }
         }
 
         private void OnPlayListRemovedItems(FileInformation file)

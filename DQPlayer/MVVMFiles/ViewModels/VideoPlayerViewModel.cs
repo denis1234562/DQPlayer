@@ -178,7 +178,7 @@ namespace DQPlayer.MVVMFiles.ViewModels
 
         private void OnWindowFileDropCommand(DragEventArgs e)
         {
-            if (FileDropHandler.TryExtractDroppedItemsUri(e, Settings.MediaPlayerExtensionPackage, out var uris))
+            if (FileDropHandler.ExtractDroppedItemsUri(e, Settings.MediaPlayerExtensionPackage, out var uris))
             {
                 ProcessInputFiles(uris);
                 return;
