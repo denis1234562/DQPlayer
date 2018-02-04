@@ -52,10 +52,17 @@
             <ListView.View>
                 <GridView>
                     <GridView.Columns>
-                        <GridViewColumn Header="Title" Width="350" DisplayMemberBinding="{Binding Title}"/>
+                        <GridViewColumn Width="350" DisplayMemberBinding="{Binding Title}">
+                            <GridViewColumn.Header>
+                                <GridViewColumnHeader Content="Title" Tag="Title" Click="lvMediaFilesColumnHeader_Click"/>
+                            </GridViewColumn.Header>
+                        </GridViewColumn>
 
-                        <GridViewColumn Header="Time" Width="114" 
-                                        DisplayMemberBinding="{Binding Time, Converter={converters:TimeSpanFormatConverter}}"/>
+                        <GridViewColumn Width="114" DisplayMemberBinding="{Binding Time, Converter={converters:TimeSpanFormatConverter}}">
+                            <GridViewColumn.Header>
+                                <GridViewColumnHeader Content="Time" Tag="Time" Click="lvMediaFilesColumnHeader_Click"/>
+                            </GridViewColumn.Header>
+                        </GridViewColumn>
                     </GridView.Columns>
                 </GridView>
             </ListView.View>

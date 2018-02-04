@@ -107,8 +107,7 @@ namespace DQPlayer.MVVMFiles.ViewModels
             _playListViewModel = new PlayListViewModel(this);
             _playListViewModel.PlayListRemovedItem += OnPlayListRemovedItems;
             _playListViewModel.PlayListFileDoubleClicked += OnPlayListFileDoubleClicked;
-            PlayListView = new PlayList();
-            PlayListView.DataContext = _playListViewModel;
+            PlayListView = new PlayList {DataContext = _playListViewModel};
         }
 
         private readonly PlayListViewModel _playListViewModel;
@@ -117,7 +116,7 @@ namespace DQPlayer.MVVMFiles.ViewModels
         private bool _repeat;
         public bool Repeat
         {
-            get { return _repeat; }
+            get => _repeat;
             set
             {
                 _repeat = value;
@@ -179,7 +178,7 @@ namespace DQPlayer.MVVMFiles.ViewModels
 
         private void OnWindowFileDropCommand(DragEventArgs e)
         {
-            if (FileDropHandler.TryExtractDroppedItemsUri(e, Settings.MediaPlayerExtensionPackage, out var uris))
+            if (FileDropHandler.ExtractDroppedItemsUri(e, Settings.MediaPlayerExtensionPackage, out var uris))
             {
                 ProcessInputFiles(uris);
                 return;

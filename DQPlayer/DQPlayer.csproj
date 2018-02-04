@@ -91,6 +91,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Benchmarking.cs" />
+    <Compile Include="Helpers\Adorners\SortAdorner.cs" />
     <Compile Include="Helpers\Template\Template.cs" />
     <Compile Include="Helpers\Template\TemplateCreator.cs" />
     <Compile Include="Helpers\CustomCollections\ICircularList.cs" />
