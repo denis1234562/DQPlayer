@@ -9,9 +9,9 @@ namespace DQPlayer.MVVMFiles.Models.PlayList
 {
     public class FileInformation : DependencyObject , INotifyPropertyChanged
     {
-        public string Title { get; }
-        public TimeSpan Time { get; }
-        public Uri FilePath { get; }
+        public TimeSpan FileLength { get; }
+        public string FileName { get; }
+        public FileInfo FileInfo { get; }
 
         public static readonly DependencyProperty IsPlayingProperty =
             DependencyProperty.Register(nameof(IsPlaying), typeof(bool), typeof(FileInformation),
@@ -27,15 +27,20 @@ namespace DQPlayer.MVVMFiles.Models.PlayList
             }
         } 
 
-        public FileInformation(Uri uri)
+        public FileInformation(string filePath)
         {
-            if (uri == null)
+            if (string.IsNullOrEmpty(filePath))
             {
-                throw new ArgumentNullException(nameof(uri));
+                throw new ArgumentNullException(nameof(filePath));
             }
-            Time = uri.OriginalString.GetFileDuration();
-            FilePath = uri;
-            Title = Path.GetFileNameWithoutExtension(uri.OriginalString);
+            FileInfo = new FileInfo(filePath);
+            FileName = Path.GetFileNameWithoutExtension(FileInfo.Name);
+            FileLength = FileInfo.GetFileDuration();
+        }
+
+        public FileInformation(Uri fileUri)
+            : this(fileUri.OriginalString)
+        {
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

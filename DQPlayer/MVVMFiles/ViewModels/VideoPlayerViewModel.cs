@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using DQPlayer.MVVMFiles.Commands;
 using DQPlayer.MVVMFiles.Models.MediaPlayer;
@@ -23,7 +24,7 @@ namespace DQPlayer.MVVMFiles.ViewModels
     {
         public event PropertyChangedEventHandler PropertyChanged;
         public event Action<IMediaService> Loaded;
-        public event Action<IEnumerable<Uri>> MediaInputNewFiles;
+        public event Action<IEnumerable<FileInformation>> MediaInputNewFiles;
         public event Action<FileInformation> MediaPlayedNewSource;
 
         private readonly Lazy<RelayCommand> _loadedCommand;
@@ -168,11 +169,12 @@ namespace DQPlayer.MVVMFiles.ViewModels
         {
             var fileDialog = new OpenFileDialog
             {
-                Filter = Settings.MediaPlayerExtensionPackageFilter.Filter
+                Filter = Settings.MediaPlayerExtensionPackageFilter.Filter,
+                Multiselect = true
             };
             if (fileDialog.ShowDialog().GetValueOrDefault())
             {
-                ProcessInputFiles(new Uri(fileDialog.FileName).AsEnumerable());
+                ProcessInputFiles(fileDialog.FileNames.Select(f => new FileInformation(f)));
             }
         }
 
@@ -186,31 +188,49 @@ namespace DQPlayer.MVVMFiles.ViewModels
             MessageBox.Show($"{Strings.InvalidFileType}", "Error");
         }
 
-        private void ProcessInputFiles(IEnumerable<Uri> files)
+        private void ProcessInputFiles(IEnumerable<FileInformation> files)
         {
             MediaInputNewFiles(files);
+
+            DeattachCurrentSubtitlesIfAny();
+            var firstElement = files.First();
+            if (firstElement.FileInfo.Extension == Settings.SubtitleExtensionString)
+            {
+                AttachNewSubtitles(firstElement);
+                return;
+            }
+
+            ChangeMediaPlayerSource(_playListViewModel.FilesCollection.Current);
+            LookForSubtitles(_playListViewModel.FilesCollection.Current);
+        }
+
+        private void DeattachCurrentSubtitlesIfAny()
+        {
             if (_currentSubtitleHandler != null)
             {
                 _currentSubtitleHandler.ForceHidingAllSubtitles();
                 _currentSubtitleHandler.DisplaySubtitle -= OnDisplaySubtitle;
                 _currentSubtitleHandler.HideSubtitle -= OnHideSubtitle;
             }
-            var firstElement = files.First();
-            if (firstElement.AbsolutePath.GetFileExtension() == Settings.SubtitleExtensionString)
+        }
+
+        private void AttachNewSubtitles(FileInformation subtitleFile)
+        {
+            AttachNewSubtitles(subtitleFile.FileInfo.FullName);
+        }
+
+        private void AttachNewSubtitles(string subtitleFile)
+        {
+            if (!Equals(MediaPlayer.CurrentState, MediaPlayerStates.None))
             {
-                if (!Equals(MediaPlayer.CurrentState, MediaPlayerStates.None))
-                {
-                    _currentSubtitleHandler = new SubtitleHandler();
-                    _currentSubtitleHandler.DisplaySubtitle += OnDisplaySubtitle;
-                    _currentSubtitleHandler.HideSubtitle += OnHideSubtitle;
-                    _currentSubtitleHandler.WithEncoding(Settings.Cyrillic)
-                        .IsStartable(MediaPlayer.CurrentState.IsRunning).Build(firstElement.AbsolutePath,
-                            MediaPlayer.MediaSlider.Value,
-                            (IRegulatableMediaServiceNotifier)MediaPlayer.MediaController);
-                }
-                return;
+                _currentSubtitleHandler = new SubtitleHandler();
+                _currentSubtitleHandler.DisplaySubtitle += OnDisplaySubtitle;
+                _currentSubtitleHandler.HideSubtitle += OnHideSubtitle;
+                _currentSubtitleHandler.WithEncoding(Settings.Cyrillic)
+                    .IsStartable(MediaPlayer.CurrentState.IsRunning).Build(subtitleFile,
+                        MediaPlayer.MediaSlider.Value,
+                        (IRegulatableMediaServiceNotifier)MediaPlayer.MediaController);
             }
-            ChangeMediaPlayerSource(_playListViewModel.FilesCollection.Current);
         }
 
         private void OnHideSubtitle(SubtitleHandler handler, SubtitleSegment segment)
@@ -267,9 +287,28 @@ namespace DQPlayer.MVVMFiles.ViewModels
         private void ChangeMediaPlayerSource(FileInformation newSource)
         {
             MediaPlayer.SetMediaState(MediaPlayerStates.Stop);
-            MediaPlayer.PlayNewPlayerSource(newSource.FilePath);
+            MediaPlayer.PlayNewPlayerSource(new Uri(newSource.FileInfo.FullName));
             _currentFileInformation = newSource;
             OnMediaPlayedNewSource(newSource);
+        }
+
+        private void LookForSubtitles(FileInformation file)
+        {
+            if (file.FileInfo.Directory == null)
+            {
+                return;
+            }
+            var availableSubtitles =
+                file.FileInfo.Directory.GetFiles($"*{Settings.SubtitleExtensionString}", SearchOption.AllDirectories);
+            foreach (var subtitle in availableSubtitles)
+            {
+                if (Path.GetFileNameWithoutExtension(subtitle.Name) == file.FileName)
+                {
+                    DeattachCurrentSubtitlesIfAny();
+                    AttachNewSubtitles(subtitle.FullName);
+                    return;
+                }
+            }
         }
 
         private void OnMediaEndedCommand()

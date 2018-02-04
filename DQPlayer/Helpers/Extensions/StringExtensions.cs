@@ -12,13 +12,13 @@ namespace DQPlayer.Helpers.Extensions
                    throw new ArgumentNullException(nameof(fileName));
         }
 
-        public static TimeSpan GetFileDuration(this string FilePath)
+        public static TimeSpan GetFileDuration(this FileInfo fileInfo)
         {
-            if (FilePath.GetFileExtension() != Settings.SubtitleExtensionString)
+            if (fileInfo.Extension != Settings.SubtitleExtensionString)
             {
                 Shell shell = new Shell();
-                Folder folder = shell.NameSpace(Path.GetDirectoryName(FilePath));
-                FolderItem folderItem = folder.ParseName(Path.GetFileName(FilePath));
+                Folder folder = shell.NameSpace(fileInfo.DirectoryName);
+                FolderItem folderItem = folder.ParseName(fileInfo.Name);
                 return TimeSpan.Parse(folder.GetDetailsOf(folderItem, 27));
             }
             return new TimeSpan(0);

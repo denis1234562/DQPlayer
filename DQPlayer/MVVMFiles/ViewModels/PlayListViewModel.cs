@@ -8,6 +8,7 @@ using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -92,9 +93,9 @@ namespace DQPlayer.MVVMFiles.ViewModels
 
         private void OnListViewFileDropCommand(DragEventArgs e)
         {
-            if (FileDropHandler.ExtractDroppedItemsUri(e, Settings.MediaPlayerExtensionPackage, out var uris))
+            if (FileDropHandler.ExtractDroppedItemsUri(e, Settings.MediaPlayerExtensionPackage, out var filesInformation))
             {
-                AddMediaFilesToPlaylist(uris.Select(uri => uri.OriginalString));
+                AddMediaFilesToPlaylist(filesInformation);
             }
         }
 
@@ -107,15 +108,13 @@ namespace DQPlayer.MVVMFiles.ViewModels
             };
             if (fileDialog.ShowDialog().GetValueOrDefault())
             {
-                AddMediaFilesToPlaylist(fileDialog.FileNames);
+                AddMediaFilesToPlaylist(fileDialog.FileNames.Select(f => new FileInformation(f)));
             }
         }
 
-        private void AddMediaFilesToPlaylist(IEnumerable<string> fileNames)
+        private void AddMediaFilesToPlaylist(IEnumerable<FileInformation> files)
         {
-            FilesCollection.AddRange(fileNames
-                .Where(name => name.GetFileExtension() != Settings.SubtitleExtensionString)
-                .Select(name => new FileInformation(new Uri(name))));
+            FilesCollection.AddRange(files.Where(file => file.FileInfo.Extension != Settings.SubtitleExtensionString));
             UpdateMoviesDuration();
         }
 
@@ -166,12 +165,12 @@ namespace DQPlayer.MVVMFiles.ViewModels
             PlayListRemovedItem?.Invoke(file);
         }
 
-        private void OnMediaInputNewFiles(IEnumerable<Uri> files)
+        private void OnMediaInputNewFiles(IEnumerable<FileInformation> files)
         {
-            List<Uri> filteredFiles = new List<Uri>(files);
-            filteredFiles.RemoveAll(f => f.OriginalString.GetFileExtension() == Settings.SubtitleExtensionString);
+            var filteredFiles =
+                new List<FileInformation>(files.Where(f => f.FileInfo.Extension != Settings.SubtitleExtensionString));
 
-            FilesCollection.AddRange(filteredFiles.Select(f => new FileInformation(f)));
+            FilesCollection.AddRange(filteredFiles);
             if (filteredFiles.Count != 0)
             {
                 FilesCollection.SetCurrent(FilesCollection.Count - filteredFiles.Count);
@@ -186,7 +185,7 @@ namespace DQPlayer.MVVMFiles.ViewModels
         private void UpdateMoviesDuration()
         {
             TimeSpan duration = new TimeSpan();
-            duration = FilesCollection.Aggregate(duration, (current, item) => current + item.Time);
+            duration = FilesCollection.Aggregate(duration, (current, item) => current + item.FileLength);
             FilesDuration = duration;
         }
 
