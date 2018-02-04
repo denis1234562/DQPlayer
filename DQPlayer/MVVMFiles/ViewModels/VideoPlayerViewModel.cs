@@ -201,7 +201,6 @@ namespace DQPlayer.MVVMFiles.ViewModels
             }
 
             ChangeMediaPlayerSource(_playListViewModel.FilesCollection.Current);
-            LookForSubtitles(_playListViewModel.FilesCollection.Current);
         }
 
         private void DeattachCurrentSubtitlesIfAny()
@@ -290,22 +289,30 @@ namespace DQPlayer.MVVMFiles.ViewModels
             MediaPlayer.PlayNewPlayerSource(new Uri(newSource.FileInfo.FullName));
             _currentFileInformation = newSource;
             OnMediaPlayedNewSource(newSource);
+            LookForSubtitles(newSource);
         }
 
+        private readonly Dictionary<FileInformation, FileInfo> _subCache = new Dictionary<FileInformation, FileInfo>();
         private void LookForSubtitles(FileInformation file)
         {
+            DeattachCurrentSubtitlesIfAny();
             if (file.FileInfo.Directory == null)
             {
                 return;
             }
+            if (_subCache.TryGetValue(file, out var subtitle))
+            {
+                AttachNewSubtitles(subtitle.FullName);
+                return;
+            }
             var availableSubtitles =
                 file.FileInfo.Directory.GetFiles($"*{Settings.SubtitleExtensionString}", SearchOption.AllDirectories);
-            foreach (var subtitle in availableSubtitles)
+            foreach (var subs in availableSubtitles)
             {
-                if (Path.GetFileNameWithoutExtension(subtitle.Name) == file.FileName)
+                if (Path.GetFileNameWithoutExtension(subs.Name) == file.FileName)
                 {
-                    DeattachCurrentSubtitlesIfAny();
-                    AttachNewSubtitles(subtitle.FullName);
+                    AttachNewSubtitles(subs.FullName);
+                    _subCache.Add(file, subs);
                     return;
                 }
             }
