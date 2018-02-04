@@ -1,5 +1,4 @@
-﻿using DQPlayer.Annotations;
-using DQPlayer.Helpers.CustomCollections;
+﻿using DQPlayer.Helpers.CustomCollections;
 using DQPlayer.Helpers.Extensions;
 using DQPlayer.Helpers.FileManagement;
 using DQPlayer.MVVMFiles.Commands;
@@ -13,6 +12,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using DQPlayer.Properties;
 
 namespace DQPlayer.MVVMFiles.ViewModels
 {
@@ -156,7 +156,7 @@ namespace DQPlayer.MVVMFiles.ViewModels
                 {
                     FilesCollection.Add(new FileInformation(new Uri(fileDialog.FileName)));
                     UpdateMoviesDuration();
-                }                
+                }
             }
         }
 

@@ -1,9 +1,9 @@
-﻿using DQPlayer.Annotations;
-using DQPlayer.Helpers.Extensions;
+﻿using DQPlayer.Helpers.Extensions;
 using System;
 using System.ComponentModel;
 using System.IO;
 using System.Windows;
+using DQPlayer.Properties;
 
 namespace DQPlayer.MVVMFiles.Models.PlayList
 {

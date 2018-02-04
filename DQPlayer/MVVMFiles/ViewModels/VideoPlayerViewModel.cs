@@ -107,8 +107,7 @@ namespace DQPlayer.MVVMFiles.ViewModels
             _playListViewModel = new PlayListViewModel(this);
             _playListViewModel.PlayListRemovedItem += OnPlayListRemovedItems;
             _playListViewModel.PlayListFileDoubleClicked += OnPlayListFileDoubleClicked;
-            PlayListView = new PlayList();
-            PlayListView.DataContext = _playListViewModel;
+            PlayListView = new PlayList {DataContext = _playListViewModel};
         }
 
         private readonly PlayListViewModel _playListViewModel;
@@ -117,7 +116,7 @@ namespace DQPlayer.MVVMFiles.ViewModels
         private bool _repeat;
         public bool Repeat
         {
-            get { return _repeat; }
+            get => _repeat;
             set
             {
                 _repeat = value;
@@ -197,7 +196,7 @@ namespace DQPlayer.MVVMFiles.ViewModels
                 _currentSubtitleHandler.HideSubtitle -= OnHideSubtitle;
             }
             var firstElement = files.First();
-            if (firstElement.AbsolutePath.GetFileExtension() == ".srt")
+            if (firstElement.AbsolutePath.GetFileExtension() == Settings.SubtitleExtensionString)
             {
                 if (!Equals(MediaPlayer.CurrentState, MediaPlayerStates.None))
                 {

@@ -6,12 +6,10 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using DQPlayer.Helpers;
-using DQPlayer.Helpers.ControlTemplates;
 using DQPlayer.Helpers.FileManagement;
+using DQPlayer.Helpers.Template;
 using DQPlayer.ResourceFiles;
 using static System.Windows.Interop.Imaging;
-using Size = System.Windows.Size;
 
 namespace DQPlayer
 {
@@ -20,13 +18,13 @@ namespace DQPlayer
         public static FileExtensionPackage MediaPlayerExtensionPackage { get; }
         public static FilePickerFilter MediaPlayerExtensionPackageFilter { get; }
 
-        public static Size MinimumWindowSize { get; }
+        public static System.Windows.Size MinimumWindowSize { get; }
 
         public static TimeSpan SkipSeconds { get; }
 
         public static TimeSpan TimerTickUpdate { get; }
 
-        public static ControlTemplateCreator<MediaElement> MediaPlayerTemplate { get; }
+        public static TemplateCreator<MediaElement, UIElement> MediaPlayerTemplate { get; }
 
         public const string SubtitleSeparationString = @"-->";
         public const string SubtitleExtensionString = @".srt";
@@ -39,7 +37,7 @@ namespace DQPlayer
         {
             TimerTickUpdate = TimeSpan.FromSeconds(0.25);
             SkipSeconds = TimeSpan.FromSeconds(10);
-            MinimumWindowSize = new Size(600, 410);
+            MinimumWindowSize = new System.Windows.Size(600, 410);
             _timeSpanStringFormats = new[]
             {
                 @"h\:m\:s",
@@ -85,12 +83,12 @@ namespace DQPlayer
             });
             MediaPlayerExtensionPackageFilter = new FilePickerFilter(MediaPlayerExtensionPackage);
 
-            var mediaTemplate = new ControlTemplate<MediaElement>()
+            var mediaTemplate = new Template<MediaElement, UIElement>()
                 .WithArgument(m => m.ScrubbingEnabled = true)
                 .WithArgument(m => m.LoadedBehavior = MediaState.Manual)
                 .WithArgument(m => m.UnloadedBehavior = MediaState.Manual)
                 .WithArgument(m => m.Volume = 0);
-            MediaPlayerTemplate = new ControlTemplateCreator<MediaElement>(mediaTemplate);
+            MediaPlayerTemplate = new TemplateCreator<MediaElement, UIElement>(mediaTemplate);
             Cyrillic = Encoding.GetEncoding("Windows-1251");
         }
 
