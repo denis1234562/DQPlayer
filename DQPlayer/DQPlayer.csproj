@@ -65,9 +65,17 @@
       <HintPath>..\packages\MvvmLightLibs.5.3.0.0\lib\net45\GalaSoft.MvvmLight.Platform.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Expression.Interactions, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Controls.Input.Toolkit, Version=3.5.40128.1, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\WPFToolkit.3.5.50211.1\lib\System.Windows.Controls.Input.Toolkit.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Windows.Controls.Layout.Toolkit, Version=3.5.40128.1, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\WPFToolkit.3.5.50211.1\lib\System.Windows.Controls.Layout.Toolkit.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Windows.Interactivity, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\MvvmLightLibs.5.3.0.0\lib\net45\System.Windows.Interactivity.dll</HintPath>
       <Private>True</Private>
@@ -83,7 +91,9 @@
     </Reference>
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
-    <Reference Include="PresentationFramework" />
+    <Reference Include="WPFToolkit, Version=3.5.40128.1, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\WPFToolkit.3.5.50211.1\lib\WPFToolkit.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
@@ -92,6 +102,8 @@
     </ApplicationDefinition>
     <Compile Include="Benchmarking.cs" />
     <Compile Include="Helpers\Adorners\SortAdorner.cs" />
+    <Compile Include="Helpers\LocalizationManagement\LocExtension.cs" />
+    <Compile Include="Helpers\LocalizationManagement\TranslationSource.cs" />
     <Compile Include="Helpers\Template\Template.cs" />
     <Compile Include="Helpers\Template\TemplateCreator.cs" />
     <Compile Include="Helpers\CustomCollections\ICircularList.cs" />
@@ -131,9 +143,62 @@
     <Compile Include="MVVMFiles\Models\MediaPlayer\MediaPlayerModel.cs" />
     <Compile Include="MVVMFiles\Models\MediaPlayer\RegulatableMediaPlayerService.cs" />
     <Compile Include="MVVMFiles\Models\PlayList\FileInformation.cs" />
+    <Compile Include="MVVMFiles\UserControls\SettingsTabs\AudioTab.xaml.cs">
+      <DependentUpon>AudioTab.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MVVMFiles\UserControls\SettingsTabs\GeneralTab.xaml.cs">
+      <DependentUpon>GeneralTab.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MVVMFiles\UserControls\SettingsTabs\HotkeysTab.xaml.cs">
+      <DependentUpon>HotkeysTab.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MVVMFiles\UserControls\SettingsTabs\SubtitlesTab.xaml.cs">
+      <DependentUpon>SubtitlesTab.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MVVMFiles\UserControls\SettingsTabs\VideoTab.xaml.cs">
+      <DependentUpon>VideoTab.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MVVMFiles\ViewModels\SettingsViewModels\AudioTabViewModel.cs" />
+    <Compile Include="MVVMFiles\ViewModels\SettingsViewModels\GeneralTabViewModel.cs" />
     <Compile Include="MVVMFiles\ViewModels\PlayListViewModel.cs" />
-    <Compile Include="PlayList.xaml.cs">
+    <Compile Include="MVVMFiles\ViewModels\SettingsViewModels\SettingsViewModel.cs" />
+    <Compile Include="MVVMFiles\ViewModels\SettingsViewModels\VideoTabViewModel.cs" />
+    <Compile Include="MVVMFiles\Views\PlayList.xaml.cs">
       <DependentUpon>PlayList.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MVVMFiles\Views\SettingsView.xaml.cs">
+      <DependentUpon>SettingsView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\Annotations1.cs" />
+    <Compile Include="ResourceFiles\SettingsResources\GeneralTabResources.bg-BG.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>GeneralTabResources.bg-BG.resx</DependentUpon>
+    </Compile>
+    <Compile Include="ResourceFiles\SettingsResources\GeneralTabResources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>GeneralTabResources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="ResourceFiles\SettingsResources\SettingsViewResources.bg-BG.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SettingsViewResources.bg-BG.resx</DependentUpon>
+    </Compile>
+    <Compile Include="ResourceFiles\SettingsResources\SettingsViewResources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SettingsViewResources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="ResourceFiles\SettingsResources\VideoTabResources.bg-BG.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>VideoTabResources.bg-BG.resx</DependentUpon>
+    </Compile>
+    <Compile Include="ResourceFiles\SettingsResources\VideoTabResources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>VideoTabResources.resx</DependentUpon>
     </Compile>
     <Compile Include="States\MediaPlayerState.cs" />
     <Compile Include="MVVMFiles\Commands\RelayCommand.cs" />
@@ -149,7 +214,27 @@
     </Compile>
     <Compile Include="Settings.cs" />
     <Compile Include="MVVMFiles\ViewModels\VideoPlayerViewModel.cs" />
-    <Page Include="MainWindow.xaml">
+    <Page Include="MVVMFiles\UserControls\SettingsTabs\AudioTab.xaml">
+      <SubType>Designer</SubType>
+      <Generator>XamlIntelliSenseFileGenerator</Generator>
+    </Page>
+    <Page Include="MVVMFiles\UserControls\SettingsTabs\GeneralTab.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="MVVMFiles\UserControls\SettingsTabs\HotkeysTab.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="MVVMFiles\UserControls\SettingsTabs\SubtitlesTab.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="MVVMFiles\UserControls\SettingsTabs\VideoTab.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="MVVMFiles\Views\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -157,11 +242,15 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.xaml.cs">
+    <Compile Include="MVVMFiles\Views\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="PlayList.xaml">
+    <Page Include="MVVMFiles\Views\PlayList.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="MVVMFiles\Views\SettingsView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -183,6 +272,30 @@
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ResourceFiles\SettingsResources\GeneralTabResources.bg-BG.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>GeneralTabResources.bg-BG.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ResourceFiles\SettingsResources\GeneralTabResources.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>GeneralTabResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ResourceFiles\SettingsResources\SettingsViewResources.bg-BG.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>SettingsViewResources.bg-BG.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ResourceFiles\SettingsResources\SettingsViewResources.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>SettingsViewResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ResourceFiles\SettingsResources\VideoTabResources.bg-BG.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>VideoTabResources.bg-BG.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ResourceFiles\SettingsResources\VideoTabResources.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>VideoTabResources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Include="ResourceFiles\Strings.bg-BG.resx" />
     <EmbeddedResource Include="ResourceFiles\Strings.resx">
@@ -243,6 +356,18 @@
   <ItemGroup>
     <Resource Include="bin\Debug\Assets\MoveNext.jpeg" />
     <Resource Include="bin\Debug\Assets\MovePrevious.jpeg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="bin\Debug\Assets\Settings-Icon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="C:\Users\PC\Desktop\New folder\WPF.Themes\WPF.Themes.csproj">
+      <Project>{cd3cd636-d63e-4bd5-9fe9-2b63da6f0616}</Project>
+      <Name>WPF.Themes</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="bin\Debug\Assets\browse-icon.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -18,7 +18,8 @@ namespace DQPlayer
         public static FileExtensionPackage MediaPlayerExtensionPackage { get; }
         public static FilePickerFilter MediaPlayerExtensionPackageFilter { get; }
 
-        public static System.Windows.Size MinimumWindowSize { get; }
+        public static System.Windows.Size MinimumMainWindowSize { get; }
+        public static System.Windows.Size MinimumSettingsWindowSize { get; }
 
         public static TimeSpan SkipSeconds { get; }
 
@@ -37,7 +38,8 @@ namespace DQPlayer
         {
             TimerTickUpdate = TimeSpan.FromSeconds(0.25);
             SkipSeconds = TimeSpan.FromSeconds(10);
-            MinimumWindowSize = new System.Windows.Size(600, 410);
+            MinimumMainWindowSize = new System.Windows.Size(600, 410);
+            MinimumSettingsWindowSize = new System.Windows.Size(550, 610);
             _timeSpanStringFormats = new[]
             {
                 @"h\:m\:s",

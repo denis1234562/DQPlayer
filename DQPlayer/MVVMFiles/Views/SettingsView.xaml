@@ -1,0 +1,62 @@
+﻿<Window x:Class="DQPlayer.MVVMFiles.Views.SettingsView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:res="clr-namespace:DQPlayer.ResourceFiles.SettingsResources"
+        xmlns:DQPlayer="clr-namespace:DQPlayer"
+        xmlns:settingsTabs="clr-namespace:DQPlayer.MVVMFiles.UserControls.SettingsTabs"
+        xmlns:settingsViewModels="clr-namespace:DQPlayer.MVVMFiles.ViewModels.SettingsViewModels"
+        xmlns:locMng="clr-namespace:DQPlayer.Helpers.LocalizationManagement"
+        mc:Ignorable="d"
+        Title="{locMng:Loc SettingsTitle, {x:Static res:SettingsViewResources.ResourceManager}}" Height="610" Width="550"
+        MinHeight="{Binding Source={x:Static DQPlayer:Settings.MinimumSettingsWindowSize}, Path=Height}"
+        MinWidth="{Binding Source={x:Static DQPlayer:Settings.MinimumSettingsWindowSize}, Path=Width}" 
+        Icon="/DQPlayer;component/bin/Debug/Assets/Settings-Icon.png"
+        Background="{DynamicResource WindowBackgroundBrush}">
+    <!--Height="{Binding Source={x:Static dqPlayer:Settings.MinimumSettingsWindowSize}, Path=Height}"-->
+    <!--Width="{Binding Source={x:Static dqPlayer:Settings.MinimumSettingsWindowSize}, Path=Width}"-->
+    <Window.DataContext>
+        <settingsViewModels:SettingsViewModel/>
+    </Window.DataContext>
+
+    <Grid Background="{DynamicResource WindowBackgroundBrush}">
+        <TabControl Name="TabControl" Margin="10,10,10,40" Background="{DynamicResource WindowBackgroundBrush}">
+            <TabItem>
+                <TabItem.Header>
+                    <TextBlock Text="{locMng:Loc InterfaceTab, {x:Static res:SettingsViewResources.ResourceManager}}" FontSize="16" Padding="5"/>
+                </TabItem.Header>
+                <settingsTabs:GeneralTab HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+            </TabItem>
+            <TabItem>
+                <TabItem.Header>
+                    <TextBlock Text="{locMng:Loc VideoTab, {x:Static res:SettingsViewResources.ResourceManager}}" FontSize="16" Padding="5"/>
+                </TabItem.Header>
+                <settingsTabs:VideoTab HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+            </TabItem>
+            <TabItem>
+                <TabItem.Header>
+                    <TextBlock Text="{locMng:Loc AudioTab, {x:Static res:SettingsViewResources.ResourceManager}}" FontSize="16" Padding="5"/>
+                </TabItem.Header>
+                <settingsTabs:AudioTab HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+            </TabItem>
+            <TabItem>
+                <TabItem.Header>
+                    <TextBlock Text="{locMng:Loc SubtitlesTab, {x:Static res:SettingsViewResources.ResourceManager}}" FontSize="16" Padding="5"/>
+                </TabItem.Header>
+                <settingsTabs:SubtitlesTab HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+            </TabItem>
+            <TabItem>
+                <TabItem.Header>
+                    <TextBlock Text="{locMng:Loc HotkeysTab, {x:Static res:SettingsViewResources.ResourceManager}}" FontSize="16" Padding="5"/>
+                </TabItem.Header>
+                <settingsTabs:HotkeysTab HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+            </TabItem>
+        </TabControl>
+        <Button Content="{locMng:Loc ResetButton, {x:Static res:SettingsViewResources.ResourceManager}}" HorizontalAlignment="Left" Margin="10,5,5,7" VerticalAlignment="Bottom" Padding="5" FontSize="13"/>
+        <StackPanel FlowDirection="RightToLeft" Orientation="Horizontal" HorizontalAlignment="Right" Height="40" Margin="0,0,10,0" VerticalAlignment="Bottom" Width="360">
+            <Button Content="{locMng:Loc SaveButton, {x:Static res:SettingsViewResources.ResourceManager}}" Margin="0,5,5,5" Padding="5" FontSize="13"/>
+            <Button Content="{locMng:Loc DiscardButton, {x:Static res:SettingsViewResources.ResourceManager}}" Margin="5" Padding="5" FontSize="13"/>
+        </StackPanel>
+    </Grid>
+</Window>

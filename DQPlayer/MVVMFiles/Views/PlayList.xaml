@@ -1,4 +1,4 @@
-﻿<Window x:Class="DQPlayer.PlayList"
+﻿<Window x:Class="DQPlayer.MVVMFiles.Views.PlayList"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -10,13 +10,10 @@
         xmlns:ia="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
         xmlns:cmd="http://www.galasoft.ch/mvvmlight"
         mc:Ignorable="d"
-        Title="PlayList" Height="415.333" Width="512" Closing="Window_Closing"
-        MinHeight="{Binding Source={x:Static local:Settings.MinimumWindowSize}, Path=Height}"
-        MinWidth="{Binding Source={x:Static local:Settings.MinimumWindowSize}, Path=Width}">
-
-    <Window.DataContext>
-        <viewModels:PlayListViewModel/>
-    </Window.DataContext>
+        Title="Playlist" Height="415.333" Width="512" Closing="Window_Closing"
+        MinHeight="{Binding Source={x:Static local:Settings.MinimumMainWindowSize}, Path=Height}"
+        MinWidth="{Binding Source={x:Static local:Settings.MinimumMainWindowSize}, Path=Width}"
+        Background="{DynamicResource WindowBackgroundBrush}">
 
     <Grid>
         <ListView Name="lvListView" Margin="0,0,0,35" AllowDrop="True" ItemsSource="{Binding FilesCollection}">
@@ -32,9 +29,7 @@
             <ListView.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="Remove" Command="{Binding RemoveCommand}" CommandParameter="{x:Reference Name=lvListView}"/>
-
                     <MenuItem Header="Add File"  Command="{Binding BrowseCommand}"/>
-
                     <MenuItem Header="Clear All"  Command="{Binding ClearAllCommand}"/>
                 </ContextMenu>
             </ListView.ContextMenu>
@@ -43,7 +38,7 @@
                 <Style TargetType="ListViewItem">
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding IsPlaying}" Value="True">
-                            <Setter Property="Background" Value="Yellow" />
+                            <Setter Property="Background" Value="LightGreen" />
                         </DataTrigger>
                     </Style.Triggers>
                 </Style>
@@ -71,7 +66,7 @@
 
         <Button Name="bClearAll" Content="Clear All" Margin="0,0,170,10" HorizontalAlignment="Right"  VerticalAlignment="Bottom" Width="75"               
                 Command="{Binding ClearAllCommand}"/>
-        
+
         <Button Name="bBrowse" Content="Browse"  Margin="0,0,10,10" HorizontalAlignment="Right" VerticalAlignment="Bottom"  Width="75"                
                 Command="{Binding BrowseCommand}"/>
 

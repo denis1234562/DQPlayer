@@ -1,24 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Drawing;
-using System.Globalization;
 using System.Linq;
-using System.Net.Mime;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
 using DQPlayer.Helpers.CustomControls;
 using DQPlayer.Helpers.Extensions;
 using DQPlayer.Helpers.SubtitlesManagement;
 using DQPlayer.MVVMFiles.Models.MediaPlayer;
 using DQPlayer.MVVMFiles.ViewModels;
+using Microsoft.Win32;
 
-namespace DQPlayer
+namespace DQPlayer.MVVMFiles.Views
 {
     public partial class MainWindow
     {
@@ -37,6 +31,7 @@ namespace DQPlayer
         public MainWindow()
         {
             InitializeComponent();
+
             SetupBindings();
             ViewModel.Loaded += ViewModel_Loaded;
         }
@@ -61,7 +56,6 @@ namespace DQPlayer
             {
                 return;
             }
-            //var lines = gridSubs.Children.Cast<Viewbox>().Select(vb => (OutlinedLabel) vb.Child).ToArray();
             var lines = gridSubs.Children.Cast<OutlinedLabel>().ToArray();
             var splitedLines = segment.Content.Split(new[] {'\n'}, StringSplitOptions.RemoveEmptyEntries)
                 .Select(l => l.Replace("\r", string.Empty)).ToArray();
@@ -178,5 +172,11 @@ namespace DQPlayer
         }
 
         #endregion
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            SettingsView s = new SettingsView();
+            s.ShowDialog();
+        }
     }
 }

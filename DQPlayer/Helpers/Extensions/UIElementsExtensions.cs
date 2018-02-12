@@ -57,17 +57,17 @@ namespace DQPlayer.Helpers.Extensions
 
         public static void AddToRightMargin(this FrameworkElement target, double valueToAdd)
         {
-            SetLeftMargin(target, target.Margin.Right + valueToAdd);
+            SetRightMargin(target, target.Margin.Right + valueToAdd);
         }
 
         public static void AddToTopMargin(this FrameworkElement target, double valueToAdd)
         {
-            SetLeftMargin(target, target.Margin.Top + valueToAdd);
+            SetTopMargin(target, target.Margin.Top + valueToAdd);
         }
 
         public static void AddToBottomMargin(this FrameworkElement target, double valueToAdd)
         {
-            SetLeftMargin(target, target.Margin.Bottom + valueToAdd);
+            SetBottomMargin(target, target.Margin.Bottom + valueToAdd);
         }
 
         public static void RemoveFromLeftMargin(this FrameworkElement target, double valueToRemove)
@@ -77,17 +77,17 @@ namespace DQPlayer.Helpers.Extensions
 
         public static void RemoveFromRightMargin(this FrameworkElement target, double valueToRemove)
         {
-            SetLeftMargin(target, target.Margin.Right - valueToRemove);
+            SetRightMargin(target, target.Margin.Right - valueToRemove);
         }
 
         public static void RemoveFromTopMargin(this FrameworkElement target, double valueToRemove)
         {
-            SetLeftMargin(target, target.Margin.Top - valueToRemove);
+            SetTopMargin(target, target.Margin.Top - valueToRemove);
         }
 
         public static void RemoveFromBottomMargin(this FrameworkElement target, double valueToRemove)
         {
-            SetLeftMargin(target, target.Margin.Bottom - valueToRemove);
+            SetBottomMargin(target, target.Margin.Bottom - valueToRemove);
         }
     }
 }

@@ -15,7 +15,7 @@ namespace DQPlayer.Helpers.CustomCollections
 
         private readonly List<T> _elements;
 
-        private int lastUsedElementIndex;
+        private int _lastUsedElementIndex;
 
         public event NotifyCollectionChangedEventHandler CollectionChanged;
         public event PropertyChangedEventHandler PropertyChanged;
@@ -30,7 +30,7 @@ namespace DQPlayer.Helpers.CustomCollections
         }
 
         public ObservableCircularList() : this(Enumerable.Empty<T>())
-        {           
+        {
         }
 
         public void AddRange(IEnumerable<T> items)
@@ -90,7 +90,6 @@ namespace DQPlayer.Helpers.CustomCollections
         #endregion
 
         #region INotifyPropertyChanged implementation
-        [NotifyPropertyChangedInvocator]
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
@@ -130,7 +129,7 @@ namespace DQPlayer.Helpers.CustomCollections
             OnPropertyChanged(IndexerName);
             OnCollectionReset();
 
-            lastUsedElementIndex = 0;
+            _lastUsedElementIndex = 0;
         }
 
         public bool Contains(T item)
@@ -140,21 +139,18 @@ namespace DQPlayer.Helpers.CustomCollections
 
         public void CopyTo(T[] array, int arrayIndex)
         {
-            _elements.CopyTo(array,arrayIndex);
+            _elements.CopyTo(array, arrayIndex);
         }
 
         public bool Remove(T item)
         {
-            var result = _elements.Remove(item);
-
-            if (result)
+            int index = _elements.IndexOf(item);
+            if (index != -1)
             {
-                OnPropertyChanged(nameof(_elements.Count));
-                OnPropertyChanged(IndexerName);
-                OnCollectionChanged(NotifyCollectionChangedAction.Add, item, _elements.Count);
+                RemoveAt(index);
             }
 
-            return result;
+            return index != -1;
         }
 
         public int Count => _elements.Count;
@@ -172,6 +168,10 @@ namespace DQPlayer.Helpers.CustomCollections
         public void Insert(int index, T item)
         {
             _elements.Insert(index, item);
+            if (index <= _lastUsedElementIndex)
+            {
+                OnPropertyChanged(nameof(Current));
+            }
 
             OnPropertyChanged(nameof(_elements.Count));
             OnPropertyChanged(IndexerName);
@@ -182,6 +182,14 @@ namespace DQPlayer.Helpers.CustomCollections
         {
             var item = _elements[index];
             _elements.RemoveAt(index);
+            if (index <= _lastUsedElementIndex)
+            {
+                OnPropertyChanged(nameof(Current));
+            }
+            if (_elements.Count > 0 && _lastUsedElementIndex >= _elements.Count)
+            {
+                _lastUsedElementIndex--;
+            }
 
             OnPropertyChanged(nameof(_elements.Count));
             OnPropertyChanged(IndexerName);
@@ -193,6 +201,11 @@ namespace DQPlayer.Helpers.CustomCollections
             get => _elements[index];
             set
             {
+                if (index == _lastUsedElementIndex)
+                {
+                    OnPropertyChanged(nameof(Current));
+                }
+
                 var item = _elements[index];
                 _elements[index] = value;
 
@@ -207,38 +220,42 @@ namespace DQPlayer.Helpers.CustomCollections
 
         public T MoveNext()
         {
-            int temp = lastUsedElementIndex;
-            lastUsedElementIndex++;
-            if (lastUsedElementIndex >= _elements.Count)
+            int temp = _lastUsedElementIndex;
+            _lastUsedElementIndex++;
+            if (_lastUsedElementIndex >= _elements.Count)
             {
-                lastUsedElementIndex = 0;
+                _lastUsedElementIndex = 0;
             }
+            OnPropertyChanged(nameof(Current));
             return _elements[temp];
         }
 
         public T MovePrevious()
         {
-            int temp = lastUsedElementIndex;
-            lastUsedElementIndex--;
-            if (lastUsedElementIndex < 0)
+            int temp = _lastUsedElementIndex;
+            _lastUsedElementIndex--;
+            if (_lastUsedElementIndex < 0)
             {
-                lastUsedElementIndex = _elements.Count - 1;
+                _lastUsedElementIndex = _elements.Count - 1;
             }
+            OnPropertyChanged(nameof(Current));
             return _elements[temp];
         }
 
         public T Current => _elements.Count == 0
             ? default(T)
-            : _elements[lastUsedElementIndex];
+            : _elements[_lastUsedElementIndex];
 
         public void SetCurrent(int currentIndex)
         {
-            lastUsedElementIndex = currentIndex;
+            _lastUsedElementIndex = currentIndex;
+            OnPropertyChanged(nameof(Current));
         }
 
         public void Reset()
         {
-            lastUsedElementIndex = 0;
+            _lastUsedElementIndex = 0;
+            OnPropertyChanged(nameof(Current));
         }
 
         #endregion

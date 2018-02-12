@@ -5,7 +5,7 @@ using System.Windows.Documents;
 using DQPlayer.Helpers.Adorners;
 using DQPlayer.MVVMFiles.ViewModels;
 
-namespace DQPlayer
+namespace DQPlayer.MVVMFiles.Views
 {
     public partial class PlayList
     {

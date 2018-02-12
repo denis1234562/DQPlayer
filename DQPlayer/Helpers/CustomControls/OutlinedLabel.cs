@@ -1,6 +1,18 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Drawing;
+using System.Globalization;
+using System.Linq;
 using System.Windows;
 using System.Windows.Media;
+using DQPlayer.Helpers.Extensions;
+using Brush = System.Windows.Media.Brush;
+using Brushes = System.Windows.Media.Brushes;
+using FontFamily = System.Windows.Media.FontFamily;
+using Pen = System.Windows.Media.Pen;
+using Point = System.Windows.Point;
+using Size = System.Windows.Size;
 
 namespace DQPlayer.Helpers.CustomControls
 {
@@ -93,6 +105,7 @@ namespace DQPlayer.Helpers.CustomControls
 
         private Size _startSize;
 
+
         public OutlinedLabel()
         {
             FontSize = 12;
@@ -100,7 +113,7 @@ namespace DQPlayer.Helpers.CustomControls
             FontFamily = new FontFamily("Seago UI");
             TextColor = Brushes.Black;
         }
-
+      
         protected override void OnRender(DrawingContext drawingContext)
         {
             if (_startSize == default(Size))

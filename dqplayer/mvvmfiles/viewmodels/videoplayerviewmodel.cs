@@ -1,15 +1,16 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using DQPlayer.MVVMFiles.Commands;
 using DQPlayer.MVVMFiles.Models.MediaPlayer;
 using DQPlayer.States;
 using Microsoft.Win32;
-using DQPlayer.Helpers;
 using System.Windows;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
+using DQPlayer.Helpers.CustomCollections;
 using DQPlayer.Helpers.Extensions;
 using DQPlayer.Helpers.FileManagement;
 using DQPlayer.Helpers.SubtitlesManagement;
@@ -23,7 +24,7 @@ namespace DQPlayer.MVVMFiles.ViewModels
     {
         public event PropertyChangedEventHandler PropertyChanged;
         public event Action<IMediaService> Loaded;
-        public event Action<IEnumerable<Uri>> MediaInputNewFiles;
+        public event Action<IEnumerable<FileInformation>> MediaInputNewFiles;
         public event Action<FileInformation> MediaPlayedNewSource;
 
         private readonly Lazy<RelayCommand> _loadedCommand;
@@ -65,11 +66,11 @@ namespace DQPlayer.MVVMFiles.ViewModels
         private readonly Lazy<RelayCommand> _playListCommand;
         public RelayCommand PlayListCommand => _playListCommand.Value;
 
-        private readonly Lazy<RelayCommand> _moveNextCommand;
-        public RelayCommand MoveNextCommand => _moveNextCommand.Value;
+        private readonly Lazy<RelayCommand<Func<ObservableCircularList<FileInformation>, FileInformation>>> _moveNextCommand;
+        public RelayCommand<Func<ObservableCircularList<FileInformation>, FileInformation>> MoveNextCommand => _moveNextCommand.Value;
 
-        private readonly Lazy<RelayCommand> _movePreviousCommand;
-        public RelayCommand MovePreviousCommand => _movePreviousCommand.Value;
+        private readonly Lazy<RelayCommand<Func<ObservableCircularList<FileInformation>, FileInformation>>> _movePreviousCommand;
+        public RelayCommand<Func<ObservableCircularList<FileInformation>, FileInformation>> MovePreviousCommand => _movePreviousCommand.Value;
 
         private readonly Lazy<RelayCommand> _mediaEndedCommand;
         public RelayCommand MediaEndedCommand => _mediaEndedCommand.Value;
@@ -99,19 +100,19 @@ namespace DQPlayer.MVVMFiles.ViewModels
             _windowFileDropCommand = CreateLazyRelayCommand<DragEventArgs>(OnWindowFileDropCommand);
             _browseCommand = CreateLazyRelayCommand(OnBrowseCommand);
             _playListCommand = CreateLazyRelayCommand(OnPlayListCommand);
-            _moveNextCommand = CreateLazyRelayCommand(OnMoveNextCommand);
-            _movePreviousCommand = CreateLazyRelayCommand(OnMovePreviousCommand);
+            _moveNextCommand = CreateLazyRelayCommand<Func<ObservableCircularList<FileInformation>, FileInformation>>(
+                func => OnMoveCommand(list => list.MoveNext()));
+            _movePreviousCommand = CreateLazyRelayCommand<Func<ObservableCircularList<FileInformation>, FileInformation>>(
+                func => OnMoveCommand(list => list.MovePrevious()));
             _mediaEndedCommand = CreateLazyRelayCommand(OnMediaEndedCommand);
 
             //Replace
-            _playListViewModel = new PlayListViewModel(this);
-            _playListViewModel.PlayListRemovedItem += OnPlayListRemovedItems;
-            _playListViewModel.PlayListFileDoubleClicked += OnPlayListFileDoubleClicked;
-            PlayListView = new PlayList {DataContext = _playListViewModel};
+            PlayListViewModel = new PlayListViewModel(this);
+            PlayListView = new Views.PlayList { DataContext = PlayListViewModel };
         }
 
-        private readonly PlayListViewModel _playListViewModel;
-        public PlayList PlayListView;
+        public PlayListViewModel PlayListViewModel { get; }
+        public Views.PlayList PlayListView;
 
         private bool _repeat;
         public bool Repeat
@@ -127,7 +128,7 @@ namespace DQPlayer.MVVMFiles.ViewModels
         public MediaPlayerModel MediaPlayer { get; set; }
 
         public bool PlayerSourceState => MediaPlayer?.CurrentState != null &&
-                                           !MediaPlayer.CurrentState.Equals(MediaPlayerStates.None);
+                                         !MediaPlayer.CurrentState.Equals(MediaPlayerStates.None);
 
         private static Lazy<RelayCommand> CreateLazyRelayCommand(Action execute, Func<bool> canExecute = null)
             => new Lazy<RelayCommand>(() => new RelayCommand(execute, canExecute));
@@ -140,7 +141,7 @@ namespace DQPlayer.MVVMFiles.ViewModels
 
         private SubtitleHandler _currentSubtitleHandler;
 
-        private FileInformation _currentFileInformation;
+        private readonly Dictionary<FileInformation, FileInfo> _subCache = new Dictionary<FileInformation, FileInfo>();
 
         [NotifyPropertyChangedInvocator]
         protected virtual void OnPropertyChanged([System.Runtime.CompilerServices.CallerMemberName] string propName = null)
@@ -168,11 +169,12 @@ namespace DQPlayer.MVVMFiles.ViewModels
         {
             var fileDialog = new OpenFileDialog
             {
-                Filter = Settings.MediaPlayerExtensionPackageFilter.Filter
+                Filter = Settings.MediaPlayerExtensionPackageFilter.Filter,
+                Multiselect = true
             };
             if (fileDialog.ShowDialog().GetValueOrDefault())
             {
-                ProcessInputFiles(new Uri(fileDialog.FileName).AsEnumerable());
+                ProcessInputFiles(fileDialog.FileNames.Select(f => new FileInformation(f)));
             }
         }
 
@@ -186,31 +188,48 @@ namespace DQPlayer.MVVMFiles.ViewModels
             MessageBox.Show($"{Strings.InvalidFileType}", "Error");
         }
 
-        private void ProcessInputFiles(IEnumerable<Uri> files)
+        private void ProcessInputFiles(IEnumerable<FileInformation> files)
         {
             MediaInputNewFiles(files);
+
+            DeattachCurrentSubtitlesIfAny();
+            var firstElement = files.First();
+            if (firstElement.FileInfo.Extension == Settings.SubtitleExtensionString)
+            {
+                AttachNewSubtitles(firstElement);
+                return;
+            }
+
+            ChangeMediaPlayerSource(PlayListViewModel.FilesCollection.Current);
+        }
+
+        private void DeattachCurrentSubtitlesIfAny()
+        {
             if (_currentSubtitleHandler != null)
             {
                 _currentSubtitleHandler.ForceHidingAllSubtitles();
                 _currentSubtitleHandler.DisplaySubtitle -= OnDisplaySubtitle;
                 _currentSubtitleHandler.HideSubtitle -= OnHideSubtitle;
             }
-            var firstElement = files.First();
-            if (firstElement.AbsolutePath.GetFileExtension() == Settings.SubtitleExtensionString)
+        }
+
+        private void AttachNewSubtitles(FileInformation subtitleFile)
+        {
+            AttachNewSubtitles(subtitleFile.FileInfo.FullName);
+        }
+
+        private void AttachNewSubtitles(string subtitleFile)
+        {
+            if (!Equals(MediaPlayer.CurrentState, MediaPlayerStates.None))
             {
-                if (!Equals(MediaPlayer.CurrentState, MediaPlayerStates.None))
-                {
-                    _currentSubtitleHandler = new SubtitleHandler();
-                    _currentSubtitleHandler.DisplaySubtitle += OnDisplaySubtitle;
-                    _currentSubtitleHandler.HideSubtitle += OnHideSubtitle;
-                    _currentSubtitleHandler.WithEncoding(Settings.Cyrillic)
-                        .IsStartable(MediaPlayer.CurrentState.IsRunning).Build(firstElement.AbsolutePath,
-                            MediaPlayer.MediaSlider.Value,
-                            (IRegulatableMediaServiceNotifier)MediaPlayer.MediaController);
-                }
-                return;
+                _currentSubtitleHandler = new SubtitleHandler();
+                _currentSubtitleHandler.DisplaySubtitle += OnDisplaySubtitle;
+                _currentSubtitleHandler.HideSubtitle += OnHideSubtitle;
+                _currentSubtitleHandler.WithEncoding(Settings.Cyrillic)
+                    .IsStartable(MediaPlayer.CurrentState.IsRunning).Build(subtitleFile,
+                        MediaPlayer.MediaSlider.Value,
+                        (IRegulatableMediaServiceNotifier)MediaPlayer.MediaController);
             }
-            ChangeMediaPlayerSource(_playListViewModel.FilesCollection.Current);
         }
 
         private void OnHideSubtitle(SubtitleHandler handler, SubtitleSegment segment)
@@ -248,62 +267,63 @@ namespace DQPlayer.MVVMFiles.ViewModels
 
         }
 
-        private void OnMoveNextCommand()
+        private void OnMoveCommand(Func<ObservableCircularList<FileInformation>, FileInformation> action)
         {
-            if (_playListViewModel.FilesCollection.Count > 1)
+            if (PlayListViewModel.FilesCollection.Count > 1)
             {
-                ChangeMediaPlayerSource(_playListViewModel.ChangeCurrent(() => _playListViewModel.FilesCollection.MoveNext()));
+                action(PlayListViewModel.FilesCollection);
+                ChangeMediaPlayerSource(PlayListViewModel.FilesCollection.Current);
             }
         }
 
-        private void OnMovePreviousCommand()
+        public void ChangeMediaPlayerSource(FileInformation newSource)
         {
-            if (_playListViewModel.FilesCollection.Count > 1)
-            {
-                ChangeMediaPlayerSource(_playListViewModel.ChangeCurrent(() => _playListViewModel.FilesCollection.MovePrevious()));
-            }
-        }
-
-        private void ChangeMediaPlayerSource(FileInformation newSource)
-        {
-            MediaPlayer.SetMediaState(MediaPlayerStates.Stop);
-            MediaPlayer.PlayNewPlayerSource(newSource.FilePath);
-            _currentFileInformation = newSource;
+            MediaPlayer.PlayNewPlayerSource(new Uri(newSource.FileInfo.FullName));
             OnMediaPlayedNewSource(newSource);
+            LookForSubtitles(newSource);
+        }
+
+        private void OnMediaPlayedNewSource(FileInformation file)
+        {
+            MediaPlayedNewSource?.Invoke(file);
+        }
+
+        private void LookForSubtitles(FileInformation file)
+        {
+            DeattachCurrentSubtitlesIfAny();
+            if (file.FileInfo.Directory == null)
+            {
+                return;
+            }
+            if (_subCache.TryGetValue(file, out var subtitle))
+            {
+                AttachNewSubtitles(subtitle.FullName);
+                return;
+            }
+            var availableSubtitles =
+                file.FileInfo.Directory.GetFiles($"*{Settings.SubtitleExtensionString}", SearchOption.AllDirectories);
+            foreach (var subs in availableSubtitles)
+            {
+                if (Path.GetFileNameWithoutExtension(subs.Name) == file.FileName)
+                {
+                    AttachNewSubtitles(subs.FullName);
+                    _subCache.Add(file, subs);
+                    return;
+                }
+            }
         }
 
         private void OnMediaEndedCommand()
         {
-            if (_playListViewModel.FilesCollection.Last().Equals(_currentFileInformation) && !Repeat)
+            MediaPlayer.SetMediaState(MediaPlayerStates.Pause);
+            return;
+            if (PlayListViewModel.FilesCollection.Last().Equals(PlayListViewModel.FilesCollection.Current) && !Repeat)
             {
-                ChangeMediaPlayerSource(_playListViewModel.ChangeCurrent(() => _playListViewModel.FilesCollection.MoveNext()));
+                PlayListViewModel.FilesCollection.MoveNext();
                 MediaPlayer.SetMediaState(MediaPlayerStates.Stop);
                 return;
             }
-            ChangeMediaPlayerSource(_playListViewModel.ChangeCurrent(() => _playListViewModel.FilesCollection.MoveNext()));
-        }
-
-        private void OnMediaPlayedNewSource(FileInformation file)
-        {        
-            MediaPlayedNewSource?.Invoke(file);
-        }
-
-        private void OnPlayListRemovedItems(FileInformation file)
-        {
-            if (_currentFileInformation != null && _currentFileInformation.Equals(file))
-            {
-                _playListViewModel.FilesCollection.Reset();
-                if (_playListViewModel.FilesCollection.Count != 0)
-                {
-                    ChangeMediaPlayerSource(_playListViewModel.FilesCollection.Current);
-                }
-                MediaPlayer.SetMediaState(MediaPlayerStates.Stop);
-            }
-        }
-
-        private void OnPlayListFileDoubleClicked(FileInformation file)
-        {
-            ChangeMediaPlayerSource(file);
+            PlayListViewModel.FilesCollection.MoveNext();
         }
     }
 }
