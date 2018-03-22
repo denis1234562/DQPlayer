@@ -1,52 +1,53 @@
-﻿namespace WPF.Themes
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Reflection;
-    using System.Text;
-    using System.Windows;
-    using System.Windows.Controls;
-    
+﻿using System;
+using System.Windows;
+using System.Windows.Controls;
+
+namespace WPF.Themes
+{   
     public static class ThemeManager
     {
+        private static string _currentTheme = "ExpressionDark";
+
+        public static string[] Themes { get; }
+
+        static ThemeManager()
+        {
+            Themes = new[]
+            {
+                "ExpressionDark",
+                "Default",
+                "ExpressionLight",
+                "BureauBlack",
+                "BureauBlue",
+                "TwilightBlue",
+            };
+        }
+
         public static ResourceDictionary GetThemeResourceDictionary(string theme)
         {
             if (theme != null)
             {
-                Assembly assembly = Assembly.LoadFrom("WPF.Themes.dll");
-                string packUri = $@"/WPF.Themes;component/{theme}/Theme.xaml";
+                string packUri = $@" /WPF.Themes;component/{theme}/Theme.xaml";
                 return Application.LoadComponent(new Uri(packUri, UriKind.Relative)) as ResourceDictionary;
             }
             return null;
         }
 
-        public static string[] GetThemes()
-        {
-            string[] themes = 
-            {
-                "WhistlerBlue",
-                "ExpressionDark",
-                "ExpressionLight", 
-                "ShinyBlue",
-                "ShinyRed",             
-                "BureauBlack",
-                "BureauBlue", 
-                "BubbleCreme", 
-                "TwilightBlue",
-            };
-            return themes;
-        }
-
         public static void ApplyTheme(this Application app, string theme)
         {
-            ResourceDictionary dictionary = GetThemeResourceDictionary(theme);
+            if (_currentTheme == theme)
+            {
+                return;
+            }
+            _currentTheme = theme;
 
+            ResourceDictionary dictionary = GetThemeResourceDictionary(theme);
             if (dictionary != null)
             {
                 app.Resources.MergedDictionaries.Clear();
                 app.Resources.MergedDictionaries.Add(dictionary);
             }
+            
         }
 
         public static void ApplyTheme(this ContentControl control, string theme)
@@ -59,48 +60,5 @@
                 control.Resources.MergedDictionaries.Add(dictionary);
             }
         }
-
-        #region Theme
-
-        /// <summary>
-        /// Theme Attached Dependency Property
-        /// </summary>
-        public static readonly DependencyProperty ThemeProperty =
-            DependencyProperty.RegisterAttached("Theme", typeof(string), typeof(ThemeManager),
-                new FrameworkPropertyMetadata((string)string.Empty,
-                    OnThemeChanged));
-
-        /// <summary>
-        /// Gets the Theme property.  This dependency property 
-        /// indicates ....
-        /// </summary>
-        public static string GetTheme(DependencyObject d)
-        {
-            return (string)d.GetValue(ThemeProperty);
-        }
-
-        /// <summary>
-        /// Sets the Theme property.  This dependency property 
-        /// indicates ....
-        /// </summary>
-        public static void SetTheme(DependencyObject d, string value)
-        {
-            d.SetValue(ThemeProperty, value);
-        }
-
-        /// <summary>
-        /// Handles changes to the Theme property.
-        /// </summary>
-        private static void OnThemeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
-            string theme = e.NewValue as string;
-            if (theme == string.Empty)
-            {
-                return;
-            }
-            //ApplyTheme(Application.Current, theme);
-        }
-
-        #endregion
     }
 }

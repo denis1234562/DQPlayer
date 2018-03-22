@@ -1276,8 +1276,8 @@
                 <ColumnDefinition />
                 <ColumnDefinition Width="20" />
             </Grid.ColumnDefinitions>
-            <Rectangle Grid.ColumnSpan="2" HorizontalAlignment="Stretch" x:Name="Rectangle" VerticalAlignment="Stretch" Width="Auto" Height="Auto" RadiusX="3" RadiusY="3" Fill="{DynamicResource LightBrush}" Stroke="{DynamicResource NormalBorderBrush}" />
-            <Rectangle Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Width="Auto" Height="Auto" RadiusX="3" RadiusY="3" Fill="{DynamicResource LightBrush}" Stroke="{DynamicResource NormalBorderBrush}" />
+            <Rectangle Grid.ColumnSpan="2" HorizontalAlignment="Stretch" x:Name="Rectangle" VerticalAlignment="Stretch" Width="Auto" Height="Auto" RadiusX="3" RadiusY="3" Fill="{DynamicResource HoverShineBrush}" Stroke="{DynamicResource ShineBrush}" />
+            <Rectangle Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Width="Auto" Height="Auto" RadiusX="3" RadiusY="3" Fill="{DynamicResource HoverShineBrush}" Stroke="{DynamicResource ShineBrush}" />
             <Border Margin="2,2,2,2" Grid.Column="1" Background="{DynamicResource NormalBrush}" CornerRadius="3,3,3,3" x:Name="border" />
             <Border Margin="2,2,2,2" Background="{DynamicResource HoverBrush}" CornerRadius="3,3,3,3" x:Name="HoverBorder" Grid.Column="1" Opacity="0" />
             <Border Margin="2,2,2,2" Background="{DynamicResource HoverShineBrush}" CornerRadius="3,3,3,3" x:Name="HoverShineBorder" Grid.Column="1" Opacity="0" />
@@ -1316,7 +1316,7 @@
 
     <ControlTemplate x:Key="ComboBoxTemplate" TargetType="{x:Type ComboBox}">
         <Grid x:Name="grid">
-            <ToggleButton Grid.Column="2" Template="{DynamicResource ComboBoxToggleButton}" x:Name="ToggleButton" Focusable="false" IsChecked="{Binding Path=IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" ClickMode="Press" />
+            <ToggleButton  Grid.Column="2" Template="{DynamicResource ComboBoxToggleButton}" x:Name="ToggleButton" Focusable="false" IsChecked="{Binding Path=IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" ClickMode="Press" />
             <ContentPresenter HorizontalAlignment="Left" Margin="3,3,23,3" x:Name="ContentSite" VerticalAlignment="Center" Content="{TemplateBinding SelectionBoxItem}" ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}" ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}" IsHitTestVisible="False" />
             <TextBox Visibility="Hidden" Template="{DynamicResource ComboBoxTextBox}" HorizontalAlignment="Left" Margin="3,3,23,3" x:Name="PART_EditableTextBox" Style="{x:Null}" VerticalAlignment="Center" Focusable="True" Background="{DynamicResource LightBrush}" IsReadOnly="{TemplateBinding IsReadOnly}" BorderBrush="{DynamicResource NormalBorderBrush}" Foreground="{DynamicResource TextBrush}" />
             <Popup IsOpen="{TemplateBinding IsDropDownOpen}" Placement="Bottom" x:Name="Popup" Focusable="False" AllowsTransparency="True" PopupAnimation="Slide">
@@ -1731,23 +1731,6 @@
         <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
         <Setter Property="Background" Value="{DynamicResource ControlBackgroundBrush}"/>
         <Setter Property="BorderBrush" Value="#FF000000"/>
-    </Style>
-    <Style TargetType="{x:Type Label}">
-        <Setter Property="HorizontalContentAlignment" Value="Left" />
-        <Setter Property="VerticalContentAlignment" Value="Top" />
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="{x:Type Label}">
-                    <Grid>
-                        <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" RecognizesAccessKey="True" />
-                    </Grid>
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="IsEnabled" Value="false" />
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-        <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
     </Style>
 
     <Style TargetType="{x:Type Menu}">

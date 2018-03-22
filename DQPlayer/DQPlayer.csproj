@@ -398,12 +398,6 @@
     <Resource Include="bin\Debug\Assets\Settings-Icon.png" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="C:\Users\PC\Desktop\New folder\WPF.Themes\WPF.Themes.csproj">
-      <Project>{cd3cd636-d63e-4bd5-9fe9-2b63da6f0616}</Project>
-      <Name>WPF.Themes</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="bin\Debug\Assets\browse-icon.png" />
   </ItemGroup>
   <ItemGroup>
@@ -443,6 +437,12 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="MVVMFiles\Models\PlayList\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\WPF.Themes\WPF.Themes.csproj">
+      <Project>{cd3cd636-d63e-4bd5-9fe9-2b63da6f0616}</Project>
+      <Name>WPF.Themes</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

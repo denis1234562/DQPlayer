@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.26730.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DQPlayer", "DQPlayer\DQPlayer.csproj", "{A6E2199D-8571-4A37-B77C-9DD2FA6DC8A2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WPF.Themes", "C:\Users\PC\Desktop\New folder\WPF.Themes\WPF.Themes.csproj", "{CD3CD636-D63E-4BD5-9FE9-2B63DA6F0616}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WPF.Themes", "WPF.Themes\WPF.Themes.csproj", "{CD3CD636-D63E-4BD5-9FE9-2B63DA6F0616}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
