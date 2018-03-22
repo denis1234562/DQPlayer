@@ -125,8 +125,9 @@ namespace DQPlayer.MVVMFiles.ViewModels
             };
             if (fileDialog.ShowDialog().GetValueOrDefault())
             {
-                OnNotify(new MediaControlEventArgs(MediaControlEventType.BrowseClick,
-                    fileDialog.FileNames.Select(FileProcesser.Processor)));
+                var files = fileDialog.FileNames.Select(FileProcesser.Selector);
+                ManagerHelper.Request(this, files);
+                OnNotify(new MediaControlEventArgs(MediaControlEventType.BrowseClick, files));
             }
         }
 

@@ -1,13 +1,24 @@
+using DQPlayer.Helpers.FileManagement;
+using DQPlayer.Helpers.InputManagement;
+using DQPlayer.MVVMFiles.Commands;
+using DQPlayer.ResourceFiles;
 using System;
 using System.Windows;
 using System.Windows.Input;
 
 namespace DQPlayer.MVVMFiles.ViewModels
 {
-    public class VideoPlayerViewModel
+    public class MainWindowViewModel
     {
         public event Action WindowFullScreen;
         public event Action WindowNormalize;
+
+        public RelayCommand<DragEventArgs> FileDropCommand { get; }
+
+        public MainWindowViewModel()
+        {
+            FileDropCommand = new RelayCommand<DragEventArgs>(OnFileDrop);
+        }
 
         public void HandleWindowClick(Window window, MouseButtonEventArgs e)
         {
@@ -43,6 +54,16 @@ namespace DQPlayer.MVVMFiles.ViewModels
             window.WindowStyle = WindowStyle.SingleBorderWindow;
             window.Topmost = false;
             WindowNormalize?.Invoke();
+        }
+
+        private void OnFileDrop(DragEventArgs e)
+        {
+            if (FileDropHandler.ExtractDroppedItemsUri(e, Settings.MediaPlayerExtensionsPackage, out var files))
+            {
+                ManagerHelper.Request(this, files);
+                return;
+            }
+            MessageBox.Show($"{Strings.InvalidFileType}", "Error");
         }
     }
 }

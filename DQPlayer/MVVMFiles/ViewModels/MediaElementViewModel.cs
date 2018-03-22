@@ -17,7 +17,6 @@ using DQPlayer.Helpers.FileManagement.FileInformation;
 using DQPlayer.Helpers.InputManagement;
 using DQPlayer.Helpers.MediaControls;
 using DQPlayer.MVVMFiles.Commands;
-using DQPlayer.MVVMFiles.Converters;
 using DQPlayer.MVVMFiles.Models.MediaPlayer;
 using DQPlayer.ResourceFiles;
 using DQPlayer.States;
@@ -30,8 +29,7 @@ namespace DQPlayer.MVVMFiles.ViewModels
 
         public event Action<object, MediaElement> MediaEnded;
 
-        public RelayCommand<MediaElement> MediaEndedCommand { get; }
-        public RelayCommand<DragEventArgs> FileDropCommand { get; }
+        public RelayCommand<MediaElement> MediaEndedCommand { get; }       
 
         public event Action<IMediaControlsViewModel> ControlsAttached;
 
@@ -57,17 +55,14 @@ namespace DQPlayer.MVVMFiles.ViewModels
         public MediaElementViewModel()
         {
             MediaEndedCommand = new RelayCommand<MediaElement>(OnMediaEnded);
-            FileDropCommand = new RelayCommand<DragEventArgs>(OnFileDrop);
             _handlers = new Dictionary<MediaControlEventType, EventHandler<MediaControlEventArgs>>
             {
-                [MediaControlEventType.BrowseClick] = OnBrowseClick,
                 [MediaControlEventType.RewindClick] = OnRewindClick,
                 [MediaControlEventType.PlayClick] = (s, e) => MediaPlayerModel.SetMediaState(MediaPlayerStates.Play),
                 [MediaControlEventType.PauseClick] = (s, e) => MediaPlayerModel.SetMediaState(MediaPlayerStates.Pause),
                 [MediaControlEventType.FastForwardClick] = OnFastForwardClick,
                 [MediaControlEventType.StopClick] = (s, e) => MediaPlayerModel.SetMediaState(MediaPlayerStates.Stop),
 
-                //[MediaControlEventType.PositionSliderThumbMouseEnter] = ControlsViewModel_PositionSliderThumbMouseEnter,
                 [MediaControlEventType.PositionSliderDragStarted] = OnPositionSliderDragStarted,
                 [MediaControlEventType.PositionSliderDragCompleted] = (s, e) => MediaPlayerModel.ResumeSerializedState(),
 
@@ -78,12 +73,15 @@ namespace DQPlayer.MVVMFiles.ViewModels
 
         private void MediaSourceManager_OnNewRequest(object sender, ManagerEventArgs<MediaFileInformation> e)
         {
-            var firstFile = e.SelectedFiles.First().Uri;
-            MediaPlayerModel.MediaController.SetNewPlayerSource(firstFile);
-            if (firstFile != null)
+            if (!sender.Equals(this))
             {
-                MediaPlayerModel.SetMediaState(MediaPlayerStates.Play);
-            }
+                var firstFile = e.SelectedFiles.FirstOrDefault();
+                MediaPlayerModel.MediaController.SetNewPlayerSource(firstFile?.Uri);
+                if (firstFile != null)
+                {
+                    MediaPlayerModel.SetMediaState(MediaPlayerStates.Play);
+                }
+            }   
         }
 
         private void OnControlsAttached(IMediaControlsViewModel controlsViewModel)
@@ -110,11 +108,6 @@ namespace DQPlayer.MVVMFiles.ViewModels
         }
 
         #region Media Controls Event Handlers
-
-        private void OnBrowseClick(object sender, MediaControlEventArgs e)
-        {
-            ManagerHelper.Request((IEnumerable<IFileInformation>) e.AdditionalInfo);
-        }
 
         private void OnFastForwardClick(object sender, MediaControlEventArgs e)
         {
@@ -145,17 +138,7 @@ namespace DQPlayer.MVVMFiles.ViewModels
         private void OnMediaEnded(MediaElement mediaElement)
         {
             MediaEnded?.Invoke(this, mediaElement);
-        }
-
-        private void OnFileDrop(DragEventArgs e)
-        {
-            if (FileDropHandler.ExtractDroppedItemsUri(e, Settings.MediaPlayerExtensionsPackage, out var files))
-            {
-                ManagerHelper.Request(files);
-                return;
-            }
-            MessageBox.Show($"{Strings.InvalidFileType}", "Error");
-        }
+        }      
 
         #endregion
 

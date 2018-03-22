@@ -5,11 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:DQPlayer"
         xmlns:viewModels="clr-namespace:DQPlayer.MVVMFiles.ViewModels"
-        xmlns:customControls="clr-namespace:DQPlayer.Helpers.CustomControls"
+        xmlns:command="http://www.galasoft.ch/mvvmlight"
         xmlns:mainWindow="clr-namespace:DQPlayer.MVVMFiles.UserControls.MainWindow"
         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
-        xmlns:mvvm="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"
-        xmlns:helpers="clr-namespace:DQPlayer.Helpers"
         xmlns:system="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
         Title="JDPlayer" Height="580" Width="700" AllowDrop="True"
@@ -19,8 +17,14 @@
         MouseDown="Window_OnMouseDown"
         PreviewMouseMove="MainWindow_OnPreviewMouseMove">
 
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Drop">
+            <command:EventToCommand Command="{Binding FileDropCommand}" PassEventArgsToCommand="True"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+
     <Window.DataContext>
-        <viewModels:VideoPlayerViewModel/>
+        <viewModels:MainWindowViewModel/>
     </Window.DataContext>
 
     <Window.Resources>

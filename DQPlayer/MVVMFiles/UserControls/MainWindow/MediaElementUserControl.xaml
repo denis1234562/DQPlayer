@@ -4,16 +4,9 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
-             xmlns:viewModels="clr-namespace:DQPlayer.MVVMFiles.ViewModels"
-             xmlns:command="http://www.galasoft.ch/mvvmlight"
+             xmlns:viewModels="clr-namespace:DQPlayer.MVVMFiles.ViewModels"           
              mc:Ignorable="d" 
              d:DesignHeight="475" d:DesignWidth="710">
-
-    <i:Interaction.Triggers>
-        <i:EventTrigger EventName="Drop">
-            <command:EventToCommand Command="{Binding FileDropCommand}" PassEventArgsToCommand="True"/>
-        </i:EventTrigger>
-    </i:Interaction.Triggers>
 
     <UserControl.DataContext>
         <viewModels:MediaElementViewModel/>

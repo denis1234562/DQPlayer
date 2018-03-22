@@ -95,7 +95,7 @@ namespace DQPlayer.MVVMFiles.ViewModels
             {
                 if (((FrameworkElement) e.OriginalSource).DataContext is MediaFileInformation item)
                 {
-                    ManagerHelper.Request(item.AsEnumerable());
+                    ManagerHelper.Request(this,item.AsEnumerable());
                 }
             }
         }
@@ -103,8 +103,8 @@ namespace DQPlayer.MVVMFiles.ViewModels
         private void OnClearAllCommand()
         {
             FilesCollection.Clear();
-            FilesDuration = new TimeSpan();
-            ManagerHelper.Request(new IFileInformation[] {null});
+            FilesDuration = TimeSpan.Zero;
+            Manager<MediaFileInformation>.Request(this,new MediaFileInformation[] {null});
         }
 
         private void OnRemoveCommand(ListView listView)
@@ -121,7 +121,7 @@ namespace DQPlayer.MVVMFiles.ViewModels
                 FilesCollection.RemoveAt(indexOfSelectedFile);
                 if (indexOfSelectedFile == currentIndex)
                 {
-                    ManagerHelper.Request(FilesCollection.Current.AsEnumerable());
+                    Manager<MediaFileInformation>.Request(this,FilesCollection.Current.AsEnumerable());
                 }
             }
             UpdateMoviesDuration();
@@ -130,7 +130,7 @@ namespace DQPlayer.MVVMFiles.ViewModels
         private void OnMediaInputNewFiles(object sender, ManagerEventArgs<MediaFileInformation> e)
         {
             //null source was requested by system
-            if (e.SelectedFiles.First() == null)
+            if (sender.Equals(this) || e.SelectedFiles.First() == null)
             {
                 return;
             }

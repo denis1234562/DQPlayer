@@ -10,24 +10,24 @@ namespace DQPlayer.Helpers.InputManagement
     {
         public static event EventHandler<ManagerEventArgs<TFileInformation>> NewRequest;
 
-        public static void Request(IEnumerable<TFileInformation> selectedFiles)
+        public static void Request(object sender,IEnumerable<TFileInformation> selectedFiles)
         {
-            Request(new ManagerEventArgs<TFileInformation>(selectedFiles));
+            Request(sender,new ManagerEventArgs<TFileInformation>(selectedFiles));
         }
 
-        public static void Request(ManagerEventArgs<TFileInformation> args)
+        public static void Request(object sender, ManagerEventArgs<TFileInformation> args)
         {
-            OnNewRequest(args);
+            OnNewRequest(sender,args);
         }
 
-        private static void Request(IEnumerable<object> selectedFiles)
+        private static void Request(object sender, IEnumerable<object> selectedFiles)
         {
-            Request(selectedFiles.Cast<TFileInformation>());
+            Request(sender,selectedFiles.Cast<TFileInformation>());
         }
 
-        private static void OnNewRequest(ManagerEventArgs<TFileInformation> args)
+        private static void OnNewRequest(object sender, ManagerEventArgs<TFileInformation> args)
         {
-            NewRequest?.Invoke(typeof(Manager<TFileInformation>), args);
+            NewRequest?.Invoke(sender, args);
         }
     }
 }

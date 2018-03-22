@@ -242,7 +242,7 @@
       <DependentUpon>Strings.resx</DependentUpon>
     </Compile>
     <Compile Include="Settings.cs" />
-    <Compile Include="MVVMFiles\ViewModels\VideoPlayerViewModel.cs" />
+    <Compile Include="MVVMFiles\ViewModels\MainWindowViewModel.cs" />
     <Page Include="MVVMFiles\UserControls\MainWindow\MediaElementUserControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

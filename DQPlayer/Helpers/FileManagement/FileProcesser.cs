@@ -6,7 +6,7 @@ namespace DQPlayer.Helpers.FileManagement
 {
     public static class FileProcesser
     {
-        public static IFileInformation Processor(string filePath)
+        public static IFileInformation Selector(string filePath)
         {
             if (string.IsNullOrEmpty(filePath))
             {

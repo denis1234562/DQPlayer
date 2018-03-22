@@ -12,7 +12,7 @@ namespace DQPlayer.MVVMFiles.Views
 {
     public partial class MainWindow
     {
-        public VideoPlayerViewModel ViewModel => DataContext as VideoPlayerViewModel;
+        public MainWindowViewModel ViewModel => DataContext as MainWindowViewModel;
 
         public MainWindow()
         {
@@ -31,10 +31,6 @@ namespace DQPlayer.MVVMFiles.Views
             mediaElementVM.CurentControls = mediaControlsVM;
 
             mediaControlsVM.CurrentMediaPlayer = ucMediaElement;
-
-            ManagerHelper.Request(new MediaFileInformation(
-                    new Uri("F:\\Movies\\World Of Warcraft\\07\\game.of.thrones.s07e07.720p.web.h264-strife.mkv"))
-                .AsEnumerable());
 
             ViewModel.WindowFullScreen += ViewModel_WindowFullScreen;
             ViewModel.WindowNormalize += ViewModel_WindowNormalize;
