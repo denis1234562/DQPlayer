@@ -1,6 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
+using System.Collections.Generic;
+using DQPlayer.MVVMFiles.Commands;
 using System.Runtime.Serialization.Formatters.Binary;
 
 namespace DQPlayer.Helpers.Extensions
@@ -69,10 +70,9 @@ namespace DQPlayer.Helpers.Extensions
                 return default(T);
             }
 
-            BinaryFormatter formatter = new BinaryFormatter();
-            MemoryStream stream = new MemoryStream();
-            using (stream)
+            using (MemoryStream stream = new MemoryStream())
             {
+                BinaryFormatter formatter = new BinaryFormatter();
                 formatter.Serialize(stream, source);
                 stream.Position = 0;
                 return (T)formatter.Deserialize(stream);
@@ -83,5 +83,11 @@ namespace DQPlayer.Helpers.Extensions
         {
             yield return item;
         }
+
+        public static Lazy<RelayCommand> CreateLazyRelayCommand(Action execute, Func<bool> canExecute = null)
+            => new Lazy<RelayCommand>(() => new RelayCommand(execute, canExecute));
+
+        public static Lazy<RelayCommand<T>> CreateLazyRelayCommand<T>(Action<T> execute, Func<T, bool> canExecute = null)
+            => new Lazy<RelayCommand<T>>(() => new RelayCommand<T>(execute, canExecute));
     }
 }

@@ -1,17 +1,20 @@
-﻿using System;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
 using System.Runtime.CompilerServices;
-using System.Windows.Data;
+using System.Windows;
+using System.Windows.Controls;
 using DQPlayer.Annotations;
-using DQPlayer.MVVMFiles.Converters;
+using DQPlayer.Helpers.LocalizationManagement;
+using DQPlayer.MVVMFiles.Commands;
+using WPF.Themes;
 
 namespace DQPlayer.MVVMFiles.ViewModels.SettingsViewModels
 {
     public class GeneralTabViewModel : INotifyPropertyChanged
     {
-        public event PropertyChangedEventHandler PropertyChanged;
+        public RelayCommand<SelectionChangedEventArgs> LanguageSelectionCommand { get; }
+        public RelayCommand<SelectionChangedEventArgs> ThemeSelectionCommand { get; }
 
         public ObservableCollection<CultureInfo> AvailableLanguages { get; set; }
 
@@ -22,52 +25,35 @@ namespace DQPlayer.MVVMFiles.ViewModels.SettingsViewModels
                 new CultureInfo("en-GB"),
                 new CultureInfo("bg-BG"),   
             };
+
+            LanguageSelectionCommand = new RelayCommand<SelectionChangedEventArgs>(OnLanugageSelectionChanged);
+            ThemeSelectionCommand = new RelayCommand<SelectionChangedEventArgs>(OnThemeSelectionChanged);
         }
+
+        private void OnLanugageSelectionChanged(SelectionChangedEventArgs e)
+        {
+            TranslationSource.Instance.CurrentCulture = (CultureInfo) e.AddedItems[0];
+        }
+
+        private void OnThemeSelectionChanged(SelectionChangedEventArgs e)
+        {
+            if (e.AddedItems.Count > 0)
+            {
+                string theme = e.AddedItems[0].ToString();
+                Application.Current.ApplyTheme(theme);
+            }
+        }
+
+        #region Implementation of INotifyPropertyChanged
+
+        public event PropertyChangedEventHandler PropertyChanged;
 
         [NotifyPropertyChangedInvocator]
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
-    }
-
-    public class SettingsEventArgs : EventArgs
-    {
-
-    }
-
-    public class BooleanSetting
-    {
-        public string Name { get; set; }
-        public bool IsEnabled { get; set; }
-    }
-
-    public class Test : BaseConverter, IValueConverter
-    {
-        #region Implementation of IValueConverter
-
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            if (BooleanSettings.GetSetting("TestSetting").IsEnabled)
-            {
-                
-            }
-            return null;
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            return null;
-        }
 
         #endregion
-    }
-
-    public class BooleanSettings
-    {
-        public static BooleanSetting GetSetting(string name)
-        {
-            return new BooleanSetting { Name = "TestSetting", IsEnabled = true};
-        }
     }
 }

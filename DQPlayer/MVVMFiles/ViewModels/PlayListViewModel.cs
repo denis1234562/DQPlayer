@@ -1,40 +1,34 @@
-﻿using DQPlayer.Helpers.CustomCollections;
-using DQPlayer.Helpers.FileManagement;
-using DQPlayer.MVVMFiles.Commands;
-using DQPlayer.MVVMFiles.Models.PlayList;
-using DQPlayer.States;
-using Microsoft.Win32;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using System;
 using System.Linq;
 using System.Windows;
-using System.Windows.Controls;
+using Microsoft.Win32;
 using System.Windows.Input;
-using DQPlayer.Properties;
+using DQPlayer.Annotations;
+using System.ComponentModel;
+using System.Windows.Controls;
+using DQPlayer.MVVMFiles.Views;
+using System.Collections.Generic;
+using DQPlayer.Helpers.Extensions;
+using DQPlayer.MVVMFiles.Commands;
+using DQPlayer.Helpers.DialogHelpers;
+using System.Runtime.CompilerServices;
+using DQPlayer.Helpers.FileManagement;
+using DQPlayer.Helpers.InputManagement;
+using DQPlayer.Helpers.CustomCollections;
+using DQPlayer.Helpers.FileManagement.FileInformation;
 
 namespace DQPlayer.MVVMFiles.ViewModels
 {
-    public class PlayListViewModel : INotifyPropertyChanged
+    public class PlaylistViewModel : INotifyPropertyChanged
     {
-        public event PropertyChangedEventHandler PropertyChanged;
+        public RelayCommand<DragEventArgs> ListViewFileDrop { get; }
+        public RelayCommand<MouseButtonEventArgs> ListViewDoubleClickCommand { get; }
+        public RelayCommand ClearAllCommand { get; }
+        public RelayCommand<ListView> RemoveCommand { get; }
+        public RelayCommand BrowseCommand { get; }
+        public RelayCommand<CancelEventArgs> WindowClosingCommand { get; }
 
-        private readonly Lazy<RelayCommand<DragEventArgs>> _listViewFileDrop;
-        public RelayCommand<DragEventArgs> ListViewFileDrop => _listViewFileDrop.Value;
-
-        private readonly Lazy<RelayCommand<MouseButtonEventArgs>> _listViewDoubleClickCommand;
-        public RelayCommand<MouseButtonEventArgs> ListViewDoubleClickCommand => _listViewDoubleClickCommand.Value;
-
-        private readonly Lazy<RelayCommand> _clearAllCommand;
-        public RelayCommand ClearAllCommand => _clearAllCommand.Value;
-
-        private readonly Lazy<RelayCommand<ListView>> _removeCommand;
-        public RelayCommand<ListView> RemoveCommand => _removeCommand.Value;
-
-        private readonly Lazy<RelayCommand> _browseCommand;
-        public RelayCommand BrowseCommand => _browseCommand.Value;
-
-        public ObservableCircularList<FileInformation> FilesCollection { get; set; }
+        public ObservableCircularList<MediaFileInformation> FilesCollection { get; set; }
 
         private TimeSpan _filesDuration;
         public TimeSpan FilesDuration
@@ -47,40 +41,32 @@ namespace DQPlayer.MVVMFiles.ViewModels
             }
         }
 
-        private readonly VideoPlayerViewModel _videoPlayerViewModel;
+        private MediaFileInformation _lastPlayedFile;
 
-        private FileInformation _lastPlayedFile;
-
-        public PlayListViewModel(VideoPlayerViewModel videoPlayerViewModel)
+        public PlaylistViewModel()
         {
-            _videoPlayerViewModel = videoPlayerViewModel;
-            _videoPlayerViewModel.MediaInputNewFiles += OnMediaInputNewFiles;
-            _videoPlayerViewModel.MediaPlayedNewSource += OnMediaPlayedNewSource;
-            FilesCollection = new ObservableCircularList<FileInformation>();
-            _listViewFileDrop = CreateLazyRelayCommand<DragEventArgs>(OnListViewFileDropCommand);
-            _listViewDoubleClickCommand = CreateLazyRelayCommand<MouseButtonEventArgs>(OnListViewDoubleClickCommand);
-            _removeCommand = CreateLazyRelayCommand<ListView>(OnRemoveCommand);
-            _clearAllCommand = CreateLazyRelayCommand(OnClearAllCommand);
-            _browseCommand = CreateLazyRelayCommand(OnBrowseCommand);
+            FilesCollection = new ObservableCircularList<MediaFileInformation>();
+            ListViewFileDrop = new RelayCommand<DragEventArgs>(OnListViewFileDropCommand);
+            ListViewDoubleClickCommand = new RelayCommand<MouseButtonEventArgs>(OnListViewDoubleClickCommand);
+            RemoveCommand = new RelayCommand<ListView>(OnRemoveCommand);
+            ClearAllCommand = new RelayCommand(OnClearAllCommand);
+            BrowseCommand = new RelayCommand(OnBrowseCommand);
+            WindowClosingCommand = new RelayCommand<CancelEventArgs>(OnWindowClosingCommand);
+
+            Manager<MediaFileInformation>.NewRequest += OnMediaInputNewFiles;
         }
 
-        private static Lazy<RelayCommand> CreateLazyRelayCommand(Action execute, Func<bool> canExecute = null)
-          => new Lazy<RelayCommand>(() => new RelayCommand(execute, canExecute));
-
-        private static Lazy<RelayCommand<T>> CreateLazyRelayCommand<T>(Action<T> execute, Func<T, bool> canExecute = null)
-            => new Lazy<RelayCommand<T>>(() => new RelayCommand<T>(execute, canExecute));
-
-        [NotifyPropertyChangedInvocator]
-        protected virtual void OnPropertyChanged([System.Runtime.CompilerServices.CallerMemberName] string propName = null)
+        private void OnWindowClosingCommand(CancelEventArgs e)
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
+            e.Cancel = true;
+            WindowDialogHelper<PlaylistView>.Instance.Hide();
         }
 
         private void OnListViewFileDropCommand(DragEventArgs e)
         {
-            if (FileDropHandler.ExtractDroppedItemsUri(e, Settings.MediaPlayerExtensionPackage, out var filesInformation))
+            if (FileDropHandler.ExtractDroppedItemsUri(e, Settings.MediaExtensionsPackage, out var filesInformation))
             {
-                AddMediaFilesToPlaylist(filesInformation);
+                AddMediaFilesToPlaylist(filesInformation.Cast<MediaFileInformation>());
             }
         }
 
@@ -88,18 +74,18 @@ namespace DQPlayer.MVVMFiles.ViewModels
         {
             var fileDialog = new OpenFileDialog
             {
-                Filter = Settings.MediaPlayerExtensionPackageFilter.Filter,
+                Filter = Settings.MediaExtensionPackageFilter.Filter,
                 Multiselect = true
             };
             if (fileDialog.ShowDialog().GetValueOrDefault())
             {
-                AddMediaFilesToPlaylist(fileDialog.FileNames.Select(f => new FileInformation(f)));
+                AddMediaFilesToPlaylist(fileDialog.FileNames.Select(t => new MediaFileInformation(t)));
             }
         }
 
-        private void AddMediaFilesToPlaylist(IEnumerable<FileInformation> files)
+        private void AddMediaFilesToPlaylist(IEnumerable<MediaFileInformation> files)
         {
-            FilesCollection.AddRange(files.Where(file => file.FileInfo.Extension != Settings.SubtitleExtensionString));
+            FilesCollection.AddRange(files);
             UpdateMoviesDuration();
         }
 
@@ -107,9 +93,9 @@ namespace DQPlayer.MVVMFiles.ViewModels
         {
             if (e.ChangedButton == MouseButton.Left)
             {
-                if (((FrameworkElement)e.OriginalSource).DataContext is FileInformation item)
+                if (((FrameworkElement) e.OriginalSource).DataContext is MediaFileInformation item)
                 {
-                    _videoPlayerViewModel.ChangeMediaPlayerSource(item);
+                    ManagerHelper.Request(item.AsEnumerable());
                 }
             }
         }
@@ -118,10 +104,7 @@ namespace DQPlayer.MVVMFiles.ViewModels
         {
             FilesCollection.Clear();
             FilesDuration = new TimeSpan();
-            if (_videoPlayerViewModel.PlayerSourceState)
-            {
-                _videoPlayerViewModel.MediaPlayer.SetMediaState(MediaPlayerStates.Stop);
-            }
+            ManagerHelper.Request(new IFileInformation[] {null});
         }
 
         private void OnRemoveCommand(ListView listView)
@@ -133,32 +116,34 @@ namespace DQPlayer.MVVMFiles.ViewModels
             }
             while (listView.SelectedItems.Count != 0)
             {
-                int indexOfSelectedFile = FilesCollection.IndexOf((FileInformation)listView.SelectedItems[0]);
+                int indexOfSelectedFile = FilesCollection.IndexOf((MediaFileInformation)listView.SelectedItems[0]);
                 int currentIndex = FilesCollection.IndexOf(_lastPlayedFile);
                 FilesCollection.RemoveAt(indexOfSelectedFile);
                 if (indexOfSelectedFile == currentIndex)
                 {
-                    _videoPlayerViewModel.ChangeMediaPlayerSource(FilesCollection.Current);
+                    ManagerHelper.Request(FilesCollection.Current.AsEnumerable());
                 }
             }
             UpdateMoviesDuration();
         }
 
-        private void OnMediaInputNewFiles(IEnumerable<FileInformation> files)
+        private void OnMediaInputNewFiles(object sender, ManagerEventArgs<MediaFileInformation> e)
         {
-            var filteredFiles =
-                new List<FileInformation>(files.Where(f => f.FileInfo.Extension != Settings.SubtitleExtensionString));
-
-            FilesCollection.AddRange(filteredFiles);
-            if (filteredFiles.Count != 0)
+            //null source was requested by system
+            if (e.SelectedFiles.First() == null)
             {
-                FilesCollection.SetCurrent(FilesCollection.Count - filteredFiles.Count);
-                if (FilesCollection.Count > 1)
-                {
-                    _videoPlayerViewModel.PlayListView.Show();
-                }               
-                UpdateMoviesDuration();
-            }          
+                return;
+            }
+            int previousSize = FilesCollection.Count;
+            FilesCollection.AddRange(e.SelectedFiles);
+            FilesCollection.SetCurrent(previousSize);
+            if (FilesCollection.Count > 1)
+            {
+                WindowDialogHelper<PlaylistView>.Instance.Show();
+            }
+            UpdateMoviesDuration();
+
+            OnMediaPlayedNewSource(FilesCollection.Current);
         }
 
         private void UpdateMoviesDuration()
@@ -168,7 +153,7 @@ namespace DQPlayer.MVVMFiles.ViewModels
             FilesDuration = duration;
         }
       
-        private void OnMediaPlayedNewSource(FileInformation file)
+        private void OnMediaPlayedNewSource(MediaFileInformation file)
         {
             if (_lastPlayedFile != null)
             {
@@ -176,7 +161,18 @@ namespace DQPlayer.MVVMFiles.ViewModels
             }
             _lastPlayedFile = file;
             file.IsPlaying = true;
-            FilesCollection.SetCurrent(FilesCollection.IndexOf(file));
         }
+
+        #region INotifyPropertyChanged Implementation
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        [NotifyPropertyChangedInvocator]
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        #endregion
     }
 }

@@ -166,4 +166,10 @@
   <data name="PlayList" xml:space="preserve">
     <value>PlayList</value>
   </data>
+  <data name="NonMediaFiles" xml:space="preserve">
+    <value>Non media files</value>
+  </data>
+  <data name="AllFiles" xml:space="preserve">
+    <value>All files</value>
+  </data>
 </root>

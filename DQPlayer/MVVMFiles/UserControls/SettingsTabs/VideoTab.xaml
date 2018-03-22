@@ -46,15 +46,15 @@
                     <CheckBox Grid.Row="1" Grid.Column="0" Content="{locMng:Loc StartInFullscreenCB, {x:Static localResources:VideoTabResources.ResourceManager}}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,6"/>
                     <CheckBox Grid.Row="2" Grid.Column="0" Content="{locMng:Loc ShowMediaTitleCB, {x:Static localResources:VideoTabResources.ResourceManager}}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,6"/>
 
-                    <Label Grid.Row="3" Grid.Column="0" Content="{locMng:Loc ShowTitleForMSLB, {x:Static localResources:VideoTabResources.ResourceManager}}" Margin="-5,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                    <Label Grid.Row="3" Grid.Column="0" Content="{locMng:Loc ShowTitleForMSLB, {x:Static localResources:VideoTabResources.ResourceManager}}" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="{DynamicResource TextBrush}"/>
                     <TextBox Name="tbShowVideoTitle" Grid.Row="3" Grid.Column="1" Margin="5,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Stretch" 
                              PreviewKeyDown="TbShowVideoTitle_OnPreviewKeyDown" 
                              DataObject.Pasting="TbShowVideoTitle_OnPasting"/>
 
-                    <Label Grid.Row="4" Grid.Column="0" Content="{locMng:Loc PositionOfVideoTitleLB, {x:Static localResources:VideoTabResources.ResourceManager}}" Margin="-5,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                    <Label Grid.Row="4" Grid.Column="0" Content="{locMng:Loc PositionOfVideoTitleLB, {x:Static localResources:VideoTabResources.ResourceManager}}" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="{DynamicResource TextBrush}"/>
                     <ComboBox Grid.Row="4" Grid.Column="1" Margin="5,0,0,0" VerticalAlignment="Center"  HorizontalAlignment="Stretch"/>
 
-                    <Label Grid.Row="5" Grid.Column="0" Content="{locMng:Loc HideCursorInFullscreenLB, {x:Static localResources:VideoTabResources.ResourceManager}}" Margin="-5,0" HorizontalAlignment="Left" VerticalAlignment="Center" />
+                    <Label Grid.Row="5" Grid.Column="0" Content="{locMng:Loc HideCursorInFullscreenLB, {x:Static localResources:VideoTabResources.ResourceManager}}" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="{DynamicResource TextBrush}"/>
                     <TextBox Name="tbHideCursor" Grid.Row="5" Grid.Column="1" Margin="5,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Stretch"
                              PreviewKeyDown="TbShowVideoTitle_OnPreviewKeyDown" 
                              DataObject.Pasting="TbShowVideoTitle_OnPasting"/>
@@ -74,7 +74,7 @@
                         <ColumnDefinition Width="1*"/>
                     </Grid.ColumnDefinitions>
 
-                    <Label Grid.Row="0" Grid.Column="0" Content="{locMng:Loc SnapshotDirectoryLB, {x:Static localResources:VideoTabResources.ResourceManager}}" Margin="-5,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                    <Label Grid.Row="0" Grid.Column="0" Content="{locMng:Loc SnapshotDirectoryLB, {x:Static localResources:VideoTabResources.ResourceManager}}" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="{DynamicResource TextBrush}"/>
                     <Grid Grid.Row="0" Grid.Column="1" Margin="5,2,0,2" HorizontalAlignment="Stretch" VerticalAlignment="Center">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="2*"/>
@@ -87,10 +87,10 @@
                         </Button>
                     </Grid>
 
-                    <Label Grid.Row="1" Grid.Column="0" Content="{locMng:Loc SnapshotPrefixLB, {x:Static localResources:VideoTabResources.ResourceManager}}" Margin="-5,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                    <Label Grid.Row="1" Grid.Column="0" Content="{locMng:Loc SnapshotPrefixLB, {x:Static localResources:VideoTabResources.ResourceManager}}" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="{DynamicResource TextBrush}"/>
                     <TextBox Text="jdsnap-" Name="tbSnapshotPrefix" Grid.Row="1" Grid.Column="1" Margin="5,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
 
-                    <Label Grid.Row="2" Grid.Column="0" Content="{locMng:Loc SnapshotFormatLB, {x:Static localResources:VideoTabResources.ResourceManager}}" Margin="-5,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                    <Label Grid.Row="2" Grid.Column="0" Content="{locMng:Loc SnapshotFormatLB, {x:Static localResources:VideoTabResources.ResourceManager}}" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="{DynamicResource TextBrush}"/>
                     <ComboBox Grid.Row="2" Grid.Column="1" Margin="5,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
                 </Grid>
             </GroupBox>
@@ -108,13 +108,13 @@
                         <ColumnDefinition Width="1*"/>
                     </Grid.ColumnDefinitions>
 
-                    <Label Grid.Row="0" Grid.Column="0" Content="{locMng:Loc AspectRatioLB, {x:Static localResources:VideoTabResources.ResourceManager}}" Margin="-5,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                    <Label Grid.Row="0" Grid.Column="0" Content="{locMng:Loc AspectRatioLB, {x:Static localResources:VideoTabResources.ResourceManager}}" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="{DynamicResource TextBrush}"/>
                     <ComboBox Grid.Row="0" Grid.Column="1" Margin="5,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
 
-                    <Label Grid.Row="1" Grid.Column="0" Content="{locMng:Loc VideoCroppingLB, {x:Static localResources:VideoTabResources.ResourceManager}}" Margin="-5,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                    <Label Grid.Row="1" Grid.Column="0" Content="{locMng:Loc VideoCroppingLB, {x:Static localResources:VideoTabResources.ResourceManager}}" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="{DynamicResource TextBrush}"/>
                     <ComboBox Grid.Row="1" Grid.Column="1" Margin="5,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Stretch"/>
 
-                    <Label Grid.Row="2" Grid.Column="0" Content="{locMng:Loc ZoomLB, {x:Static localResources:VideoTabResources.ResourceManager}}" Margin="-5,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                    <Label Grid.Row="2" Grid.Column="0" Content="{locMng:Loc ZoomLB, {x:Static localResources:VideoTabResources.ResourceManager}}" HorizontalAlignment="Left" VerticalAlignment="Center" Foreground="{DynamicResource TextBrush}"/>
                     <TextBox Text="" Name="tbZoom" Grid.Row="2" Grid.Column="1" Margin="5,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Stretch"                             
                              PreviewKeyDown="TbShowVideoTitle_OnPreviewKeyDown" 
                              DataObject.Pasting="TbShowVideoTitle_OnPasting"/>

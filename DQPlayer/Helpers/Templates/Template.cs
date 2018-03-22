@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace DQPlayer.Helpers.Template
+namespace DQPlayer.Helpers.Templates
 {
     public class Template<TSource, TBase>
         where TSource : TBase, new()

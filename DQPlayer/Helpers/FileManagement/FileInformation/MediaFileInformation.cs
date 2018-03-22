@@ -1,20 +1,22 @@
-﻿using DQPlayer.Helpers.Extensions;
 using System;
 using System.ComponentModel;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Windows;
-using DQPlayer.Properties;
+using DQPlayer.Annotations;
+using DQPlayer.Helpers.Extensions;
 
-namespace DQPlayer.MVVMFiles.Models.PlayList
+namespace DQPlayer.Helpers.FileManagement.FileInformation
 {
-    public class FileInformation : DependencyObject , INotifyPropertyChanged
+    public class MediaFileInformation : DependencyObject, IFileInformation, INotifyPropertyChanged
     {
         public TimeSpan FileLength { get; }
         public string FileName { get; }
         public FileInfo FileInfo { get; }
+        public Uri Uri { get; }
 
         public static readonly DependencyProperty IsPlayingProperty =
-            DependencyProperty.Register(nameof(IsPlaying), typeof(bool), typeof(FileInformation),
+            DependencyProperty.Register(nameof(IsPlaying), typeof(bool), typeof(MediaFileInformation),
                 new PropertyMetadata(null));
 
         public bool IsPlaying
@@ -25,9 +27,9 @@ namespace DQPlayer.MVVMFiles.Models.PlayList
                 SetValue(IsPlayingProperty, value);
                 OnPropertyChanged();
             }
-        } 
+        }
 
-        public FileInformation(string filePath)
+        public MediaFileInformation(string filePath)
         {
             if (string.IsNullOrEmpty(filePath))
             {
@@ -36,18 +38,24 @@ namespace DQPlayer.MVVMFiles.Models.PlayList
             FileInfo = new FileInfo(filePath);
             FileName = Path.GetFileNameWithoutExtension(FileInfo.Name);
             FileLength = FileInfo.GetFileDuration();
+            Uri = new Uri(FileInfo.FullName);
         }
 
-        public FileInformation(Uri fileUri)
+        public MediaFileInformation(Uri fileUri)
             : this(fileUri.OriginalString)
         {
         }
 
+        #region INotifyPropertyChanged Implementation
+
         public event PropertyChangedEventHandler PropertyChanged;
+
         [NotifyPropertyChangedInvocator]
-        protected virtual void OnPropertyChanged([System.Runtime.CompilerServices.CallerMemberName] string propName = null)
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
+
+        #endregion
     }
 }

@@ -1,0 +1,251 @@
+﻿<UserControl x:Class="DQPlayer.MVVMFiles.UserControls.MainWindow.MediaPlayerControlsUserControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:converters="clr-namespace:DQPlayer.MVVMFiles.Converters"
+             xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+             xmlns:viewModels="clr-namespace:DQPlayer.MVVMFiles.ViewModels"
+             xmlns:customControls="clr-namespace:DQPlayer.Helpers.CustomControls"
+             xmlns:command="http://www.galasoft.ch/mvvmlight"
+             xmlns:mainWindow="clr-namespace:DQPlayer.MVVMFiles.UserControls.MainWindow"
+             mc:Ignorable="d" 
+             Background="{DynamicResource WindowBackgroundBrush}" Height="Auto" Width="Auto">
+
+    <UserControl.Resources>
+        <converters:MultiValueConverter x:Key="MultiValueConverter"/>
+        <Style x:Key="TransparentButton" TargetType="{x:Type Button}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="Transparent">
+                            <ContentPresenter/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="TransparentToggleButton" TargetType="{x:Type ToggleButton}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ButtonBase">
+                        <Border Background="Transparent">
+                            <ContentPresenter/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="{x:Type ToolTip}" TargetType="ToolTip">
+            <Setter Property="OverridesDefaultStyle" Value="true"/>
+            <Setter Property="HasDropShadow" Value="True"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToolTip">
+                        <StackPanel>
+                            <Border CornerRadius="7" HorizontalAlignment="Center" VerticalAlignment="Top" Padding="5" BorderThickness="2,2,2,2" >
+                                <Border.Background>
+                                    <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                        <GradientStop Color="#CF181818" Offset="0"/>
+                                        <GradientStop Color="#BE1C1C1C" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Border.Background>
+                                <Border.BorderBrush>
+                                    <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                        <GradientStop Color="#80FFFFFF" Offset="0"/>
+                                        <GradientStop Color="#7FFFFFFF" Offset="1"/>
+                                        <GradientStop Color="#FFFFF18D" Offset="0.344"/>
+                                        <GradientStop Color="#FFFFF4AB" Offset="0.647"/>
+                                    </LinearGradientBrush>
+                                </Border.BorderBrush>
+                                <TextBlock FontFamily="Tahoma" FontSize="12" Text="{TemplateBinding Content}" Foreground="#5095D6" />
+                            </Border>
+                            <Path Data="M 0 9 9 18 18 9" Fill="White" Stroke="Gray" StrokeThickness="2" VerticalAlignment="Bottom" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <UserControl.DataContext>
+        <viewModels:MediaPlayerControlsViewModel/>
+    </UserControl.DataContext>
+
+    <Border Margin="-2" BorderBrush="{DynamicResource TextBrush}" BorderThickness="1,1,1,1" CornerRadius="5">
+        <Border.Effect>
+            <DropShadowEffect Color="Black" Opacity="0.1" Direction="260"/>
+        </Border.Effect>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="50"/>
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Row="0" VerticalAlignment="Bottom" HorizontalAlignment="Stretch">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="55"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="55"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <Label Grid.Column="0" Name="lbMovieElapsedTime" HorizontalContentAlignment="Right" VerticalAlignment="Center" HorizontalAlignment="Center"
+                       Content="{Binding ElementName=sMovieSkipSlider, Path=Value, Converter={converters:SecondsToFormattedTimeSpan}}" Foreground="{DynamicResource TextBrush}"/>
+
+                <customControls:ThumbDragSlider Grid.Column="1" x:Name="sMovieSkipSlider" Height="14" HorizontalAlignment="Stretch" VerticalAlignment="Center" IsMoveToPointEnabled="True"
+                                                IsEnabled="{Binding PlayerSourceState}"
+                                                Style="{StaticResource {x:Type Slider}}"
+                                                Value="{Binding CurrentMediaPlayer.MediaElement.Position, Mode=TwoWay, Converter={converters:SecondsToTimeSpanConverter}}"
+                                                MouseMove="Slider_OnPreviewMouseMove"
+                                                MouseLeave="Slider_OnMouseLeave">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="DragStarted">
+                            <i:InvokeCommandAction Command="{Binding PositionSliderDragStartedCommand}" CommandParameter="{Binding ElementName=sMovieSkipSlider}"/>
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="DragCompleted">
+                            <i:InvokeCommandAction Command="{Binding PositionSliderDragCompletedCommand}"/>
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="ThumbMouseEnter">
+                            <command:EventToCommand Command="{Binding PositionSliderThumbMouseEnterCommand}" PassEventArgsToCommand="True"/>
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="PreviewMouseMove">
+                            <i:InvokeCommandAction Command="{Binding TooltipUpdateCommand}">
+                                <i:InvokeCommandAction.CommandParameter>
+                                    <MultiBinding Converter="{StaticResource MultiValueConverter}">
+                                        <Binding ElementName="ttPositionSlider"/>
+                                        <Binding ElementName="sMovieSkipSlider" Converter="{converters:SliderTooltipValueConverter}" ConverterParameter="{converters:SecondsToFormattedTimeSpan}"/>
+                                    </MultiBinding>
+                                </i:InvokeCommandAction.CommandParameter>
+                            </i:InvokeCommandAction>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                    <customControls:ThumbDragSlider.ToolTip>
+                        <ToolTip Name="ttPositionSlider" Placement="Top" PlacementTarget="{Binding ElementName=sMovieSkipSlider}" Style="{StaticResource {x:Type ToolTip}}"/>
+                    </customControls:ThumbDragSlider.ToolTip>
+                </customControls:ThumbDragSlider>
+
+                <Label Grid.Column="2" Name="lbMovieTimeLeft" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="{DynamicResource TextBrush}"
+                       Content="{Binding ElementName=sMovieSkipSlider, Path=Value, Converter={converters:LeftTimeConverter}, ConverterParameter={x:Reference sMovieSkipSlider}, Mode=OneWay}"/>
+            </Grid>
+
+            <Grid Grid.Row="1" >
+                <Grid.Background>
+                    <ImageBrush ImageSource="pack://application:,,,/bin/Debug/Assets/MediaPlayerLayout/Down_bar.png" Stretch="UniformToFill"/>
+                </Grid.Background>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="132*"/>
+                    <ColumnDefinition Width="281*"/>
+                    <ColumnDefinition Width="105*"/>
+                    <ColumnDefinition Width="130*"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Center" Orientation="Horizontal" Margin="0,12">
+                    <Button Name="bPlaylist" Height="26" Width="24" Margin="10,0"
+                            Style="{StaticResource TransparentButton}"
+                            Command="{Binding PlaylistClickCommand}">
+                        <Image Source="pack://application:,,,/bin/Debug/Assets/MediaPlayerLayout/List copy.png"/>
+                    </Button>
+                    <ToggleButton Name="bRepeat" Height="26" Width="24" Margin="10,0"                             
+                                  Command="{Binding RepeatCheckCommand}" CommandParameter="{Binding ElementName=bRepeat, Path=IsChecked}">
+                        <Image Source="pack://application:,,,/bin/Debug/Assets/MediaPlayerLayout/Replay copy.png"/>
+                    </ToggleButton>
+                    <Button Height="26" Width="24" Margin="10,0" 
+                            Style="{StaticResource TransparentButton}"
+                            Command="{Binding SettingsClickCommand}">
+                        <Image Source="pack://application:,,,/bin/Debug/Assets/MediaPlayerLayout/Tools copy.png"/>
+                    </Button>
+                </StackPanel>
+                <StackPanel Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Orientation="Horizontal" Grid.ColumnSpan="2" Margin="0,6">
+                    <Button Name ="bBrowse" Height="26" Width="22" Margin="15,0"
+                            Style="{StaticResource TransparentButton}"
+                            Command="{Binding BrowseFilesCommand}">
+                        <Image Source="pack://application:,,,/bin/Debug/Assets/MediaPlayerLayout/Open_files copy.png"/>
+                    </Button>
+                    <Button Name="bRewind" Height="24" Width="32" Margin="15,0"
+                            IsEnabled="{Binding PlayerSourceState}"
+                            Command="{Binding RewindClickCommand}" CommandParameter="{Binding ElementName=sMovieSkipSlider}"
+                            Style="{StaticResource TransparentButton}">
+                        <Image Source="pack://application:,,,/bin/Debug/Assets/MediaPlayerLayout/Rewind copy.png"/>
+                    </Button>
+                    <Button Name="bMovePrevious" Height="26" Width="22" Margin="15,0"
+                            IsEnabled="{Binding PlayerSourceState}"
+                            Command="{Binding MovePreviousCommand}"
+                            Style="{StaticResource TransparentButton}">
+                        <Image Source="pack://application:,,,/bin/Debug/Assets/MediaPlayerLayout/Previous_Tr copy.png"/>
+                    </Button>
+
+                    <ToggleButton Name="bPlayPause" Height="38" Width="24" Margin="15,0" IsThreeState="False"
+                                  IsChecked="{Binding IsCheckedState}"
+                                  IsEnabled="{Binding PlayerSourceState}"
+                                  Style="{StaticResource TransparentToggleButton}"
+                                  Command ="{Binding PlayPauseClickCommand}" CommandParameter="{Binding ElementName=bPlayPause, Path=IsChecked}">
+                        <Image>
+                            <Image.Style>
+                                <Style TargetType="{x:Type Image}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsCheckedState}" Value="True">
+                                            <Setter Property="Source" Value="pack://application:,,,/bin/Debug/Assets/MediaPlayerLayout/Pause copy.png"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding IsCheckedState}" Value="False">
+                                            <Setter Property="Source" Value="pack://application:,,,/bin/Debug/Assets/MediaPlayerLayout/Play copy.png"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Image.Style>
+                        </Image>
+                    </ToggleButton>
+
+                    <Button Name="bMoveNext" Height="26" Width="22" Margin="15,0"
+                            IsEnabled="{Binding PlayerSourceState}"
+                            Command="{Binding MoveNextCommand}"
+                            Style="{StaticResource TransparentButton}">
+                        <Image Source="pack://application:,,,/bin/Debug/Assets/MediaPlayerLayout/Next_Tr copy.png"/>
+                    </Button>
+                    <Button Name="bFastForward" Height="24" Width="32" Margin="15,0"
+                            IsEnabled="{Binding PlayerSourceState}"
+                            Command="{Binding FastForwardClickCommand}" CommandParameter="{Binding ElementName=sMovieSkipSlider}"
+                            Style="{StaticResource TransparentButton}">
+                        <Image Source="pack://application:,,,/bin/Debug/Assets/MediaPlayerLayout/Fast_forw copy.png"/>
+                    </Button>
+                    <Button Name="bStop" Height="24" Width="22" Margin="15,0"
+                            IsEnabled="{Binding PlayerSourceState}"
+                            Command="{Binding StopClickCommand}" CommandParameter="{Binding ElementName=sMovieSkipSlider}"
+                            Style="{StaticResource TransparentButton}">
+                        <Image Source="pack://application:,,,/bin/Debug/Assets/MediaPlayerLayout/Stop copy.png"/>
+                    </Button>
+                </StackPanel>
+
+                <customControls:ThumbDragSlider Grid.Column="3" x:Name="sVolumeSlider" Minimum="0" Maximum="1" HorizontalAlignment="Right" VerticalAlignment="Center" Width="120" Margin="0,18,10,18"
+                                                Style="{StaticResource {x:Type Slider}}"
+                                                IsMoveToPointEnabled="True"
+                                                Value="{Binding ElementName=Player, Path=Volume}"
+                                                MouseMove="Slider_OnPreviewMouseMove"
+                                                MouseLeave="Slider_OnMouseLeave">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="ThumbMouseEnter">
+                            <command:EventToCommand Command="{Binding PositionSliderThumbMouseEnterCommand}" PassEventArgsToCommand="True"/>
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="ValueChanged">
+                            <command:EventToCommand Command="{Binding VolumeSliderValueChangedCommand}" PassEventArgsToCommand="True"/>
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="PreviewMouseMove">
+                            <i:InvokeCommandAction Command="{Binding TooltipUpdateCommand}">
+                                <i:InvokeCommandAction.CommandParameter>
+                                    <MultiBinding Converter="{StaticResource MultiValueConverter}">
+                                        <Binding ElementName="ttVolumeSlider"/>
+                                        <Binding ElementName="sVolumeSlider" Converter="{converters:SliderTooltipValueConverter}" ConverterParameter="{converters:PercentageConverter}"/>
+                                    </MultiBinding>
+                                </i:InvokeCommandAction.CommandParameter>
+                            </i:InvokeCommandAction>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                    <Slider.ToolTip>
+                        <ToolTip Name="ttVolumeSlider" Placement="Top" PlacementTarget="{Binding ElementName=sVolumeSlider}" Style="{StaticResource {x:Type ToolTip}}"/>
+                    </Slider.ToolTip>
+                </customControls:ThumbDragSlider>
+            </Grid>
+        </Grid>
+    </Border>
+</UserControl>

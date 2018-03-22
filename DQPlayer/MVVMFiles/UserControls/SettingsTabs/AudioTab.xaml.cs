@@ -24,5 +24,12 @@ namespace DQPlayer.MVVMFiles.UserControls.SettingsTabs
         {
             InitializeComponent();
         }
+
+        private void SBalanceSlider_OnValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+
+            imgRightHeadphone.Opacity = Math.Max(0.01, 0.5 + e.NewValue / 2);
+            imgLeftHeadphone.Opacity = Math.Max(0.01, 0.5 - e.NewValue / 2);           
+        }
     }
 }

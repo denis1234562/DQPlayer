@@ -1,4 +1,3 @@
-using System.Windows.Controls;
 using DQPlayer.States;
 
 namespace DQPlayer.MVVMFiles.Models.MediaPlayer

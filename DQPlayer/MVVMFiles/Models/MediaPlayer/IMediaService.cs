@@ -5,5 +5,6 @@ namespace DQPlayer.MVVMFiles.Models.MediaPlayer
         void Play();
         void Pause();
         void Stop();
+        void ChangeVolume(double value);
     }
 }

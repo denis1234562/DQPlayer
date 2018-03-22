@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using DQPlayer.MVVMFiles.Models.MediaPlayer;
 
@@ -18,28 +17,40 @@ namespace DQPlayer.States
 
         static MediaPlayerStates()
         {
-            ConstructorInfo ctor = typeof(MediaPlayerState)
-                .GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance)
-                .FirstOrDefault(c => c.GetParameters().Select(p => p.ParameterType)
-                    .SequenceEqual(new[] {typeof(int), typeof(bool), typeof(Action<IRegulatableMediaService>)}));
+            var ctor = typeof(MediaPlayerState).GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic, null,
+                new[] {typeof(int), typeof(bool), typeof(Action<IRegulatableMediaService>)}, null);
+
+            if (ctor == null)
+            {
+                throw new MissingMethodException(nameof(ctor));
+            }
+
             None = (MediaPlayerState) ctor.Invoke(new object[] {0, false, null});
+
             Pause = (MediaPlayerState) ctor.Invoke(new object[]
-                {1, false, (Action<IRegulatableMediaService>) (m => m.Pause())});
+                {1, false, new Action<IRegulatableMediaService>(m => m.Pause())});
+
             Play = (MediaPlayerState) ctor.Invoke(new object[]
-                {2, true, (Action<IRegulatableMediaService>) (m => m.Play())});
+                {2, true, new Action<IRegulatableMediaService>(m => m.Play())});
+
             Stop = (MediaPlayerState) ctor.Invoke(new object[]
-                {3, false, (Action<IRegulatableMediaService>) (m => m.Stop())});
+                {3, false, new Action<IRegulatableMediaService>(m => m.Stop())});
+
             FastForward = (MediaPlayerState) ctor.Invoke(new object[]
-                {4, true, (Action<IRegulatableMediaService>) (m => m.FastForward())});
+                {4, true, new Action<IRegulatableMediaService>(m => m.FastForward())});
+
             Rewind = (MediaPlayerState) ctor.Invoke(new object[]
-                {5, true, (Action<IRegulatableMediaService>) (m => m.Rewind())});
+                {5, true, new Action<IRegulatableMediaService>(m => m.Rewind())});
         }
 
-        private readonly List<MediaPlayerState> _playerStates = new List<MediaPlayerState>
+        private readonly IReadOnlyList<MediaPlayerState> _playerStates = new List<MediaPlayerState>(5)
         {
+            None,
             Pause,
             Play,
-            Stop
+            Stop,
+            FastForward,
+            Rewind
         };
 
         public IEnumerator<MediaPlayerState> GetEnumerator()

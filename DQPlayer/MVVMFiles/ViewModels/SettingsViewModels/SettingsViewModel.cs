@@ -9,11 +9,6 @@ namespace DQPlayer.MVVMFiles.ViewModels.SettingsViewModels
 {
     public class SettingsViewModel : INotifyPropertyChanged
     {
-        public SettingsViewModel()
-        {
-
-        }
-
         public event PropertyChangedEventHandler PropertyChanged;
 
         [NotifyPropertyChangedInvocator]

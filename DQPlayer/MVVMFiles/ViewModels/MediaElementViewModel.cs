@@ -1,0 +1,173 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+using System.Windows.Data;
+using System.Windows.Input;
+using DQPlayer.Annotations;
+using DQPlayer.Helpers;
+using DQPlayer.Helpers.CustomControls;
+using DQPlayer.Helpers.Extensions;
+using DQPlayer.Helpers.FileManagement;
+using DQPlayer.Helpers.FileManagement.FileInformation;
+using DQPlayer.Helpers.InputManagement;
+using DQPlayer.Helpers.MediaControls;
+using DQPlayer.MVVMFiles.Commands;
+using DQPlayer.MVVMFiles.Converters;
+using DQPlayer.MVVMFiles.Models.MediaPlayer;
+using DQPlayer.ResourceFiles;
+using DQPlayer.States;
+
+namespace DQPlayer.MVVMFiles.ViewModels
+{
+    public class MediaElementViewModel : IMediaElementViewModel
+    {
+        private readonly Dictionary<MediaControlEventType, EventHandler<MediaControlEventArgs>> _handlers;
+
+        public event Action<object, MediaElement> MediaEnded;
+
+        public RelayCommand<MediaElement> MediaEndedCommand { get; }
+        public RelayCommand<DragEventArgs> FileDropCommand { get; }
+
+        public event Action<IMediaControlsViewModel> ControlsAttached;
+
+        public MediaPlayerModel MediaPlayerModel { get; set; }
+
+        private IMediaControlsViewModel _curentControls;
+        public IMediaControlsViewModel CurentControls
+        {
+            get => _curentControls;
+            set
+            {
+                if (_curentControls != null)
+                {
+                    Unsubscribe(_curentControls);
+                }
+                _curentControls = value;
+                Subscribe(_curentControls);
+                OnControlsAttached(_curentControls);
+                OnPropertyChanged();
+            }
+        }
+
+        public MediaElementViewModel()
+        {
+            MediaEndedCommand = new RelayCommand<MediaElement>(OnMediaEnded);
+            FileDropCommand = new RelayCommand<DragEventArgs>(OnFileDrop);
+            _handlers = new Dictionary<MediaControlEventType, EventHandler<MediaControlEventArgs>>
+            {
+                [MediaControlEventType.BrowseClick] = OnBrowseClick,
+                [MediaControlEventType.RewindClick] = OnRewindClick,
+                [MediaControlEventType.PlayClick] = (s, e) => MediaPlayerModel.SetMediaState(MediaPlayerStates.Play),
+                [MediaControlEventType.PauseClick] = (s, e) => MediaPlayerModel.SetMediaState(MediaPlayerStates.Pause),
+                [MediaControlEventType.FastForwardClick] = OnFastForwardClick,
+                [MediaControlEventType.StopClick] = (s, e) => MediaPlayerModel.SetMediaState(MediaPlayerStates.Stop),
+
+                //[MediaControlEventType.PositionSliderThumbMouseEnter] = ControlsViewModel_PositionSliderThumbMouseEnter,
+                [MediaControlEventType.PositionSliderDragStarted] = OnPositionSliderDragStarted,
+                [MediaControlEventType.PositionSliderDragCompleted] = (s, e) => MediaPlayerModel.ResumeSerializedState(),
+
+                [MediaControlEventType.VolumeSliderValueChanged] = ControlsViewModel_VolumeSliderValueChanged,
+            };
+            Manager<MediaFileInformation>.NewRequest += MediaSourceManager_OnNewRequest;
+        }
+
+        private void MediaSourceManager_OnNewRequest(object sender, ManagerEventArgs<MediaFileInformation> e)
+        {
+            var firstFile = e.SelectedFiles.First().Uri;
+            MediaPlayerModel.MediaController.SetNewPlayerSource(firstFile);
+            if (firstFile != null)
+            {
+                MediaPlayerModel.SetMediaState(MediaPlayerStates.Play);
+            }
+        }
+
+        private void OnControlsAttached(IMediaControlsViewModel controlsViewModel)
+        {
+            ControlsAttached?.Invoke(controlsViewModel);
+        }
+
+        private void ControlsViewModel_Notify(object sender, MediaControlEventArgs e)
+        {
+            if (_handlers.TryGetValue(e.EventType, out var action))
+            {
+                action.Invoke(sender, e);
+            }
+        }
+
+        private void Subscribe(ICustomObservable<MediaControlEventArgs> provider)
+        {
+            provider.Notify += ControlsViewModel_Notify;
+        }
+
+        private void Unsubscribe(ICustomObservable<MediaControlEventArgs> provider)
+        {
+            provider.Notify -= ControlsViewModel_Notify;
+        }
+
+        #region Media Controls Event Handlers
+
+        private void OnBrowseClick(object sender, MediaControlEventArgs e)
+        {
+            ManagerHelper.Request((IEnumerable<IFileInformation>) e.AdditionalInfo);
+        }
+
+        private void OnFastForwardClick(object sender, MediaControlEventArgs e)
+        {
+            MediaPlayerModel.SerializeState(MediaPlayerStates.FastForward);
+            MediaPlayerModel.ResumeSerializedState();
+        }
+
+        private void OnRewindClick(object sender, MediaControlEventArgs mediaControlEventArgs)
+        {
+            MediaPlayerModel.SerializeState(MediaPlayerStates.Rewind);
+            MediaPlayerModel.ResumeSerializedState();
+        }
+
+        private void OnPositionSliderDragStarted(object sender, MediaControlEventArgs e)
+        {
+            //force video update
+            MediaPlayerModel.MediaController.SetNewPlayerPosition(
+                ((ThumbDragSlider) e.AdditionalInfo).Value.Add(TimeSpan.FromMilliseconds(10)));
+            MediaPlayerModel.SerializeState(MediaPlayerStates.Pause);
+        }
+
+        private void ControlsViewModel_VolumeSliderValueChanged(object sender, MediaControlEventArgs e)
+        {
+            var routedArgs = (RoutedPropertyChangedEventArgs<double>) e.AdditionalInfo;
+            MediaPlayerModel.MediaController.ChangeVolume(routedArgs.NewValue);
+        }
+
+        private void OnMediaEnded(MediaElement mediaElement)
+        {
+            MediaEnded?.Invoke(this, mediaElement);
+        }
+
+        private void OnFileDrop(DragEventArgs e)
+        {
+            if (FileDropHandler.ExtractDroppedItemsUri(e, Settings.MediaPlayerExtensionsPackage, out var files))
+            {
+                ManagerHelper.Request(files);
+                return;
+            }
+            MessageBox.Show($"{Strings.InvalidFileType}", "Error");
+        }
+
+        #endregion
+
+        #region INotifyPropertyChanged Implementation
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        [NotifyPropertyChangedInvocator]
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+        #endregion
+    }
+}

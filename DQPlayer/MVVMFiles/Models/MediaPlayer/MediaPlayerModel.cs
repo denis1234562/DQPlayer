@@ -1,6 +1,5 @@
 using System;
 using System.ComponentModel;
-using DQPlayer.Helpers.CustomControls;
 using DQPlayer.Helpers.Extensions;
 using DQPlayer.Properties;
 using DQPlayer.States;
@@ -11,11 +10,9 @@ namespace DQPlayer.MVVMFiles.Models.MediaPlayer
     {
         private MediaPlayerState _lastState;
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public IntermissionTimer MediaPlayerTimer { get; }
 
         public IRegulatableMediaService MediaController { get; set; }
-        public IntermissionTimer MediaPlayerTimer { get; }
-        public ThumbDragSlider MediaSlider { get; }
 
         private MediaPlayerState _currentState;
         public MediaPlayerState CurrentState
@@ -31,28 +28,10 @@ namespace DQPlayer.MVVMFiles.Models.MediaPlayer
             }
         }
 
-        public MediaPlayerModel(MediaPlayerState state, ThumbDragSlider mediaSlider)
+        public MediaPlayerModel(MediaPlayerState state)
         {
             MediaPlayerTimer = new IntermissionTimer();
             CurrentState = state;
-            MediaSlider = mediaSlider;
-            MediaSlider.DragStarted += MediaSlider_DragStarted;
-        }
-
-        private void MediaSlider_DragStarted(object sender, System.Windows.Controls.Primitives.DragStartedEventArgs e)
-        {
-            this.SetPlayerPositionToCursor();
-        }
-
-        public MediaPlayerModel(ThumbDragSlider mediaSlider)
-            : this(MediaPlayerStates.None, mediaSlider)
-        {
-        }
-
-        [NotifyPropertyChangedInvocator]
-        protected virtual void OnPropertyChanged([System.Runtime.CompilerServices.CallerMemberName] string propName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
         }
 
         public void SetMediaState(MediaPlayerState state)
@@ -60,6 +39,8 @@ namespace DQPlayer.MVVMFiles.Models.MediaPlayer
             CurrentState = state;
             CurrentState.StateAction(MediaController);
         }
+
+        #region Implementation of IResumableState<MediaPlayerState>
 
         public void SerializeState(MediaPlayerState newState)
         {
@@ -76,5 +57,19 @@ namespace DQPlayer.MVVMFiles.Models.MediaPlayer
             SetMediaState(_lastState);
             _lastState = null;
         }
+
+        #endregion
+
+        #region Implementation of INotifyPropertyChanged
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        [NotifyPropertyChangedInvocator]
+        protected virtual void OnPropertyChanged([System.Runtime.CompilerServices.CallerMemberName] string propName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
+        }
+
+        #endregion
     }
 }

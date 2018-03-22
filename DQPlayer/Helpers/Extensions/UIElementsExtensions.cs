@@ -24,7 +24,7 @@ namespace DQPlayer.Helpers.Extensions
             return Math.Min(Math.Max(simulatedPosition, 0), track.Maximum);
         }
 
-        public static T GetElementFromTemplate<T>(this System.Windows.Controls.Control source, string name)
+        public static T GetElementFromTemplate<T>(this Control source, string name)
             where T : UIElement
         {
             return source.Template.FindName(name, source) as T;

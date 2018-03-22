@@ -1,28 +1,19 @@
-﻿using System.ComponentModel;
-using System.Windows;
+﻿using System.Windows;
+using System.ComponentModel;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using DQPlayer.Helpers.Adorners;
-using DQPlayer.MVVMFiles.ViewModels;
 
 namespace DQPlayer.MVVMFiles.Views
 {
-    public partial class PlayList
+    public partial class PlaylistView
     {
-        public PlayListViewModel ViewModel => DataContext as PlayListViewModel;
-
         private GridViewColumnHeader listViewSortCol;
         private SortAdorner listViewSortAdorner;
 
-        public PlayList()
+        public PlaylistView()
         {
             InitializeComponent(); 
-        }
-
-        private void Window_Closing(object sender, CancelEventArgs e)
-        {
-            e.Cancel = true;
-            Hide();
         }
 
         private void lvMediaFilesColumnHeader_Click(object sender, RoutedEventArgs e)

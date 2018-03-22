@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DQPlayer.Helpers.Template
+namespace DQPlayer.Helpers.Templates
 {
     public class TemplateCreator<TSource, TBase>
         where TSource : TBase, new()

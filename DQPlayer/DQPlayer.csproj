@@ -55,6 +55,9 @@
     <Reference Include="envdte80, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
+    <Reference Include="ExtendedDotNet">
+      <HintPath>..\..\Projects\Libraries\ExtendedDotNet\ExtendedDotNet\ExtendedDotNet\bin\Debug\ExtendedDotNet.dll</HintPath>
+    </Reference>
     <Reference Include="GalaSoft.MvvmLight, Version=5.3.0.19026, Culture=neutral, PublicKeyToken=e7570ab207bcb616, processorArchitecture=MSIL">
       <HintPath>..\packages\MvvmLightLibs.5.3.0.0\lib\net45\GalaSoft.MvvmLight.dll</HintPath>
     </Reference>
@@ -102,10 +105,22 @@
     </ApplicationDefinition>
     <Compile Include="Benchmarking.cs" />
     <Compile Include="Helpers\Adorners\SortAdorner.cs" />
+    <Compile Include="Helpers\Animations\AnimationManager.cs" />
+    <Compile Include="Helpers\Animations\AnimationWrapper.cs" />
+    <Compile Include="Helpers\DialogHelpers\WindowDialogHelper.cs" />
+    <Compile Include="Helpers\FileManagement\FileInformation\IFileInformation.cs" />
+    <Compile Include="Helpers\FileManagement\FileInformation\MediaFileInformation.cs" />
+    <Compile Include="Helpers\FileManagement\FileProcesser.cs" />
+    <Compile Include="Helpers\ICustomObservable.cs" />
+    <Compile Include="Helpers\InputManagement\Manager.cs" />
+    <Compile Include="Helpers\InputManagement\ManagerHelper.cs" />
     <Compile Include="Helpers\LocalizationManagement\LocExtension.cs" />
     <Compile Include="Helpers\LocalizationManagement\TranslationSource.cs" />
-    <Compile Include="Helpers\Template\Template.cs" />
-    <Compile Include="Helpers\Template\TemplateCreator.cs" />
+    <Compile Include="Helpers\MediaControls\MediaControlEventArgs.cs" />
+    <Compile Include="Helpers\InputManagement\ManagerEventArgs.cs" />
+    <Compile Include="MVVMFiles\SetPropertyAction.cs" />
+    <Compile Include="Helpers\Templates\Template.cs" />
+    <Compile Include="Helpers\Templates\TemplateCreator.cs" />
     <Compile Include="Helpers\CustomCollections\ICircularList.cs" />
     <Compile Include="Helpers\CustomCollections\ObservableCircularList.cs" />
     <Compile Include="Helpers\CustomControls\OutlinedLabel.cs" />
@@ -127,22 +142,32 @@
     <Compile Include="Helpers\SubtitlesManagement\SubtitleInterval.cs" />
     <Compile Include="Helpers\SubtitlesManagement\SubtitleReader.cs" />
     <Compile Include="Helpers\SubtitlesManagement\SubtitleSegment.cs" />
+    <Compile Include="MVVMFiles\Commands\MultiValueRelayCommand.cs" />
     <Compile Include="MVVMFiles\Converters\InverseBooleanToVisibilityConverter.cs" />
     <Compile Include="MVVMFiles\Converters\LeftTimeConverter.cs" />
     <Compile Include="MVVMFiles\Converters\MediaButtonsVisibilityConverter.cs" />
+    <Compile Include="MVVMFiles\Converters\MultiValueConverter.cs" />
+    <Compile Include="MVVMFiles\Converters\PercentageConverter.cs" />
+    <Compile Include="MVVMFiles\Converters\SliderTooltipValueConverter.cs" />
+    <Compile Include="MVVMFiles\Converters\RoundingConverter.cs" />
     <Compile Include="MVVMFiles\Converters\SecondsToFormattedTimeSpan.cs" />
     <Compile Include="MVVMFiles\Converters\SecondsToTimeSpanConverter.cs" />
     <Compile Include="MVVMFiles\Models\MediaPlayer\IMediaPlayer.cs" />
     <Compile Include="MVVMFiles\Models\MediaPlayer\IMediaService.cs" />
     <Compile Include="IntermissionTimer.cs" />
-    <Compile Include="MVVMFiles\Models\MediaPlayer\IMediaServiceNotifier.cs" />
     <Compile Include="MVVMFiles\Models\MediaPlayer\IRegulatableMediaPlayer.cs" />
     <Compile Include="MVVMFiles\Models\MediaPlayer\IRegulatableMediaService.cs" />
-    <Compile Include="MVVMFiles\Models\MediaPlayer\IRegulatableMediaServiceNotifier.cs" />
     <Compile Include="MVVMFiles\Models\MediaPlayer\IResumableState.cs" />
     <Compile Include="MVVMFiles\Models\MediaPlayer\MediaPlayerModel.cs" />
     <Compile Include="MVVMFiles\Models\MediaPlayer\RegulatableMediaPlayerService.cs" />
-    <Compile Include="MVVMFiles\Models\PlayList\FileInformation.cs" />
+    <Compile Include="Helpers\FileManagement\FileInformation\FileInformation.cs" />
+    <Compile Include="MVVMFiles\UserControls\MainWindow\IMediaElementUserControl.cs" />
+    <Compile Include="MVVMFiles\UserControls\MainWindow\MediaElementUserControl.xaml.cs">
+      <DependentUpon>MediaElementUserControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MVVMFiles\UserControls\MainWindow\MediaPlayerControlsUserControl.xaml.cs">
+      <DependentUpon>MediaPlayerControlsUserControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="MVVMFiles\UserControls\SettingsTabs\AudioTab.xaml.cs">
       <DependentUpon>AudioTab.xaml</DependentUpon>
     </Compile>
@@ -158,13 +183,17 @@
     <Compile Include="MVVMFiles\UserControls\SettingsTabs\VideoTab.xaml.cs">
       <DependentUpon>VideoTab.xaml</DependentUpon>
     </Compile>
+    <Compile Include="MVVMFiles\ViewModels\IMediaControlsViewModel.cs" />
+    <Compile Include="MVVMFiles\ViewModels\IMediaElementViewModel.cs" />
+    <Compile Include="MVVMFiles\ViewModels\MediaElementViewModel.cs" />
+    <Compile Include="MVVMFiles\ViewModels\MediaPlayerControlsViewModel.cs" />
     <Compile Include="MVVMFiles\ViewModels\SettingsViewModels\AudioTabViewModel.cs" />
     <Compile Include="MVVMFiles\ViewModels\SettingsViewModels\GeneralTabViewModel.cs" />
-    <Compile Include="MVVMFiles\ViewModels\PlayListViewModel.cs" />
+    <Compile Include="MVVMFiles\ViewModels\PlaylistViewModel.cs" />
     <Compile Include="MVVMFiles\ViewModels\SettingsViewModels\SettingsViewModel.cs" />
     <Compile Include="MVVMFiles\ViewModels\SettingsViewModels\VideoTabViewModel.cs" />
-    <Compile Include="MVVMFiles\Views\PlayList.xaml.cs">
-      <DependentUpon>PlayList.xaml</DependentUpon>
+    <Compile Include="MVVMFiles\Views\PlaylistView.xaml.cs">
+      <DependentUpon>PlaylistView.xaml</DependentUpon>
     </Compile>
     <Compile Include="MVVMFiles\Views\SettingsView.xaml.cs">
       <DependentUpon>SettingsView.xaml</DependentUpon>
@@ -214,6 +243,14 @@
     </Compile>
     <Compile Include="Settings.cs" />
     <Compile Include="MVVMFiles\ViewModels\VideoPlayerViewModel.cs" />
+    <Page Include="MVVMFiles\UserControls\MainWindow\MediaElementUserControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="MVVMFiles\UserControls\MainWindow\MediaPlayerControlsUserControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MVVMFiles\UserControls\SettingsTabs\AudioTab.xaml">
       <SubType>Designer</SubType>
       <Generator>XamlIntelliSenseFileGenerator</Generator>
@@ -246,7 +283,7 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="MVVMFiles\Views\PlayList.xaml">
+    <Page Include="MVVMFiles\Views\PlaylistView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -368,6 +405,44 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="bin\Debug\Assets\browse-icon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="bin\Debug\Assets\Headphone-Left.png" />
+    <Resource Include="bin\Debug\Assets\Headphone-Right.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="bin\Debug\Assets\MediaPlayerLayout\Down_bar.png" />
+    <Resource Include="bin\Debug\Assets\MediaPlayerLayout\Fast_forw copy.png" />
+    <Resource Include="bin\Debug\Assets\MediaPlayerLayout\Film_progress_line copy.png" />
+    <Resource Include="bin\Debug\Assets\MediaPlayerLayout\full_scr copy.png" />
+    <Resource Include="bin\Debug\Assets\MediaPlayerLayout\List copy.png" />
+    <Resource Include="bin\Debug\Assets\MediaPlayerLayout\Minus copy.png" />
+    <Resource Include="bin\Debug\Assets\MediaPlayerLayout\Next_Tr copy.png" />
+    <Resource Include="bin\Debug\Assets\MediaPlayerLayout\Open_files copy.png" />
+    <Resource Include="bin\Debug\Assets\MediaPlayerLayout\Play copy.png" />
+    <Resource Include="bin\Debug\Assets\MediaPlayerLayout\Previous_Tr copy.png" />
+    <Resource Include="bin\Debug\Assets\MediaPlayerLayout\Progress_key copy.png" />
+    <Resource Include="bin\Debug\Assets\MediaPlayerLayout\quadrat copy.png" />
+    <Resource Include="bin\Debug\Assets\MediaPlayerLayout\Replay copy.png" />
+    <Resource Include="bin\Debug\Assets\MediaPlayerLayout\Rewind copy.png" />
+    <Resource Include="bin\Debug\Assets\MediaPlayerLayout\Stop copy.png" />
+    <Resource Include="bin\Debug\Assets\MediaPlayerLayout\Tools copy.png" />
+    <Resource Include="bin\Debug\Assets\MediaPlayerLayout\UP_bar.png" />
+    <Resource Include="bin\Debug\Assets\MediaPlayerLayout\Volume_key copy.png" />
+    <Resource Include="bin\Debug\Assets\MediaPlayerLayout\Vulume_line copy.png" />
+    <Resource Include="bin\Debug\Assets\MediaPlayerLayout\X-icon copy.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="bin\Debug\Assets\MediaPlayerLayout\Pause copy.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="bin\Debug\Assets\JD_Icon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="bin\Debug\Assets\MediaPlayerLayout\Initial_Screen copy.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="MVVMFiles\Models\PlayList\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

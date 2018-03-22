@@ -24,11 +24,6 @@ namespace DQPlayer.Helpers.Extensions
             player.MediaController.SetNewPlayerPosition(TimeSpan.FromSeconds(simulatedValue));
         }
 
-        public static void SetPlayerPositionToCursor(this IRegulatableMediaPlayer player)
-        {
-            SetPlayerPositionToCursor(player, player.MediaSlider.GetElementFromTemplate<Track>("PART_Track"));
-        }
-
         public static void PlayNewPlayerSource(this IRegulatableMediaPlayer player, Uri source)
         {
             if (player == null)

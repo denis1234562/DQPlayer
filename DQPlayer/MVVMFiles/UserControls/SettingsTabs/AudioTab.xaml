@@ -8,6 +8,7 @@
              xmlns:baseResources="clr-namespace:DQPlayer.ResourceFiles"
              xmlns:localResources="clr-namespace:DQPlayer.ResourceFiles.SettingsResources"
              xmlns:locMng="clr-namespace:DQPlayer.Helpers.LocalizationManagement"
+             xmlns:converters="clr-namespace:DQPlayer.MVVMFiles.Converters"
              mc:Ignorable="d" 
              Background="{DynamicResource WindowBackgroundBrush}"
              d:DesignHeight="500" d:DesignWidth="450">
@@ -20,9 +21,39 @@
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="30"/>
-                <RowDefinition Height="200"/>
-                <RowDefinition Height="115"/>
+                <RowDefinition Height="180"/>
             </Grid.RowDefinitions>
+
+            <CheckBox Grid.Row="0" Content="Enable sound" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,5,0,5"/>
+
+            <GroupBox Grid.Row="1" Header="Audio properties" Height="Auto" Width="Auto">
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Top">
+                    <Label Content="Audio output balance" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource TextBrush}"/>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+
+                        </Grid.RowDefinitions>
+
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="50"/>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="50"/>
+                        </Grid.ColumnDefinitions>
+                        <Image Name="imgLeftHeadphone" Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" Source="pack://application:,,,/bin/Debug/Assets/Headphone-Left.png" 
+                               Margin="0,5,5,0" HorizontalAlignment="Left" Height="100" VerticalAlignment="Top" Width="50" Stretch="Fill" Opacity="0.5"/>
+
+                        <Slider Name="sBalanceSlider" Grid.Row="0" Grid.Column="1" Width="150" Minimum="-1" Maximum="1" Value="0"
+                                ValueChanged="SBalanceSlider_OnValueChanged"/>
+
+                        <Image Name="imgRightHeadphone" Grid.Row="0" Grid.RowSpan="2" Grid.Column="2" Source="pack://application:,,,/bin/Debug/Assets/Headphone-Right.png" 
+                               Margin="5,5,0,0" HorizontalAlignment="Left" Height="100" VerticalAlignment="Top" Width="50" Stretch="Fill" Opacity="0.5"/>
+                        <Label Grid.Row="0" Grid.Column="1" Foreground="{DynamicResource TextBrush}"
+                               HorizontalAlignment="Center" VerticalAlignment="Bottom" Content="{Binding ElementName=sBalanceSlider, Path=Value, Converter={converters:RoundingConverter}, ConverterParameter=1}"/>
+                    </Grid>
+                </StackPanel>
+            </GroupBox>
         </Grid>
     </ScrollViewer>
 </UserControl>

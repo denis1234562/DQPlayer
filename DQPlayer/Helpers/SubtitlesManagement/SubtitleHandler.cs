@@ -3,10 +3,9 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using System.Windows.Controls;
 using DQPlayer.Helpers.CustomCollections;
 using DQPlayer.Helpers.Extensions;
-using DQPlayer.MVVMFiles.Models.MediaPlayer;
+using DQPlayer.MVVMFiles.ViewModels;
 
 namespace DQPlayer.Helpers.SubtitlesManagement
 {
@@ -34,7 +33,7 @@ namespace DQPlayer.Helpers.SubtitlesManagement
             _isStartable = start;
             return this;
         }
-        public SubtitleHandler Build(string path, TimeSpan currentTime, IRegulatableMediaServiceNotifier notifier)
+        public SubtitleHandler Build(string path, TimeSpan currentTime, MediaPlayerControlsViewModel notifier)
         {
             if (string.IsNullOrEmpty(path))
             {
@@ -61,12 +60,12 @@ namespace DQPlayer.Helpers.SubtitlesManagement
                 _subtitleDisplayTracker.Start();
             }
         }
-        private void SetupNotifierSubscriptions(IRegulatableMediaServiceNotifier notifier)
+        private void SetupNotifierSubscriptions(MediaPlayerControlsViewModel notifier)
         {
-            notifier.MediaPositionChanged += (o, span) => ResyncSubtitles(span);
-            notifier.MediaPlayed += OnMediaPlayed;
-            notifier.MediaPaused += OnMediaPaused;
-            notifier.MediaStopped += OnMediaStopped;         
+            //notifier.MediaPositionChanged += (o, span) => ResyncSubtitles(span);
+            //notifier.PlayClick += OnMediaPlayed;
+            //notifier.PauseClick += OnMediaPaused;
+            //notifier.StopClick += OnMediaStopped;         
         }
 
         private void OnMediaStopped(object sender)

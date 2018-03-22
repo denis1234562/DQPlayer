@@ -22,6 +22,8 @@ namespace DQPlayer.Helpers.SubtitlesManagement
             return $"{Start} --> {End}";
         }
 
+        #region Implementation of IEquatable<SubtitleInterval>
+
         public bool Equals(SubtitleInterval other)
         {
             if (ReferenceEquals(null, other)) return false;
@@ -45,6 +47,10 @@ namespace DQPlayer.Helpers.SubtitlesManagement
             }
         }
 
+        #endregion
+
+        #region Implementation of IComparable<SubtitleInterval>
+
         public int CompareTo(SubtitleInterval other)
         {
             if (ReferenceEquals(this, other)) return 0;
@@ -53,5 +59,7 @@ namespace DQPlayer.Helpers.SubtitlesManagement
             if (startComparison != 0) return startComparison;
             return End.CompareTo(other.End);
         }
+
+        #endregion
     }
 }
