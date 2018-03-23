@@ -112,7 +112,7 @@ namespace DQPlayer.MVVMFiles.ViewModels
 
         private void CurrentMediaPlayer_MediaPlayedNewSource(object sender, ManagerEventArgs<MediaFileInformation> e)
         {
-            IsCheckedState = true;
+            IsCheckedState = e.SelectedFiles.First() != null;
             OnPropertyChanged(nameof(PlayerSourceState));
         }
 
@@ -139,7 +139,7 @@ namespace DQPlayer.MVVMFiles.ViewModels
         }
 
         private void OnFastForwardClick(ThumbDragSlider slider)
-        {
+        {           
             var position = Min(slider.Value, slider.Value.Add(Settings.SkipSeconds));
             slider.Value = position;
             OnNotify(new MediaControlEventArgs(MediaControlEventType.FastForwardClick, position));

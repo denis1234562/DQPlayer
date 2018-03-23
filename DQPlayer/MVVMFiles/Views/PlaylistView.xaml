@@ -25,7 +25,13 @@
     </Window.DataContext>
 
     <Grid>
-        <ListView Name="lvListView" Margin="0,0,0,35" AllowDrop="True" ItemsSource="{Binding FilesCollection}">
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <ListView Grid.Row="0" Name="lvListView" AllowDrop="True" ItemsSource="{Binding FilesCollection}">
             <ia:Interaction.Triggers>
                 <ia:EventTrigger EventName="Drop">
                     <cmd:EventToCommand Command="{Binding ListViewFileDrop}" PassEventArgsToCommand="True"/>
@@ -75,21 +81,23 @@
             </ListView.View>
         </ListView>
 
-
-        <Button Name="bClearAll" Content="Clear All" Margin="0,0,170,10" HorizontalAlignment="Right"  VerticalAlignment="Bottom" Width="75"               
-                Command="{Binding ClearAllCommand}"/>
-
-        <Button Name="bBrowse" Content="Browse"  Margin="0,0,10,10" HorizontalAlignment="Right" VerticalAlignment="Bottom"  Width="75"                
-                Command="{Binding BrowseCommand}"/>
-
-        <Button Name="bRemove" Content="Remove"  Margin="0,0,90,10" HorizontalAlignment="Right" VerticalAlignment="Bottom"  Width="75"
-                Command="{Binding RemoveCommand}"
-                CommandParameter="{x:Reference Name=lvListView}"/>
-
-        <Label Name="lbMoviesTime" Content="Playlist time /"  HorizontalAlignment="Left" Margin="0,0,0,5" VerticalAlignment="Bottom" Height="25"
+        <DockPanel Grid.Row="1" Margin="0,5">
+            <Label DockPanel.Dock="Left" HorizontalAlignment="Left" 
+               Content="{Binding FilesCollection, Converter={converters:PlaylistFilesDurationConverter}}"             
                Foreground="{DynamicResource TextBrush}"/>
 
-        <Label Name="lbPlayListMoviesTime" HorizontalAlignment="Left" Margin="80,0,0,5" VerticalAlignment="Bottom" Width="77"
-               Content="{Binding FilesDuration}" Height="25" Foreground="{DynamicResource TextBrush}"/>
+            <Button Name="bBrowse" DockPanel.Dock="Right" HorizontalAlignment="Right" Margin="5,0"  
+                Padding="20,0" FontSize="12" Content="Browse"             
+                Command="{Binding BrowseCommand}" />
+
+            <Button Name="bRemove" DockPanel.Dock="Right" HorizontalAlignment="Right" Margin="5,0" 
+                Padding="20,0" FontSize="12" Content="Remove"    
+                Command="{Binding RemoveCommand}" 
+                CommandParameter="{x:Reference Name=lvListView}"/>
+
+            <Button Name="bClearAll" DockPanel.Dock="Right" HorizontalAlignment="Right"  Margin="5,0" 
+                Padding="20,0" FontSize="12" Content="Clear All"                
+                Command="{Binding ClearAllCommand}" />
+        </DockPanel>
     </Grid>
 </Window>

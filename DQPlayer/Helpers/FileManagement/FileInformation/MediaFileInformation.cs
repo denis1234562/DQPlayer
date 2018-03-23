@@ -8,7 +8,7 @@ using DQPlayer.Helpers.Extensions;
 
 namespace DQPlayer.Helpers.FileManagement.FileInformation
 {
-    public class MediaFileInformation : DependencyObject, IFileInformation, INotifyPropertyChanged
+    public class MediaFileInformation : DependencyObject, IFileInformation, INotifyPropertyChanged, IEquatable<MediaFileInformation>
     {
         public TimeSpan FileLength { get; }
         public string FileName { get; }
@@ -54,6 +54,18 @@ namespace DQPlayer.Helpers.FileManagement.FileInformation
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        #endregion
+
+        #region Equality members
+
+        public bool Equals(MediaFileInformation other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return FileLength.Equals(other.FileLength) && string.Equals(FileName, other.FileName) &&
+                   Equals(FileInfo, other.FileInfo) && Equals(Uri, other.Uri);
         }
 
         #endregion

@@ -118,6 +118,7 @@
     <Compile Include="Helpers\LocalizationManagement\TranslationSource.cs" />
     <Compile Include="Helpers\MediaControls\MediaControlEventArgs.cs" />
     <Compile Include="Helpers\InputManagement\ManagerEventArgs.cs" />
+    <Compile Include="MVVMFiles\Converters\PlaylistFilesDurationConverter.cs" />
     <Compile Include="MVVMFiles\SetPropertyAction.cs" />
     <Compile Include="Helpers\Templates\Template.cs" />
     <Compile Include="Helpers\Templates\TemplateCreator.cs" />

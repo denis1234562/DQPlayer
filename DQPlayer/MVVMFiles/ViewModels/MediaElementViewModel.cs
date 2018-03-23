@@ -77,6 +77,7 @@ namespace DQPlayer.MVVMFiles.ViewModels
             {
                 var firstFile = e.SelectedFiles.FirstOrDefault();
                 MediaPlayerModel.MediaController.SetNewPlayerSource(firstFile?.Uri);
+                MediaPlayerModel.SetMediaState(MediaPlayerStates.None);
                 if (firstFile != null)
                 {
                     MediaPlayerModel.SetMediaState(MediaPlayerStates.Play);
