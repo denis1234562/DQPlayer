@@ -168,7 +168,6 @@ namespace DQPlayer.MVVMFiles.ViewModels
             Notify?.Invoke(this, eventArgs);
         }
 
-
         #endregion
     }
 

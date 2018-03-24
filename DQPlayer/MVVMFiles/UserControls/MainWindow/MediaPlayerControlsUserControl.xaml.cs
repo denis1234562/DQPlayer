@@ -63,6 +63,7 @@ namespace DQPlayer.MVVMFiles.UserControls.MainWindow
             if (e.MouseDevice.DirectlyOver.GetType() == typeof(Thumb))
             {
                 //in case it was covered by thumb
+                //TODO doesn't really work
                 tt.IsOpen = true;
             }
             tt.HorizontalOffset = Mouse.GetPosition(slider).X - tt.ActualWidth / 2;

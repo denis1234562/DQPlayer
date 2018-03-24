@@ -8,13 +8,13 @@ using System.Windows.Controls;
 using DQPlayer.MVVMFiles.Views;
 using DQPlayer.Helpers.Extensions;
 using DQPlayer.MVVMFiles.Commands;
+using System.Collections.Specialized;
 using DQPlayer.Helpers.DialogHelpers;
 using System.Runtime.CompilerServices;
 using DQPlayer.Helpers.FileManagement;
 using DQPlayer.Helpers.InputManagement;
 using DQPlayer.Helpers.CustomCollections;
 using DQPlayer.Helpers.FileManagement.FileInformation;
-using System.Collections.Specialized;
 
 namespace DQPlayer.MVVMFiles.ViewModels
 {
@@ -28,8 +28,6 @@ namespace DQPlayer.MVVMFiles.ViewModels
         public RelayCommand<CancelEventArgs> WindowClosingCommand { get; }
 
         public ObservableCircularList<MediaFileInformation> FilesCollection { get; set; }
-
-        private MediaFileInformation _lastPlayedFile;
 
         public PlaylistViewModel()
         {
@@ -78,67 +76,59 @@ namespace DQPlayer.MVVMFiles.ViewModels
 
         private void OnListViewDoubleClickCommand(MouseButtonEventArgs e)
         {
-            if (e.ChangedButton == MouseButton.Left)
+            if (e.ChangedButton == MouseButton.Left &&
+                ((FrameworkElement) e.OriginalSource).DataContext is MediaFileInformation item)
             {
-                if (((FrameworkElement) e.OriginalSource).DataContext is MediaFileInformation item)
-                {
-                    Manager<MediaFileInformation>.Request(this,item.AsEnumerable());
-                }
+                Manager<MediaFileInformation>.Request(this, item.AsEnumerable());
             }
         }
 
         private void OnClearAllCommand()
         {
             FilesCollection.Clear();
-            Manager<MediaFileInformation>.Request(this,new MediaFileInformation[] {null});
+            Manager<MediaFileInformation>.Request(this, new MediaFileInformation[] { null });
         }
 
         private void OnRemoveCommand(ListView listView)
         {
-            if (listView.SelectedItems.Count == 0)
+            var lastPlayedFile = FilesCollection.Current;
+            while(listView.SelectedItems.Count > 0)
             {
-                MessageBox.Show("Please select a file to remove.");
-                return;
+                FilesCollection.Remove((MediaFileInformation) listView.SelectedItems[0]);
             }
-            while (listView.SelectedItems.Count != 0)
+            if (!lastPlayedFile.Equals(FilesCollection.Current))
             {
-                MediaFileInformation selectedFile = (MediaFileInformation)listView.SelectedItems[0];
-                FilesCollection.Remove(selectedFile);
-                if (selectedFile.Equals(FilesCollection.Current))
-                {
-                    Manager<MediaFileInformation>.Request(this, FilesCollection.Current.AsEnumerable());
-                }
+                Manager<MediaFileInformation>.Request(this, new MediaFileInformation[] { null });
             }
         }
 
         private void OnManagerRequest(object sender, ManagerEventArgs<MediaFileInformation> e)
         {
-            OnMediaPlayedNewSource(FilesCollection.Current);
-            var f = FilesCollection.Current;
-            //null source was requested by system
-            if (sender.Equals(this) || e.SelectedFiles.First() == null)
+            var firstMediaFile = e.SelectedFiles.First();
+            if (firstMediaFile == null)
             {
+                if (FilesCollection.Current != null)
+                {
+                    FilesCollection.Current.IsPlaying = false;
+                }
                 return;
             }
-            int previousSize = FilesCollection.Count;
-            FilesCollection.AddRange(e.SelectedFiles);
-            FilesCollection.SetCurrent(previousSize);
-            if (FilesCollection.Count > 1)
+            if (!sender.Equals(this))
             {
-                WindowDialogHelper<PlaylistView>.Instance.Show();
-            }       
-            
-        }
-      
-        private void OnMediaPlayedNewSource(MediaFileInformation file)
-        {
-            if (_lastPlayedFile != null)
-            {
-                _lastPlayedFile.IsPlaying = false;
+                FilesCollection.AddRange(e.SelectedFiles);
             }
-            _lastPlayedFile = file;
-            file.IsPlaying = true;
+            ChangePlayingFile(firstMediaFile);
         }
+         
+        private void ChangePlayingFile(MediaFileInformation file, bool newFileState = true)
+        {
+            if (FilesCollection.Current != null)
+            { 
+                FilesCollection.Current.IsPlaying = false;
+            }
+            FilesCollection.SetCurrent(FilesCollection.IndexOf(file));
+            FilesCollection.Current.IsPlaying = newFileState;
+        } 
 
         #region INotifyPropertyChanged Implementation
 
@@ -150,6 +140,6 @@ namespace DQPlayer.MVVMFiles.ViewModels
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        #endregion
+        #endregion 
     }
 }

@@ -6,7 +6,7 @@ namespace WPF.Themes
 {   
     public static class ThemeManager
     {
-        private static string _currentTheme = "ExpressionDark";
+        private static string _currentTheme = "Default";
 
         public static string[] Themes { get; }
 
@@ -14,12 +14,10 @@ namespace WPF.Themes
         {
             Themes = new[]
             {
-                "ExpressionDark",
                 "Default",
                 "ExpressionLight",
                 "BureauBlack",
                 "BureauBlue",
-                "TwilightBlue",
             };
         }
 

@@ -147,7 +147,7 @@
                             Command="{Binding PlaylistClickCommand}">
                         <Image Source="pack://application:,,,/bin/Debug/Assets/MediaPlayerLayout/List copy.png"/>
                     </Button>
-                    <ToggleButton Name="bRepeat" Height="26" Width="24" Margin="10,0"                             
+                    <ToggleButton Name="bRepeat" Height="26" Width="24" Margin="10,0"
                                   Command="{Binding RepeatCheckCommand}" CommandParameter="{Binding ElementName=bRepeat, Path=IsChecked}">
                         <Image Source="pack://application:,,,/bin/Debug/Assets/MediaPlayerLayout/Replay copy.png"/>
                     </ToggleButton>

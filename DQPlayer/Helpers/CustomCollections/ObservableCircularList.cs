@@ -182,13 +182,14 @@ namespace DQPlayer.Helpers.CustomCollections
         {
             var item = _elements[index];
             _elements.RemoveAt(index);
-            if (index <= _lastUsedElementIndex)
-            {
-                OnPropertyChanged(nameof(Current));
-            }
+            var previousCurrentIndex = _lastUsedElementIndex;
             if (_elements.Count > 0 && _lastUsedElementIndex >= _elements.Count)
             {
                 _lastUsedElementIndex--;
+            }
+            if (index <= previousCurrentIndex)
+            {
+                OnPropertyChanged(nameof(Current));
             }
 
             OnPropertyChanged(nameof(_elements.Count));

@@ -5,20 +5,14 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
-using System.Windows.Data;
-using System.Windows.Input;
 using DQPlayer.Annotations;
 using DQPlayer.Helpers;
 using DQPlayer.Helpers.CustomControls;
-using DQPlayer.Helpers.Extensions;
-using DQPlayer.Helpers.FileManagement;
 using DQPlayer.Helpers.FileManagement.FileInformation;
 using DQPlayer.Helpers.InputManagement;
 using DQPlayer.Helpers.MediaControls;
 using DQPlayer.MVVMFiles.Commands;
 using DQPlayer.MVVMFiles.Models.MediaPlayer;
-using DQPlayer.ResourceFiles;
 using DQPlayer.States;
 
 namespace DQPlayer.MVVMFiles.ViewModels

@@ -23,6 +23,8 @@ namespace DQPlayer.MVVMFiles.Views
 
         private void ConfigureUserControls()
         {
+            Application.Current.ShutdownMode = ShutdownMode.OnMainWindowClose;
+
             WindowDialogHelper<PlaylistView>.Instance.Show();
             WindowDialogHelper<PlaylistView>.Instance.Hide();
             var mediaControlsVM = ucMediaPlayerControls.DataContext as IMediaControlsViewModel;
@@ -51,7 +53,6 @@ namespace DQPlayer.MVVMFiles.Views
 
         private void ViewModel_WindowNormalize()
         {
-            Console.WriteLine("weq");
             ucMediaPlayerControls.Visibility = Visibility.Visible;
             ucMediaPlayerControls.Opacity = 1;
 
@@ -66,7 +67,7 @@ namespace DQPlayer.MVVMFiles.Views
 
         private void MainWindow_OnPreviewMouseMove(object sender, MouseEventArgs e)
         {
-            if (WindowState == WindowState.Maximized)
+            if (ViewModel.IsFullScreen)
             {
                 Settings.AnimationManager.CancelAnimation("FadeOut", ucMediaPlayerControls);
                 ucMediaPlayerControls.Visibility = Visibility.Visible;
@@ -88,7 +89,7 @@ namespace DQPlayer.MVVMFiles.Views
 
         private void MediaPlayerControls_OnMouseLeave(object sender, MouseEventArgs e)
         {
-            if (WindowState == WindowState.Maximized)
+            if (ViewModel.IsFullScreen)
             {
                 Settings.AnimationManager.BeginAnimation("FadeOut", ucMediaPlayerControls);
             }

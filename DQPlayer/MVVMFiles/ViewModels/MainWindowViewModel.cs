@@ -13,6 +13,8 @@ namespace DQPlayer.MVVMFiles.ViewModels
         public event Action WindowFullScreen;
         public event Action WindowNormalize;
 
+        public bool IsFullScreen { get; private set; }
+
         public RelayCommand<DragEventArgs> FileDropCommand { get; }
 
         public MainWindowViewModel()
@@ -45,6 +47,7 @@ namespace DQPlayer.MVVMFiles.ViewModels
             window.Topmost = true;
             window.Visibility = Visibility.Visible;
 
+            IsFullScreen = true;
             WindowFullScreen?.Invoke();
         }
 
@@ -53,6 +56,8 @@ namespace DQPlayer.MVVMFiles.ViewModels
             window.WindowState = WindowState.Normal;
             window.WindowStyle = WindowStyle.SingleBorderWindow;
             window.Topmost = false;
+
+            IsFullScreen = false;
             WindowNormalize?.Invoke();
         }
 

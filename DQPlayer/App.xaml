@@ -5,7 +5,7 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source ="/WPF.Themes;component/ExpressionDark/Theme.xaml"/>
+                <ResourceDictionary Source ="/WPF.Themes;component/Default/Theme.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

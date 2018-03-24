@@ -27,8 +27,8 @@ namespace DQPlayer
         private readonly Stopwatch _sw;
 
         private MulticastDelegate _tickEventHandlers;
-        private MulticastDelegate tickEventHandlers =>
-            _tickEventHandlers ?? (_tickEventHandlers = (MulticastDelegate)typeof(DispatcherTimer)
+        private MulticastDelegate TickEventHandlers =>
+            _tickEventHandlers ?? (_tickEventHandlers = (MulticastDelegate) typeof(DispatcherTimer)
                 .GetField("Tick", BindingFlags.Instance | BindingFlags.NonPublic)
                 ?.GetValue(this));
 
@@ -122,7 +122,7 @@ namespace DQPlayer
                         Cancelation();
                         return;
                     }
-                    foreach (var handler in tickEventHandlers.GetInvocationList())
+                    foreach (var handler in TickEventHandlers.GetInvocationList())
                     {
                         Dispatcher.Invoke(() => handler.Method.Invoke(handler.Target,
                             new object[] {this, EventArgs.Empty}));
