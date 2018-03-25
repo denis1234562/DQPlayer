@@ -34,6 +34,10 @@ namespace DQPlayer.MVVMFiles.Views
 
             mediaControlsVM.CurrentMediaPlayer = ucMediaElement;
 
+            ManagerHelper.Request(this, new MediaFileInformation(
+                    new Uri("F:\\Movies\\World Of Warcraft\\07\\game.of.thrones.s07e07.720p.web.h264-strife.mkv"))
+                .AsEnumerable());
+
             ViewModel.WindowFullScreen += ViewModel_WindowFullScreen;
             ViewModel.WindowNormalize += ViewModel_WindowNormalize;
         }
@@ -71,7 +75,7 @@ namespace DQPlayer.MVVMFiles.Views
             {
                 Settings.AnimationManager.CancelAnimation("FadeOut", ucMediaPlayerControls);
                 ucMediaPlayerControls.Visibility = Visibility.Visible;
-                ucMediaPlayerControls.Opacity = 1;
+                ucMediaPlayerControls.Opacity = 0.5;
                 if (!ucMediaPlayerControls.IsMouseOver)
                 {
                     Settings.AnimationManager.BeginAnimation("FadeOut", ucMediaPlayerControls);

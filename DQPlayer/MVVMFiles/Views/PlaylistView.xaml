@@ -12,7 +12,7 @@
         Title="Playlist" Height="415" Width="510"
         MinHeight="{Binding Source={x:Static local:Settings.MinimumMainWindowSize}, Path=Height}"
         MinWidth="{Binding Source={x:Static local:Settings.MinimumMainWindowSize}, Path=Width}"
-        Background="{DynamicResource WindowBackgroundBrush}">
+        Background="{DynamicResource WindowBackgroundBrush}" Icon="/DQPlayer;component/bin/Debug/Assets/JD_Icon.png">
 
     <ia:Interaction.Triggers>
         <ia:EventTrigger EventName="Closing">
@@ -20,6 +20,22 @@
         </ia:EventTrigger>
     </ia:Interaction.Triggers>
 
+    <Window.Resources>
+        <Style x:Key="ContextMenuWithoutIconStripStyle" TargetType="{x:Type ContextMenu}">
+            <Setter Property="OverridesDefaultStyle" Value="True" />
+            <Setter Property="SnapsToDevicePixels" Value="True" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ContextMenu}">
+                        <Border BorderThickness="1" CornerRadius="4" BorderBrush="Black" x:Name="Border" Background="{DynamicResource WindowBackgroundBrush}">
+                            <StackPanel ClipToBounds="True" Orientation="Vertical" IsItemsHost="True" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+    
     <Window.DataContext>
         <viewModels:PlaylistViewModel/>
     </Window.DataContext>
@@ -41,10 +57,10 @@
                 </ia:EventTrigger>
             </ia:Interaction.Triggers>
 
-            <ListView.ContextMenu >
-                <ContextMenu Background="{DynamicResource WindowBackgroundBrush}">
-                    <MenuItem Header="Remove" Command="{Binding RemoveCommand}" CommandParameter="{x:Reference Name=lvListView}"/>
-                    <MenuItem Header="Add File"  Command="{Binding BrowseCommand}"/>
+            <ListView.ContextMenu>
+                <ContextMenu Background="{DynamicResource WindowBackgroundBrush}" Style="{StaticResource ContextMenuWithoutIconStripStyle}">
+                    <MenuItem Header="Add File"  Command="{Binding BrowseCommand}" Icon="+"/>
+                    <MenuItem Header="Remove" Command="{Binding RemoveCommand}" CommandParameter="{x:Reference Name=lvListView}" Icon="-"/>
                     <MenuItem Header="Clear All"  Command="{Binding ClearAllCommand}"/>
                 </ContextMenu>
             </ListView.ContextMenu>
@@ -71,7 +87,7 @@
                     <GridView.Columns>
                         <GridViewColumn Width="320" DisplayMemberBinding="{Binding FileName}">
                             <GridViewColumn.Header>
-                                <GridViewColumnHeader Content="File name" Tag="FileName" Foreground="{DynamicResource TextBrush}" 
+                                <GridViewColumnHeader Content="File name" Tag="FileName" Foreground="{DynamicResource TextBrush}"
                                                       Click="lvMediaFilesColumnHeader_Click"/>
                             </GridViewColumn.Header>
                         </GridViewColumn>

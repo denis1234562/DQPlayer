@@ -6,11 +6,11 @@
 -->
 
 <ResourceDictionary
-  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-  mc:Ignorable="d"
-  xmlns:d="http://schemas.microsoft.com/expression/blend/2008">
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008">
 
     <!-- Main Colors -->
 
@@ -94,7 +94,7 @@
         <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
         <Setter Property="BorderBrush" Value="{DynamicResource NormalBorderBrush}" />
         <Setter Property="Template" Value="{DynamicResource ButtonTemplate}" />
-   </Style>
+    </Style>
 
     <ControlTemplate x:Key="ButtonTemplate" TargetType="{x:Type Button}">
         <ControlTemplate.Resources>
@@ -1307,7 +1307,7 @@
         <ControlTemplate.Triggers>
         </ControlTemplate.Triggers>
     </ControlTemplate>
-    
+
     <Style TargetType="{x:Type ComboBox}">
         <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
         <Setter Property="SnapsToDevicePixels" Value="true" />
@@ -2653,8 +2653,14 @@
                         </Grid.RowDefinitions>
                         <DockPanel Margin="{TemplateBinding Padding}">
                             <ScrollViewer Focusable="false" DockPanel.Dock="Top" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden">
-                                <GridViewHeaderRowPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" Margin="2,0,2,0" AllowsColumnReorder="{Binding Path=TemplatedParent.View.AllowsColumnReorder, RelativeSource={RelativeSource TemplatedParent}}" ColumnHeaderContainerStyle="{Binding Path=TemplatedParent.View.ColumnHeaderContainerStyle, RelativeSource={RelativeSource TemplatedParent}}" ColumnHeaderContextMenu="{Binding Path=TemplatedParent.View.ColumnHeaderContextMenu, RelativeSource={RelativeSource TemplatedParent}}" ColumnHeaderTemplate="{Binding Path=TemplatedParent.View.ColumnHeaderTemplate, RelativeSource={RelativeSource TemplatedParent}}" ColumnHeaderTemplateSelector="{Binding Path=TemplatedParent.View.ColumnHeaderTemplateSelector, RelativeSource={RelativeSource TemplatedParent}}" ColumnHeaderToolTip="{Binding Path=TemplatedParent.View.ColumnHeaderToolTip, RelativeSource={RelativeSource TemplatedParent}}" Columns="{Binding Path=TemplatedParent.View.Columns, RelativeSource={RelativeSource TemplatedParent}}" />
-
+                                <GridViewHeaderRowPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" Margin="2,0,2,0" 
+                                                            AllowsColumnReorder="{Binding Path=TemplatedParent.View.AllowsColumnReorder, RelativeSource={RelativeSource TemplatedParent}}" 
+                                                            ColumnHeaderContainerStyle="{Binding Path=TemplatedParent.View.ColumnHeaderContainerStyle, RelativeSource={RelativeSource TemplatedParent}}" 
+                                                            ColumnHeaderContextMenu="{Binding Path=TemplatedParent.View.ColumnHeaderContextMenu, RelativeSource={RelativeSource TemplatedParent}}" 
+                                                            ColumnHeaderTemplate="{Binding Path=TemplatedParent.View.ColumnHeaderTemplate, RelativeSource={RelativeSource TemplatedParent}}" 
+                                                            ColumnHeaderTemplateSelector="{Binding Path=TemplatedParent.View.ColumnHeaderTemplateSelector, RelativeSource={RelativeSource TemplatedParent}}" 
+                                                            ColumnHeaderToolTip="{Binding Path=TemplatedParent.View.ColumnHeaderToolTip, RelativeSource={RelativeSource TemplatedParent}}" 
+                                                            Columns="{Binding Path=TemplatedParent.View.Columns, RelativeSource={RelativeSource TemplatedParent}}"/>
                             </ScrollViewer>
                             <ScrollContentPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" x:Name="PART_ScrollContentPresenter" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" CanContentScroll="{TemplateBinding CanContentScroll}" KeyboardNavigation.DirectionalNavigation="Local" />
                         </DockPanel>
@@ -2951,13 +2957,13 @@
         <Setter Property="BorderBrush" Value="{DynamicResource NormalBorderBrush}" />
         <Setter Property="Template" Value="{DynamicResource ButtonTemplate}" />
         <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
-						<Setter Property="FontSize" Value="10"/>
-				<Setter Property="MinHeight" Value="18"/>
-				<Setter Property="MinWidth" Value="50"/>
+        <Setter Property="FontSize" Value="10"/>
+        <Setter Property="MinHeight" Value="18"/>
+        <Setter Property="MinWidth" Value="50"/>
     </Style>
 
     <Style x:Key="{x:Static ToolBar.CheckBoxStyleKey}" TargetType="{x:Type CheckBox}">
-			<Setter Property="FontSize" Value="10"/>
+        <Setter Property="FontSize" Value="10"/>
         <Setter Property="SnapsToDevicePixels" Value="true" />
         <Setter Property="FocusVisualStyle" Value="{DynamicResource CheckBoxFocusVisual}" />
         <Setter Property="Background" Value="{DynamicResource NormalBrush}" />
@@ -2967,7 +2973,7 @@
     </Style>
 
     <Style x:Key="{x:Static ToolBar.RadioButtonStyleKey}" TargetType="{x:Type RadioButton}">
-			<Setter Property="FontSize" Value="10"/>
+        <Setter Property="FontSize" Value="10"/>
         <Setter Property="SnapsToDevicePixels" Value="true" />
         <Setter Property="FocusVisualStyle" Value="{DynamicResource RadioButtonFocusVisual}" />
         <Setter Property="Background" Value="{DynamicResource NormalBrush}" />
@@ -2986,14 +2992,14 @@
     </Style>
 
     <Style x:Key="{x:Static ToolBar.ComboBoxStyleKey}" TargetType="{x:Type ComboBox}">
-			<Setter Property="FontSize" Value="10"/>
+        <Setter Property="FontSize" Value="10"/>
         <Setter Property="SnapsToDevicePixels" Value="true" />
         <Setter Property="Template" Value="{DynamicResource ComboBoxTemplate}" />
         <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
     </Style>
 
     <Style x:Key="{x:Static ToolBar.TextBoxStyleKey}" TargetType="{x:Type TextBox}">
-			<Setter Property="FontSize" Value="10"/>
+        <Setter Property="FontSize" Value="10"/>
         <Setter Property="KeyboardNavigation.TabNavigation" Value="None" />
         <Setter Property="FocusVisualStyle" Value="{x:Null}" />
         <Setter Property="AllowDrop" Value="true" />
@@ -3190,7 +3196,3 @@
     </Style>
 
 </ResourceDictionary>
-
-
-
-
