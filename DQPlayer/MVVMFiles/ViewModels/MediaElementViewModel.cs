@@ -59,17 +59,25 @@ namespace DQPlayer.MVVMFiles.ViewModels
 
                 [MediaControlEventType.PositionSliderDragStarted] = OnPositionSliderDragStarted,
                 [MediaControlEventType.PositionSliderDragCompleted] = (s, e) => MediaPlayerModel.ResumeSerializedState(),
-
                 [MediaControlEventType.VolumeSliderValueChanged] = ControlsViewModel_VolumeSliderValueChanged,
+
+                [MediaControlEventType.MoveNextClick] = OnMoveNextClick,
+                [MediaControlEventType.MovePreviousClick] = OnMovePreviousClick,
             };
-            Manager<MediaFileInformation>.NewRequest += MediaSourceManager_OnNewRequest;
+            FileManager<MediaFileInformation>.Instance.NewRequest += FileManager_OnNewRequest;
         }
 
-        private void MediaSourceManager_OnNewRequest(object sender, ManagerEventArgs<MediaFileInformation> e)
+        private void OnMoveNextClick(object s, MediaControlEventArgs e) => PlaylistManager.Instance.Request(this,
+            new PlaylistManagerEventArgs(PlaylistAction.PlayNext));
+
+        private void OnMovePreviousClick(object s, MediaControlEventArgs e) => PlaylistManager.Instance.Request(this,
+            new PlaylistManagerEventArgs(PlaylistAction.PlayPrevious));
+
+        private void FileManager_OnNewRequest(object sender, FileManagerEventArgs<MediaFileInformation> e)
         {
             if (!sender.Equals(this))
             {
-                var firstFile = e.SelectedFiles.FirstOrDefault();
+                var firstFile = e.SelectedFiles.First();
                 MediaPlayerModel.MediaController.SetNewPlayerSource(firstFile?.Uri);
                 MediaPlayerModel.SetMediaState(MediaPlayerStates.None);
                 if (firstFile != null)

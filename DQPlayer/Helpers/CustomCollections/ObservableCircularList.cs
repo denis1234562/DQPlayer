@@ -219,6 +219,15 @@ namespace DQPlayer.Helpers.CustomCollections
 
         #region Implementation of ICircularList<T>
 
+        public T Next => _lastUsedElementIndex + 1 >= _elements.Count
+            ? _elements[0]
+            : _elements[_lastUsedElementIndex + 1];
+
+        public T Previous => _lastUsedElementIndex - 1 < 0
+            ? _elements[_elements.Count -1]
+            : _elements[_lastUsedElementIndex - 1];
+
+
         public T MoveNext()
         {
             int temp = _lastUsedElementIndex;

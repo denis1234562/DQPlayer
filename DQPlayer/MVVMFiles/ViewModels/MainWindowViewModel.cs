@@ -65,7 +65,7 @@ namespace DQPlayer.MVVMFiles.ViewModels
         {
             if (FileDropHandler.ExtractDroppedItemsUri(e, Settings.MediaPlayerExtensionsPackage, out var files))
             {
-                ManagerHelper.Request(this, files);
+                FileManagerHelper.Request(this, files);
                 return;
             }
             MessageBox.Show($"{Strings.InvalidFileType}", "Error");

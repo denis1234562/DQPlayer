@@ -112,12 +112,14 @@
     <Compile Include="Helpers\FileManagement\FileInformation\MediaFileInformation.cs" />
     <Compile Include="Helpers\FileManagement\FileProcesser.cs" />
     <Compile Include="Helpers\ICustomObservable.cs" />
-    <Compile Include="Helpers\InputManagement\Manager.cs" />
-    <Compile Include="Helpers\InputManagement\ManagerHelper.cs" />
+    <Compile Include="Helpers\InputManagement\FileManager.cs" />
+    <Compile Include="Helpers\InputManagement\FileManagerHelper.cs" />
+    <Compile Include="Helpers\InputManagement\PlaylistManager.cs" />
+    <Compile Include="Helpers\InputManagement\PlaylistManagerEventArgs.cs" />
     <Compile Include="Helpers\LocalizationManagement\LocExtension.cs" />
     <Compile Include="Helpers\LocalizationManagement\TranslationSource.cs" />
     <Compile Include="Helpers\MediaControls\MediaControlEventArgs.cs" />
-    <Compile Include="Helpers\InputManagement\ManagerEventArgs.cs" />
+    <Compile Include="Helpers\InputManagement\FileManagerEventArgs.cs" />
     <Compile Include="MVVMFiles\Converters\PlaylistFilesDurationConverter.cs" />
     <Compile Include="Helpers\Templates\Template.cs" />
     <Compile Include="Helpers\Templates\TemplateCreator.cs" />
@@ -362,24 +364,6 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="bin\Debug\Assets\Pause.jpeg" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="bin\Debug\Assets\Play.jpeg" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="bin\Debug\Assets\SkipBack.jpeg" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="bin\Debug\Assets\SkipForward.jpeg" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="bin\Debug\Assets\Stop.jpeg" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="bin\Debug\Assets\SplashScreen.jpg" />
-  </ItemGroup>
-  <ItemGroup>
     <COMReference Include="Shell32">
       <Guid>{50A7E9B0-70EF-11D1-B75A-00A0C90564FE}</Guid>
       <VersionMajor>1</VersionMajor>
@@ -389,10 +373,6 @@
       <Isolated>False</Isolated>
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </COMReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="bin\Debug\Assets\MoveNext.jpeg" />
-    <Resource Include="bin\Debug\Assets\MovePrevious.jpeg" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="bin\Debug\Assets\Settings-Icon.png" />
@@ -435,14 +415,21 @@
   <ItemGroup>
     <Resource Include="bin\Debug\Assets\MediaPlayerLayout\Initial_Screen copy.png" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="MVVMFiles\Models\PlayList\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <ProjectReference Include="..\WPF.Themes\WPF.Themes.csproj">
       <Project>{cd3cd636-d63e-4bd5-9fe9-2b63da6f0616}</Project>
       <Name>WPF.Themes</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="bin\Debug\Assets\Plus_Icon.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="bin\Debug\Assets\Minus_Icon.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="bin\Debug\Assets\X_Icon.jpg" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

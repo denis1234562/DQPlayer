@@ -142,26 +142,6 @@ namespace DQPlayer.ResourceFiles {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        public static System.Drawing.Bitmap PauseImage {
-            get {
-                object obj = ResourceManager.GetObject("PauseImage", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        public static System.Drawing.Bitmap PlayImage {
-            get {
-                object obj = ResourceManager.GetObject("PlayImage", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to PlayList.
         /// </summary>
         public static string PlayList {
@@ -176,46 +156,6 @@ namespace DQPlayer.ResourceFiles {
         public static string Resume {
             get {
                 return ResourceManager.GetString("Resume", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        public static System.Drawing.Bitmap SkipBackImage {
-            get {
-                object obj = ResourceManager.GetObject("SkipBackImage", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        public static System.Drawing.Bitmap SkipForwardImage {
-            get {
-                object obj = ResourceManager.GetObject("SkipForwardImage", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        public static System.Drawing.Bitmap SplashScreenImage {
-            get {
-                object obj = ResourceManager.GetObject("SplashScreenImage", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        public static System.Drawing.Bitmap StopImage {
-            get {
-                object obj = ResourceManager.GetObject("StopImage", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
             }
         }
         

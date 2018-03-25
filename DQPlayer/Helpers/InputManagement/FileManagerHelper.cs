@@ -7,19 +7,20 @@ using ExtendedDotNet.ReflectionHelpers;
 
 namespace DQPlayer.Helpers.InputManagement
 {
-    public static class ManagerHelper
+    public static class FileManagerHelper
     {
         private static readonly Dictionary<Type, Action<object, IEnumerable<object>>> _newRequests;
 
-        static ManagerHelper()
+        static FileManagerHelper()
         {
             var fileInformations = typeof(IFileInformation).GetDerivedTypesFor(Assembly.GetExecutingAssembly());
 
             _newRequests = new Dictionary<Type, Action<object, IEnumerable<object>>>();
             foreach (var information in fileInformations)
             {
-                var instance = typeof(Manager<>).MakeGenericType(information);
-                var methodInfo = instance.GetMethod("Request", BindingFlags.NonPublic | BindingFlags.Static);
+                var type = typeof(FileManager<>).MakeGenericType(information);
+                var instance = type.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static).GetValue(null);
+                var methodInfo = type.GetMethod("Request", BindingFlags.NonPublic | BindingFlags.Instance);
                 _newRequests.Add(information,
                     (sender, enumerable) => methodInfo.Invoke(instance, new[] {sender, enumerable}));
             }
@@ -27,10 +28,10 @@ namespace DQPlayer.Helpers.InputManagement
 
         public static void Request(object sender, IEnumerable<IFileInformation> selectedFiles)
         {
-            Request(sender, new ManagerEventArgs<IFileInformation>(selectedFiles));
+            Request(sender, new FileManagerEventArgs<IFileInformation>(selectedFiles));
         }
 
-        public static void Request(object sender, ManagerEventArgs<IFileInformation> args)
+        public static void Request(object sender, FileManagerEventArgs<IFileInformation> args)
         {
             var typeGroups = args.SelectedFiles.GroupBy(information => information.GetType());
             foreach (var typeGroup in typeGroups)

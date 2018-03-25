@@ -6,7 +6,6 @@ using Microsoft.Win32;
 using System.Windows.Input;
 using DQPlayer.Annotations;
 using System.ComponentModel;
-using System.Globalization;
 using DQPlayer.MVVMFiles.Views;
 using DQPlayer.MVVMFiles.Commands;
 using DQPlayer.Helpers.DialogHelpers;
@@ -14,22 +13,17 @@ using DQPlayer.Helpers.MediaControls;
 using System.Runtime.CompilerServices;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
-using System.Windows.Data;
 using DQPlayer.Helpers.CustomControls;
-using DQPlayer.Helpers.Extensions;
 using DQPlayer.Helpers.FileManagement;
 using DQPlayer.Helpers.InputManagement;
 using DQPlayer.MVVMFiles.UserControls.MainWindow;
 using DQPlayer.Helpers.FileManagement.FileInformation;
-using DQPlayer.MVVMFiles.Converters;
 using static DQPlayer.Helpers.Extensions.GeneralExtensions;
 
 namespace DQPlayer.MVVMFiles.ViewModels
 {
     public partial class MediaPlayerControlsViewModel : IMediaControlsViewModel
     {
-        public double TestProperty { get; set; } = 2;
-
         public MediaPlayerControlsViewModel()
         {
             PlaylistClickCommand = new RelayCommand(OnPlaylistClick);
@@ -88,7 +82,7 @@ namespace DQPlayer.MVVMFiles.ViewModels
             => WindowDialogHelper<PlaylistView>.Instance.Show();
 
         private void OnRepeatChecked(bool state) 
-            => OnNotify(new MediaControlEventArgs(MediaControlEventType.PlaylistClick, state));
+            => OnNotify(new MediaControlEventArgs(MediaControlEventType.RepeatCheck, state));
 
         private void OnSettingsClicked()
             => WindowDialogHelper<SettingsView>.Instance.Show();
@@ -101,16 +95,16 @@ namespace DQPlayer.MVVMFiles.ViewModels
 
         private void OnMediaAttached()
         {
-            Manager<MediaFileInformation>.NewRequest += CurrentMediaPlayer_MediaPlayedNewSource;
+            FileManager<MediaFileInformation>.Instance.NewRequest += CurrentMediaPlayer_MediaPlayedNewSource;
             MediaAttached?.Invoke(this, CurrentMediaPlayer);
         }
 
         private void OnMediaDetached()
         {
-            Manager<MediaFileInformation>.NewRequest -= CurrentMediaPlayer_MediaPlayedNewSource;
+            FileManager<MediaFileInformation>.Instance.NewRequest -= CurrentMediaPlayer_MediaPlayedNewSource;
         }
 
-        private void CurrentMediaPlayer_MediaPlayedNewSource(object sender, ManagerEventArgs<MediaFileInformation> e)
+        private void CurrentMediaPlayer_MediaPlayedNewSource(object sender, FileManagerEventArgs<MediaFileInformation> e)
         {
             IsCheckedState = e.SelectedFiles.First() != null;
             OnPropertyChanged(nameof(PlayerSourceState));
@@ -126,7 +120,7 @@ namespace DQPlayer.MVVMFiles.ViewModels
             if (fileDialog.ShowDialog().GetValueOrDefault())
             {
                 var files = fileDialog.FileNames.Select(FileProcesser.Selector);
-                ManagerHelper.Request(this, files);
+                FileManagerHelper.Request(this, files);
                 OnNotify(new MediaControlEventArgs(MediaControlEventType.BrowseClick, files));
             }
         }

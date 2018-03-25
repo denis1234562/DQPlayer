@@ -6,6 +6,7 @@ using DQPlayer.Annotations;
 using System.ComponentModel;
 using System.Windows.Controls;
 using DQPlayer.MVVMFiles.Views;
+using System.Collections.Generic;
 using DQPlayer.Helpers.Extensions;
 using DQPlayer.MVVMFiles.Commands;
 using System.Collections.Specialized;
@@ -29,6 +30,16 @@ namespace DQPlayer.MVVMFiles.ViewModels
 
         public ObservableCircularList<MediaFileInformation> FilesCollection { get; set; }
 
+        private delegate MediaFileInformation
+            PlaylistActionDelegate(ObservableCircularList<MediaFileInformation> files);
+
+        private static readonly Dictionary<PlaylistAction, PlaylistActionDelegate> _playlistActions =
+            new Dictionary<PlaylistAction, PlaylistActionDelegate>
+            {
+                [PlaylistAction.PlayNext] = files => files.Next,
+                [PlaylistAction.PlayPrevious] = files => files.Previous,
+            };
+
         public PlaylistViewModel()
         {
             FilesCollection = new ObservableCircularList<MediaFileInformation>();
@@ -41,8 +52,13 @@ namespace DQPlayer.MVVMFiles.ViewModels
 
             FilesCollection.CollectionChanged += FilesCollection_CollectionChanged;
 
-            Manager<MediaFileInformation>.NewRequest += OnManagerRequest;
+            FileManager<MediaFileInformation>.Instance.NewRequest += FileManager_OnNewRequest;
+            PlaylistManager.Instance.NewRequest += PlaylistManager_OnNewRequest;
         }
+
+        private void PlaylistManager_OnNewRequest(object sender, PlaylistManagerEventArgs e) =>
+            FileManager<MediaFileInformation>.Instance.Request(this,
+                _playlistActions[e.PlaylistAction].Invoke(FilesCollection).AsEnumerable());
 
         private void FilesCollection_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
             => OnPropertyChanged(nameof(FilesCollection));
@@ -79,14 +95,14 @@ namespace DQPlayer.MVVMFiles.ViewModels
             if (e.ChangedButton == MouseButton.Left &&
                 ((FrameworkElement) e.OriginalSource).DataContext is MediaFileInformation item)
             {
-                Manager<MediaFileInformation>.Request(this, item.AsEnumerable());
+                FileManager<MediaFileInformation>.Instance.Request(this, item.AsEnumerable());
             }
         }
 
         private void OnClearAllCommand()
         {
             FilesCollection.Clear();
-            Manager<MediaFileInformation>.Request(this, new MediaFileInformation[] { null });
+            FileManager<MediaFileInformation>.Instance.Request(this, new MediaFileInformation[] { null });
         }
 
         private void OnRemoveCommand(ListView listView)
@@ -98,11 +114,11 @@ namespace DQPlayer.MVVMFiles.ViewModels
             }
             if (!lastPlayedFile.Equals(FilesCollection.Current))
             {
-                Manager<MediaFileInformation>.Request(this, new MediaFileInformation[] { null });
+                FileManager<MediaFileInformation>.Instance.Request(this, new MediaFileInformation[] { null });
             }
         }
 
-        private void OnManagerRequest(object sender, ManagerEventArgs<MediaFileInformation> e)
+        private void FileManager_OnNewRequest(object sender, FileManagerEventArgs<MediaFileInformation> e)
         {
             var firstMediaFile = e.SelectedFiles.First();
             if (firstMediaFile == null)

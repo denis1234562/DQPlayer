@@ -7,7 +7,7 @@ namespace DQPlayer.Helpers.CustomCollections
     {
         private readonly IList<T> _elements = new List<T>();
 
-        private int lastUsedElementIndex;
+        private int _lastUsedElementIndex;
 
         public CircularList(IEnumerable<T> collection, int startingIterableIndex = 0)
         {
@@ -15,7 +15,7 @@ namespace DQPlayer.Helpers.CustomCollections
             {
                 _elements.Add(item);
             }
-            lastUsedElementIndex = startingIterableIndex;
+            _lastUsedElementIndex = startingIterableIndex;
         }
 
         public CircularList()
@@ -95,43 +95,48 @@ namespace DQPlayer.Helpers.CustomCollections
 
         #region Implementation of ICircularList<T>
 
+        public T Next => _lastUsedElementIndex + 1 >= _elements.Count
+            ? _elements[0]
+            : _elements[_lastUsedElementIndex + 1];
+
+        public T Previous => _lastUsedElementIndex - 1 < 0
+            ? _elements[_elements.Count - 1]
+            : _elements[_lastUsedElementIndex - 1];
+
         public T MoveNext()
         {
-            int temp = lastUsedElementIndex;
-            lastUsedElementIndex++;
-            if (lastUsedElementIndex >= _elements.Count)
+            int temp = _lastUsedElementIndex;
+            _lastUsedElementIndex++;
+            if (_lastUsedElementIndex >= _elements.Count)
             {
-                lastUsedElementIndex = 0;
+                _lastUsedElementIndex = 0;
             }
             return _elements[temp];
         }
 
         public T MovePrevious()
         {
-            int temp = lastUsedElementIndex;
-            lastUsedElementIndex--;
-            if (lastUsedElementIndex < 0)
+            int temp = _lastUsedElementIndex;
+            _lastUsedElementIndex--;
+            if (_lastUsedElementIndex < 0)
             {
-                lastUsedElementIndex = _elements.Count - 1;
+                _lastUsedElementIndex = _elements.Count - 1;
             }
             return _elements[temp];
         }
 
-        public T Current
-        {
-            get => _elements.Count == 0
-             ? default(T)
-             : _elements[lastUsedElementIndex];
-        }
+        public T Current => _elements.Count == 0
+            ? default(T)
+            : _elements[_lastUsedElementIndex];
 
         public void SetCurrent(int currentIndex)
         {
-            lastUsedElementIndex = currentIndex;
+            _lastUsedElementIndex = currentIndex;
         }
 
         public void Reset()
         {
-            lastUsedElementIndex = 0;
+            _lastUsedElementIndex = 0;
         }
 
         #endregion

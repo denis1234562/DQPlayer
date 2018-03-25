@@ -4,13 +4,30 @@ using System.Windows;
 
 namespace DQPlayer.Helpers.DialogHelpers
 {
-    public class WindowDialogHelper<T>
+    public sealed class WindowDialogHelper<T>
         where T : Window, new()
     {
-        private static WindowDialogHelper<T> _instance;
-        public static WindowDialogHelper<T> Instance => _instance ?? (_instance = new WindowDialogHelper<T>());
+        private static readonly object _padlock = new object();
+
+        private static readonly Lazy<WindowDialogHelper<T>> _instance =
+            new Lazy<WindowDialogHelper<T>>(() => new WindowDialogHelper<T>());
+        public static WindowDialogHelper<T> Instance
+        {
+            get
+            {
+                lock (_padlock)
+                {
+                    return _instance.Value;
+                }
+            }
+        }
 
         private T _windowInstance;
+
+        private WindowDialogHelper()
+        {
+            
+        }
 
         public object DataContext
         {
