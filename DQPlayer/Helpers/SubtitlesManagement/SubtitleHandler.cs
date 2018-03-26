@@ -71,7 +71,7 @@ namespace DQPlayer.Helpers.SubtitlesManagement
         private void OnMediaStopped(object sender)
         {
             Pause();
-            ResyncSubtitles(new TimeSpan(0));
+            ResyncSubtitles(TimeSpan.Zero);
         }
 
         private void OnMediaPlayed(object sender)
@@ -139,7 +139,7 @@ namespace DQPlayer.Helpers.SubtitlesManagement
             foreach (var subtitle in _currentlyShownSubtitles)
             {
                 ScheduleSubtitleHiding(subtitle,
-                    GeneralExtensions.Max(new TimeSpan(0), subtitle.SubtitleInterval.End.Subtract(interval)));
+                    GeneralExtensions.Max(TimeSpan.Zero, subtitle.SubtitleInterval.End.Subtract(interval)));
             }
         }
 

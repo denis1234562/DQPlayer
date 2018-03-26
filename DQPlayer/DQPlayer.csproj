@@ -114,6 +114,7 @@
     <Compile Include="Helpers\ICustomObservable.cs" />
     <Compile Include="Helpers\InputManagement\FileManager.cs" />
     <Compile Include="Helpers\InputManagement\FileManagerHelper.cs" />
+    <Compile Include="Helpers\InputManagement\IManager.cs" />
     <Compile Include="Helpers\InputManagement\PlaylistManager.cs" />
     <Compile Include="Helpers\InputManagement\PlaylistManagerEventArgs.cs" />
     <Compile Include="Helpers\LocalizationManagement\LocExtension.cs" />
@@ -415,21 +416,16 @@
   <ItemGroup>
     <Resource Include="bin\Debug\Assets\MediaPlayerLayout\Initial_Screen copy.png" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Resource Include="bin\Debug\Assets\Minus_Sign.png" />
+    <Resource Include="bin\Debug\Assets\Plus_Sign.png" />
+    <Resource Include="bin\Debug\Assets\X_Sign.png" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\WPF.Themes\WPF.Themes.csproj">
       <Project>{cd3cd636-d63e-4bd5-9fe9-2b63da6f0616}</Project>
       <Name>WPF.Themes</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="bin\Debug\Assets\Plus_Icon.jpg" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="bin\Debug\Assets\Minus_Icon.jpg" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="bin\Debug\Assets\X_Icon.jpg" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

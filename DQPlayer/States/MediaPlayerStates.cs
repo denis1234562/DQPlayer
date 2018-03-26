@@ -12,8 +12,6 @@ namespace DQPlayer.States
         public static MediaPlayerState Pause { get; }
         public static MediaPlayerState Play { get; }
         public static MediaPlayerState Stop { get; }
-        public static MediaPlayerState FastForward { get; }
-        public static MediaPlayerState Rewind { get; }
 
         static MediaPlayerStates()
         {
@@ -35,12 +33,6 @@ namespace DQPlayer.States
 
             Stop = (MediaPlayerState) ctor.Invoke(new object[]
                 {3, false, new Action<IRegulatableMediaService>(m => m.Stop())});
-
-            FastForward = (MediaPlayerState) ctor.Invoke(new object[]
-                {4, true, new Action<IRegulatableMediaService>(m => m.FastForward())});
-
-            Rewind = (MediaPlayerState) ctor.Invoke(new object[]
-                {5, true, new Action<IRegulatableMediaService>(m => m.Rewind())});
         }
 
         private readonly IReadOnlyList<MediaPlayerState> _playerStates = new List<MediaPlayerState>(5)
@@ -49,8 +41,6 @@ namespace DQPlayer.States
             Pause,
             Play,
             Stop,
-            FastForward,
-            Rewind
         };
 
         public IEnumerator<MediaPlayerState> GetEnumerator()

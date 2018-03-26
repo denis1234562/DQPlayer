@@ -165,7 +165,7 @@
                     </Button>
                     <Button Name="bRewind" Height="24" Width="32" Margin="15,0"
                             IsEnabled="{Binding PlayerSourceState}"
-                            Command="{Binding RewindClickCommand}" CommandParameter="{Binding ElementName=sMovieSkipSlider}"
+                            Command="{Binding RewindClickCommand}"
                             Style="{StaticResource TransparentButton}">
                         <Image Source="pack://application:,,,/bin/Debug/Assets/MediaPlayerLayout/Rewind copy.png"/>
                     </Button>
@@ -205,7 +205,7 @@
                     </Button>
                     <Button Name="bFastForward" Height="24" Width="32" Margin="15,0"
                             IsEnabled="{Binding PlayerSourceState}"
-                            Command="{Binding FastForwardClickCommand}" CommandParameter="{Binding ElementName=sMovieSkipSlider}"
+                            Command="{Binding FastForwardClickCommand}"
                             Style="{StaticResource TransparentButton}">
                         <Image Source="pack://application:,,,/bin/Debug/Assets/MediaPlayerLayout/Fast_forw copy.png"/>
                     </Button>

@@ -55,8 +55,7 @@ namespace DQPlayer.MVVMFiles.Models.MediaPlayer
 
         void IRegulatableMediaService.Rewind()
         {
-            var position = GeneralExtensions.Max(_mediaElement.Position.Subtract(Settings.SkipSeconds),
-                new TimeSpan(0));
+            var position = GeneralExtensions.Max(_mediaElement.Position.Subtract(Settings.SkipSeconds), TimeSpan.Zero);
             SetNewPlayerPosition(position);
         }
 
@@ -75,7 +74,7 @@ namespace DQPlayer.MVVMFiles.Models.MediaPlayer
         public void SetNewPlayerSource(Uri source)
         {
             _mediaElement.Source = source;
-            _mediaElement.Position = new TimeSpan(0);
+            _mediaElement.Position = TimeSpan.Zero;
         }
 
         #endregion

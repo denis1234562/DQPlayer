@@ -21,13 +21,16 @@ namespace DQPlayer.MVVMFiles.ViewModels
     {
         private readonly Dictionary<MediaControlEventType, EventHandler<MediaControlEventArgs>> _handlers;
 
+        private Action _currentFileCallback;
+        private bool _repeatState;
+
         public event Action<object, MediaElement> MediaEnded;
 
         public RelayCommand<MediaElement> MediaEndedCommand { get; }       
 
-        public event Action<IMediaControlsViewModel> ControlsAttached;
-
         public MediaPlayerModel MediaPlayerModel { get; set; }
+
+        public event Action<IMediaControlsViewModel> ControlsAttached;
 
         private IMediaControlsViewModel _curentControls;
         public IMediaControlsViewModel CurentControls
@@ -51,10 +54,10 @@ namespace DQPlayer.MVVMFiles.ViewModels
             MediaEndedCommand = new RelayCommand<MediaElement>(OnMediaEnded);
             _handlers = new Dictionary<MediaControlEventType, EventHandler<MediaControlEventArgs>>
             {
-                [MediaControlEventType.RewindClick] = OnRewindClick,
+                [MediaControlEventType.RewindClick] = (s, e) => MediaPlayerModel.MediaController.Rewind(),
                 [MediaControlEventType.PlayClick] = (s, e) => MediaPlayerModel.SetMediaState(MediaPlayerStates.Play),
                 [MediaControlEventType.PauseClick] = (s, e) => MediaPlayerModel.SetMediaState(MediaPlayerStates.Pause),
-                [MediaControlEventType.FastForwardClick] = OnFastForwardClick,
+                [MediaControlEventType.FastForwardClick] = (s, e) => MediaPlayerModel.MediaController.FastForward(),
                 [MediaControlEventType.StopClick] = (s, e) => MediaPlayerModel.SetMediaState(MediaPlayerStates.Stop),
 
                 [MediaControlEventType.PositionSliderDragStarted] = OnPositionSliderDragStarted,
@@ -63,6 +66,7 @@ namespace DQPlayer.MVVMFiles.ViewModels
 
                 [MediaControlEventType.MoveNextClick] = OnMoveNextClick,
                 [MediaControlEventType.MovePreviousClick] = OnMovePreviousClick,
+                [MediaControlEventType.RepeatCheck] = (sender, args) => _repeatState = (bool) args.AdditionalInfo
             };
             FileManager<MediaFileInformation>.Instance.NewRequest += FileManager_OnNewRequest;
         }
@@ -82,6 +86,7 @@ namespace DQPlayer.MVVMFiles.ViewModels
                 MediaPlayerModel.SetMediaState(MediaPlayerStates.None);
                 if (firstFile != null)
                 {
+                    _currentFileCallback = () => e.Callback?.Invoke(firstFile, _repeatState);
                     MediaPlayerModel.SetMediaState(MediaPlayerStates.Play);
                 }
             }   
@@ -112,18 +117,6 @@ namespace DQPlayer.MVVMFiles.ViewModels
 
         #region Media Controls Event Handlers
 
-        private void OnFastForwardClick(object sender, MediaControlEventArgs e)
-        {
-            MediaPlayerModel.SerializeState(MediaPlayerStates.FastForward);
-            MediaPlayerModel.ResumeSerializedState();
-        }
-
-        private void OnRewindClick(object sender, MediaControlEventArgs mediaControlEventArgs)
-        {
-            MediaPlayerModel.SerializeState(MediaPlayerStates.Rewind);
-            MediaPlayerModel.ResumeSerializedState();
-        }
-
         private void OnPositionSliderDragStarted(object sender, MediaControlEventArgs e)
         {
             //force video update
@@ -140,6 +133,7 @@ namespace DQPlayer.MVVMFiles.ViewModels
 
         private void OnMediaEnded(MediaElement mediaElement)
         {
+            _currentFileCallback?.Invoke();
             MediaEnded?.Invoke(this, mediaElement);
         }      
 

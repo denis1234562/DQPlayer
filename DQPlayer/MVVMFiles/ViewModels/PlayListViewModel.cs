@@ -30,15 +30,9 @@ namespace DQPlayer.MVVMFiles.ViewModels
 
         public ObservableCircularList<MediaFileInformation> FilesCollection { get; set; }
 
-        private delegate MediaFileInformation
-            PlaylistActionDelegate(ObservableCircularList<MediaFileInformation> files);
+        private delegate void PlaylistActionDelegate(ObservableCircularList<MediaFileInformation> files);
 
-        private static readonly Dictionary<PlaylistAction, PlaylistActionDelegate> _playlistActions =
-            new Dictionary<PlaylistAction, PlaylistActionDelegate>
-            {
-                [PlaylistAction.PlayNext] = files => files.Next,
-                [PlaylistAction.PlayPrevious] = files => files.Previous,
-            };
+        private readonly Dictionary<PlaylistAction, PlaylistActionDelegate> _playlistActions;
 
         public PlaylistViewModel()
         {
@@ -50,6 +44,12 @@ namespace DQPlayer.MVVMFiles.ViewModels
             BrowseCommand = new RelayCommand(OnBrowseCommand);
             WindowClosingCommand = new RelayCommand<CancelEventArgs>(OnWindowClosingCommand);
 
+            _playlistActions = new Dictionary<PlaylistAction, PlaylistActionDelegate>
+            {
+                [PlaylistAction.PlayNext] = files => RequestNewFiles(files.Next, FileManagerCallback),
+                [PlaylistAction.PlayPrevious] = files => RequestNewFiles(files.Previous, FileManagerCallback),
+            };
+
             FilesCollection.CollectionChanged += FilesCollection_CollectionChanged;
 
             FileManager<MediaFileInformation>.Instance.NewRequest += FileManager_OnNewRequest;
@@ -57,8 +57,7 @@ namespace DQPlayer.MVVMFiles.ViewModels
         }
 
         private void PlaylistManager_OnNewRequest(object sender, PlaylistManagerEventArgs e) =>
-            FileManager<MediaFileInformation>.Instance.Request(this,
-                _playlistActions[e.PlaylistAction].Invoke(FilesCollection).AsEnumerable());
+            _playlistActions[e.PlaylistAction].Invoke(FilesCollection);
 
         private void FilesCollection_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
             => OnPropertyChanged(nameof(FilesCollection));
@@ -95,14 +94,14 @@ namespace DQPlayer.MVVMFiles.ViewModels
             if (e.ChangedButton == MouseButton.Left &&
                 ((FrameworkElement) e.OriginalSource).DataContext is MediaFileInformation item)
             {
-                FileManager<MediaFileInformation>.Instance.Request(this, item.AsEnumerable());
+                RequestNewFiles(item, FileManagerCallback);
             }
         }
 
         private void OnClearAllCommand()
         {
             FilesCollection.Clear();
-            FileManager<MediaFileInformation>.Instance.Request(this, new MediaFileInformation[] { null });
+            RequestNewFiles(new MediaFileInformation[] { null });
         }
 
         private void OnRemoveCommand(ListView listView)
@@ -114,7 +113,7 @@ namespace DQPlayer.MVVMFiles.ViewModels
             }
             if (!lastPlayedFile.Equals(FilesCollection.Current))
             {
-                FileManager<MediaFileInformation>.Instance.Request(this, new MediaFileInformation[] { null });
+                RequestNewFiles(new MediaFileInformation[] { null });
             }
         }
 
@@ -132,6 +131,7 @@ namespace DQPlayer.MVVMFiles.ViewModels
             if (!sender.Equals(this))
             {
                 FilesCollection.AddRange(e.SelectedFiles);
+                RequestNewFiles(e.SelectedFiles, FileManagerCallback);
             }
             ChangePlayingFile(firstMediaFile);
         }
@@ -144,7 +144,30 @@ namespace DQPlayer.MVVMFiles.ViewModels
             }
             FilesCollection.SetCurrent(FilesCollection.IndexOf(file));
             FilesCollection.Current.IsPlaying = newFileState;
-        } 
+        }
+
+        private void RequestNewFiles(IEnumerable<MediaFileInformation> files,
+            FileManager<MediaFileInformation>.FileManagerCallback callback = null)
+        {
+            FileManager<MediaFileInformation>.Instance.Request(this,
+                new FileManagerEventArgs<MediaFileInformation>(files, callback));
+        }
+
+        private void RequestNewFiles(MediaFileInformation file,
+            FileManager<MediaFileInformation>.FileManagerCallback callback = null)
+        {
+            RequestNewFiles(file.AsEnumerable(), callback);
+        }
+
+        private void FileManagerCallback(MediaFileInformation currentPlayingFile, bool repeatState)
+        {
+            //Check if replay is checked
+            //if so ignore the equals call
+            if (!FilesCollection.Last().Equals(FilesCollection.Current) || repeatState)
+            {
+                RequestNewFiles(FilesCollection.Next, FileManagerCallback);
+            }
+        }
 
         #region INotifyPropertyChanged Implementation
 

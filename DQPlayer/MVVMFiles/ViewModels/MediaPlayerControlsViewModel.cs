@@ -18,7 +18,6 @@ using DQPlayer.Helpers.FileManagement;
 using DQPlayer.Helpers.InputManagement;
 using DQPlayer.MVVMFiles.UserControls.MainWindow;
 using DQPlayer.Helpers.FileManagement.FileInformation;
-using static DQPlayer.Helpers.Extensions.GeneralExtensions;
 
 namespace DQPlayer.MVVMFiles.ViewModels
 {
@@ -30,11 +29,11 @@ namespace DQPlayer.MVVMFiles.ViewModels
             RepeatCheckCommand = new RelayCommand<bool>(OnRepeatChecked);
             SettingsClickCommand = new RelayCommand(OnSettingsClicked);
             BrowseFilesCommand = new RelayCommand(OnBrowseFiles);
-            RewindClickCommand = new RelayCommand<ThumbDragSlider>(OnRewindClick);
+            RewindClickCommand = new RelayCommand(OnRewindClick);
             MovePreviousCommand = new RelayCommand(OnMovePrevious);
             PlayPauseClickCommand = new RelayCommand<bool>(OnPlayPauseClick);
             MoveNextCommand = new RelayCommand(OnMoveNext);
-            FastForwardClickCommand = new RelayCommand<ThumbDragSlider>(OnFastForwardClick);
+            FastForwardClickCommand = new RelayCommand(OnFastForwardClick);
             StopClickCommand = new RelayCommand<ThumbDragSlider>(OnStopClick);
             PositionSliderDragStartedCommand = new RelayCommand<ThumbDragSlider>(OnPositionSliderDragStarted);
             PositionSliderDragCompletedCommand = new RelayCommand(OnPositionSliderDragCompleted);
@@ -87,6 +86,12 @@ namespace DQPlayer.MVVMFiles.ViewModels
         private void OnSettingsClicked()
             => WindowDialogHelper<SettingsView>.Instance.Show();
 
+        private void OnRewindClick()
+            => OnNotify(new MediaControlEventArgs(MediaControlEventType.RewindClick));
+
+        private void OnFastForwardClick()
+            => OnNotify(new MediaControlEventArgs(MediaControlEventType.FastForwardClick));
+
         private void OnStopClick(ThumbDragSlider slider)
         {
             slider.Value = TimeSpan.Zero;
@@ -125,18 +130,12 @@ namespace DQPlayer.MVVMFiles.ViewModels
             }
         }
 
-        private void OnRewindClick(ThumbDragSlider slider)
+        private void TooltipUpdate(object[] values)
         {
-            var position = Max(slider.Value.Subtract(Settings.SkipSeconds), new TimeSpan(0));
-            slider.Value = position;
-            OnNotify(new MediaControlEventArgs(MediaControlEventType.RewindClick, position));
-        }
+            var tooltip = (ToolTip)values[0];
+            var obtainValue = (Func<object>)values[1];
 
-        private void OnFastForwardClick(ThumbDragSlider slider)
-        {           
-            var position = Min(slider.Value, slider.Value.Add(Settings.SkipSeconds));
-            slider.Value = position;
-            OnNotify(new MediaControlEventArgs(MediaControlEventType.FastForwardClick, position));
+            tooltip.Content = obtainValue.Invoke();
         }
 
         #endregion
@@ -211,27 +210,18 @@ namespace DQPlayer.MVVMFiles.ViewModels
         public RelayCommand<bool> RepeatCheckCommand { get; }
         public RelayCommand SettingsClickCommand { get; }
         public RelayCommand BrowseFilesCommand { get; }
-        public RelayCommand<ThumbDragSlider> RewindClickCommand { get; }
+        public RelayCommand RewindClickCommand { get; }
         public RelayCommand MovePreviousCommand { get; }
         public RelayCommand<bool> PlayPauseClickCommand { get; }
         public RelayCommand MoveNextCommand { get; }
-        public RelayCommand<ThumbDragSlider> FastForwardClickCommand { get; }
+        public RelayCommand FastForwardClickCommand { get; }
         public RelayCommand<ThumbDragSlider> StopClickCommand { get; }
         public RelayCommand<RoutedPropertyChangedEventArgs<double>> VolumeSliderValueChangedCommand { get; }
         public RelayCommand<ThumbDragSlider> PositionSliderDragStartedCommand { get; }
         public RelayCommand PositionSliderDragCompletedCommand { get; }
         public RelayCommand<MouseEventArgs> PositionSliderThumbMouseEnterCommand { get; }
-
-        #endregion
-
         public MultiValueRelayCommand TooltipUpdateCommand => new MultiValueRelayCommand(TooltipUpdate);
 
-        private void TooltipUpdate(object[] values)
-        {
-            var tooltip = (ToolTip)values[0];
-            var obtainValue = (Func<object>) values[1];
-
-            tooltip.Content = obtainValue.Invoke();
-        }
+        #endregion
     }
 }

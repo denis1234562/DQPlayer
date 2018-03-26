@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Threading;
 
 namespace DQPlayer
@@ -95,8 +96,11 @@ namespace DQPlayer
             _hasScheduledIntermission = true;
         }
 
-        public void Resume()
+        public async void Resume()
         {
+            //allows await Task.Delay(scheduledIntermissionTime, _cancelationToken.Token); to cancel in case of spam,
+            //which would otherwise cause an throw exception by .NET's API (cant be catched)
+            await Task.Delay(1);
             if ((_task == null || _task.IsCompleted) && (_hasScheduledIntermission || _sw.ElapsedTicks == 0))
             {
                 _task = Task.Run(async () =>
@@ -112,10 +116,11 @@ namespace DQPlayer
                     }
                     try
                     {
-                        await Task.Delay(scheduledIntermissionTime, _cancelationToken.Token);
+                        await Task.Delay(scheduledIntermissionTime, _cancelationToken.Token).ContinueWith(task => {});
                     }
-                    catch (TaskCanceledException)
+                    catch (TaskCanceledException ex)
                     {
+                        Console.WriteLine(ex.Message);
                     }
                     if (_cancelationToken.IsCancellationRequested)
                     {

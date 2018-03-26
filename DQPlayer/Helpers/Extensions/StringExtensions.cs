@@ -21,7 +21,7 @@ namespace DQPlayer.Helpers.Extensions
                 FolderItem folderItem = folder.ParseName(fileInfo.Name);
                 return TimeSpan.Parse(folder.GetDetailsOf(folderItem, 27));
             }
-            return new TimeSpan(0);
+            return TimeSpan.Zero;
         }
     }
 }

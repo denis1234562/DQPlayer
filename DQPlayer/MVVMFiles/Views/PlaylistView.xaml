@@ -61,17 +61,17 @@
                 <ContextMenu Background="{DynamicResource WindowBackgroundBrush}" Style="{StaticResource ContextMenuWithoutIconStripStyle}">
                     <MenuItem Header="Add File"  Command="{Binding BrowseCommand}">
                         <MenuItem.Icon>
-                            <Image Stretch="Fill" Height="15" Width="15" Source="/DQPlayer;component/bin/Debug/Assets/Plus_Icon.jpg"/>
+                            <Image Stretch="Fill" Height="15" Width="15" Source="/DQPlayer;component/bin/Debug/Assets/Plus_Sign.png"/>
                         </MenuItem.Icon>
                     </MenuItem>
                     <MenuItem Header="Remove" Command="{Binding RemoveCommand}" CommandParameter="{x:Reference Name=lvListView}">
                         <MenuItem.Icon>
-                            <Image Stretch="Fill" Height="15" Width="15" Source="/DQPlayer;component/bin/Debug/Assets/Minus_Icon.jpg"/>
+                            <Image Stretch="Fill" Height="15" Width="15" Source="/DQPlayer;component/bin/Debug/Assets/Minus_Sign.png"/>
                         </MenuItem.Icon>
                     </MenuItem>
                     <MenuItem Header="Clear All" Command="{Binding ClearAllCommand}">
                         <MenuItem.Icon>
-                            <Image Stretch="Fill" Height="15" Width="15" Source="/DQPlayer;component/bin/Debug/Assets/X_Icon.jpg"/>
+                            <Image Stretch="Fill" Height="15" Width="15" Source="/DQPlayer;component/bin/Debug/Assets/X_Sign.png"/>
                         </MenuItem.Icon>
                     </MenuItem>
                 </ContextMenu>

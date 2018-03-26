@@ -1,21 +1,17 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using DQPlayer.Annotations;
 using DQPlayer.Helpers.FileManagement.FileInformation;
 
 namespace DQPlayer.Helpers.InputManagement
 {
-    public interface IManager<TArgs>
-        where TArgs : EventArgs
-    {
-        event EventHandler<TArgs> NewRequest;
-        void Request(object sender, TArgs e);
-    }
-
     public sealed class FileManager<TFileInformation>
         : IManager<FileManagerEventArgs<TFileInformation>>
         where TFileInformation : IFileInformation
     {
+        public delegate void FileManagerCallback(TFileInformation fileInformation, bool repeatState);
+
         private static readonly object _padlock = new object();
 
         private static readonly Lazy<FileManager<TFileInformation>> _instance =
@@ -36,7 +32,6 @@ namespace DQPlayer.Helpers.InputManagement
 
         private FileManager()
         {
-
         }
 
         public void Request(object sender, IEnumerable<TFileInformation> selectedFiles)
@@ -49,7 +44,12 @@ namespace DQPlayer.Helpers.InputManagement
             OnNewRequest(sender, args);
         }
 
-        //required for ManagerHelper's reflection
+        /// <summary>
+        /// Called via reflection by <see cref="FileManagerHelper"/>
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="selectedFiles"></param>
+        [UsedImplicitly]
         private void Request(object sender, IEnumerable<object> selectedFiles)
         {
             Request(sender, selectedFiles.Cast<TFileInformation>());

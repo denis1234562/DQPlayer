@@ -8,10 +8,13 @@ namespace DQPlayer.Helpers.InputManagement
         where TFileInformation : IFileInformation
     {
         public IEnumerable<TFileInformation> SelectedFiles { get; }
+        public FileManager<TFileInformation>.FileManagerCallback Callback { get; }
 
-        public FileManagerEventArgs(IEnumerable<TFileInformation> selectedFiles)
+        public FileManagerEventArgs(IEnumerable<TFileInformation> selectedFiles,
+            FileManager<TFileInformation>.FileManagerCallback callback = null)
         {
             SelectedFiles = selectedFiles ?? throw new ArgumentNullException(nameof(selectedFiles));
+            Callback = callback;
         }
     }
 }
