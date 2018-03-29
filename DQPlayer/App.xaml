@@ -2,10 +2,13 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              StartupUri="MVVMFiles/Views/MainWindow.xaml">
+    <!--StartupUri="MVVMFiles/UserControls/SettingsTabs/SubtitlesTab.xaml">-->
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source ="/WPF.Themes;component/Default/Theme.xaml"/>
+                <ResourceDictionary Source ="MVVMFiles/ResourceDictionaries/ColorPickerStyle.xaml"/>
+                <ResourceDictionary Source="MVVMFiles/ResourceDictionaries/ColorCanvasStyle.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>
