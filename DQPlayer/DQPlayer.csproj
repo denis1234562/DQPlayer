@@ -125,7 +125,10 @@
     <Compile Include="Helpers\Adorners\SortAdorner.cs" />
     <Compile Include="Helpers\Animations\AnimationManager.cs" />
     <Compile Include="Helpers\Animations\AnimationWrapper.cs" />
+    <Compile Include="Helpers\CustomCollections\KeyedEntryCollection.cs" />
+    <Compile Include="Helpers\CustomCollections\ObservableDictionary.cs" />
     <Compile Include="Helpers\DialogHelpers\WindowDialogHelper.cs" />
+    <Compile Include="Helpers\Extensions\LoopUtilities.cs" />
     <Compile Include="Helpers\FileManagement\FileInformation\IFileInformation.cs" />
     <Compile Include="Helpers\FileManagement\FileInformation\MediaFileInformation.cs" />
     <Compile Include="Helpers\FileManagement\FileProcesser.cs" />
@@ -139,6 +142,8 @@
     <Compile Include="Helpers\LocalizationManagement\TranslationSource.cs" />
     <Compile Include="Helpers\MediaControls\MediaControlEventArgs.cs" />
     <Compile Include="Helpers\InputManagement\FileManagerEventArgs.cs" />
+    <Compile Include="Helpers\ObjectPooling\ObjectPooler.cs" />
+    <Compile Include="Helpers\ObjectPooling\PooledObject.cs" />
     <Compile Include="MVVMFiles\Converters\ColorToSolidColorBrushConverter.cs" />
     <Compile Include="MVVMFiles\Converters\PlaylistFilesDurationConverter.cs" />
     <Compile Include="Helpers\Templates\Template.cs" />
@@ -189,6 +194,9 @@
     </Compile>
     <Compile Include="MVVMFiles\UserControls\MainWindow\MediaPlayerControlsUserControl.xaml.cs">
       <DependentUpon>MediaPlayerControlsUserControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="MVVMFiles\UserControls\MainWindow\SubtitlesUserControl.xaml.cs">
+      <DependentUpon>SubtitlesUserControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="MVVMFiles\UserControls\SettingsTabs\AudioTab.xaml.cs">
       <DependentUpon>AudioTab.xaml</DependentUpon>
@@ -274,6 +282,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="MVVMFiles\UserControls\MainWindow\MediaPlayerControlsUserControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="MVVMFiles\UserControls\MainWindow\SubtitlesUserControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

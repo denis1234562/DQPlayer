@@ -5,7 +5,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using DQPlayer.Properties;
+using DQPlayer.Annotations;
 
 namespace DQPlayer.Helpers.CustomCollections
 {
@@ -90,10 +90,13 @@ namespace DQPlayer.Helpers.CustomCollections
         #endregion
 
         #region INotifyPropertyChanged implementation
+
+        [NotifyPropertyChangedInvocator]
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
+
         #endregion
 
         #region Implementation of IEnumerable

@@ -1,19 +1,48 @@
 ﻿using System;
 using System.Windows;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Windows.Media.Animation;
+using DQPlayer.Helpers.CustomCollections;
+using DQPlayer.Helpers.ObjectPooling;
 
 namespace DQPlayer.Helpers.Animations
 {
     public class AnimationManager
     {
-        private readonly IDictionary<string, AnimationWrapper> _animationCache;
+        private readonly ObservableDictionary<string, AnimationWrapper> _animationCache;
         private readonly HashSet<KeyValuePair<UIElement, AnimationWrapper>> _elementToAnimationCache;
+        private readonly IDictionary<string, ObjectPooler<AnimationTimeline>> _animationObjectPoolers;
 
         public AnimationManager()
         {
-            _animationCache = new Dictionary<string, AnimationWrapper>();
+            _animationCache = new ObservableDictionary<string, AnimationWrapper>();
             _elementToAnimationCache = new HashSet<KeyValuePair<UIElement, AnimationWrapper>>();
+            _animationObjectPoolers = new Dictionary<string, ObjectPooler<AnimationTimeline>>();
+
+            _animationCache.CollectionChanged += AnimationCache_OnCollectionChanged;
+        }
+
+        private void AnimationCache_OnCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.Action == NotifyCollectionChangedAction.Add)
+            {
+                var addedAnimation = (KeyValuePair<string, AnimationWrapper>) e.NewItems[0];
+                AddObjectPooler(addedAnimation);
+            }
+            else if (e.Action == NotifyCollectionChangedAction.Remove)
+            {
+                var removedAnimation = (KeyValuePair<string, AnimationWrapper>) e.NewItems[0];
+                _animationObjectPoolers.Remove(removedAnimation.Key);
+            }
+        }
+
+        private void AddObjectPooler(KeyValuePair<string, AnimationWrapper> animationWrapper)
+        {
+            _animationObjectPoolers.Add(animationWrapper.Key,
+                new ObjectPooler<AnimationTimeline>(
+                    new PooledObject<AnimationTimeline>(animationWrapper.Value.АnimationInitializer), 100,
+                    PoolRefillMethod.WholePool));
         }
 
         public void BeginAnimation(string name, UIElement element, TimeSpan? beginTime, Duration duration)
@@ -26,10 +55,11 @@ namespace DQPlayer.Helpers.Animations
             {
                 throw new KeyNotFoundException(nameof(name));
             }
-            var animation = animationWrapper.АnimationInitializer.Invoke();
-            animation.BeginTime = beginTime;
-            animation.Duration = duration;
-            BeginAnimationImpl(animationWrapper, animation, element);
+            BeginAnimationImpl(animationWrapper, element, animation =>
+            {
+                animation.BeginTime = beginTime;
+                animation.Duration = duration;
+            });
         }
 
         public void BeginAnimation(string name, UIElement element)
@@ -42,13 +72,13 @@ namespace DQPlayer.Helpers.Animations
             {
                 throw new KeyNotFoundException(nameof(name));
             }
-            var animation = animationWrapper.АnimationInitializer.Invoke();
-
-            BeginAnimationImpl(animationWrapper, animation, element);
+            BeginAnimationImpl(animationWrapper, element);
         }
 
-        private void BeginAnimationImpl(AnimationWrapper animationWrapper, AnimationTimeline animation, UIElement element)
+        private void BeginAnimationImpl(AnimationWrapper animationWrapper, UIElement element, Action<AnimationTimeline> modifiers = null)
         {
+            var animation = _animationObjectPoolers[animationWrapper.Name].GetObject();
+            modifiers?.Invoke(animation);
             if (animationWrapper.OnCompleted != null)
             {
                 var kvp = new KeyValuePair<UIElement, AnimationWrapper>(element, animationWrapper);
