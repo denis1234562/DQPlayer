@@ -3,11 +3,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
-using DQPlayer.Annotations;
 
 namespace DQPlayer.Helpers.CustomCollections
 {
@@ -31,44 +31,36 @@ namespace DQPlayer.Helpers.CustomCollections
 
         private readonly SerializationInfo _serializationInfo;
 
-        private bool _requiresSyncronization;
-
-        private KeyedEntryCollection<TKey> _keyedEntryCollection;
-
         private Dictionary<TKey, TValue> _dictionary;
-
-        private Dictionary<TKey, TValue> Dictionary
-        {
-            get
-            {
-                if (_requiresSyncronization)
-                {
-                    _dictionary = _keyedEntryCollection.ToDictionary(entry => (TKey)entry.Key,
-                        entry => (TValue)entry.Value);
-                    _requiresSyncronization = false;
-                }
-                return _dictionary;
-            }
-        }
 
         #region Constructors
 
-        public ObservableDictionary(IDictionary<TKey, TValue> dictionary, IEqualityComparer<TKey> comparer = null)
-            : this(comparer)
+        public ObservableDictionary(IDictionary<TKey, TValue> dictionary, IEqualityComparer<TKey> comparer)
         {
             if (dictionary == null)
             {
                 throw new ArgumentNullException(nameof(dictionary));
             }
-            foreach (var kvp in dictionary)
+            _dictionary = new Dictionary<TKey, TValue>(comparer);
+            foreach (var entry in dictionary)
             {
-                AddEntry(kvp);
+                AddEntry(entry);
             }
         }
 
-        public ObservableDictionary(IEqualityComparer<TKey> comparer = null)
+        public ObservableDictionary(IDictionary<TKey, TValue> dictionary)
+            : this(dictionary, null)
         {
-            _keyedEntryCollection = new KeyedEntryCollection<TKey>(comparer);
+        }
+
+        public ObservableDictionary(IEqualityComparer<TKey> comparer)
+        {
+            _dictionary = new Dictionary<TKey, TValue>(comparer);
+        }
+
+        public ObservableDictionary(int capacity = 0)
+        {
+            _dictionary = new Dictionary<TKey, TValue>(capacity);
         }
 
         /// <summary>
@@ -87,12 +79,10 @@ namespace DQPlayer.Helpers.CustomCollections
 
         private void AddEntry(KeyValuePair<TKey, TValue> keyValuePair)
         {
-            var entry = new DictionaryEntry(keyValuePair.Key, keyValuePair.Value);
-            _keyedEntryCollection.Add(entry);
-            _requiresSyncronization = true;
+            _dictionary.Add(keyValuePair.Key, keyValuePair.Value);
 
             OnCommonPropertiesChanged();
-            OnCollectionChanged(NotifyCollectionChangedAction.Add, keyValuePair, _keyedEntryCollection.Count - 1);
+            OnCollectionChanged(NotifyCollectionChangedAction.Add, keyValuePair, -1);
         }
 
         private void AddEntry(TKey key, TValue value)
@@ -102,38 +92,26 @@ namespace DQPlayer.Helpers.CustomCollections
 
         private bool RemoveEntry(TKey key)
         {
-            var itemIndex = _keyedEntryCollection.IndexOf(key);
-            if (itemIndex != -1)
+            if (_dictionary.TryGetValue(key, out var value))
             {
-                var value = _keyedEntryCollection[key];
-                _keyedEntryCollection.RemoveAt(itemIndex);
-
-                _requiresSyncronization = true;
-
                 OnCommonPropertiesChanged();
-                OnCollectionChanged(NotifyCollectionChangedAction.Remove, value, itemIndex);
-
+                OnCollectionChanged(NotifyCollectionChangedAction.Remove, value, -1);
+                return true;
             }
             return false;
         }
 
         private void SetEntry(TKey key, TValue value)
         {
-            if (_keyedEntryCollection.Contains(key))
+            if (_dictionary.TryGetValue(key, out var currentValue))
             {
-                var entry = _keyedEntryCollection[key];
-                var entryIndex = _keyedEntryCollection.IndexOf(entry);
-                if (!entry.Value.Equals(value))
-                {
-                    _keyedEntryCollection.Remove(key);
-                    _keyedEntryCollection.Insert(entryIndex, new DictionaryEntry(key, value));
-                }
-
-                _requiresSyncronization = true;
-
+                _dictionary[key] = value;
                 OnCommonPropertiesChanged();
-                OnCollectionChanged(NotifyCollectionChangedAction.Replace, entry, new DictionaryEntry(key, value), entryIndex);
+                OnCollectionChanged(NotifyCollectionChangedAction.Replace,
+                    new KeyValuePair<TKey, TValue>(key, currentValue),
+                    new KeyValuePair<TKey, TValue>(key, value), -1);
             }
+            AddEntry(key, value);
         }
 
         #endregion
@@ -142,7 +120,7 @@ namespace DQPlayer.Helpers.CustomCollections
 
         public void Clear()
         {
-            _keyedEntryCollection.Clear();
+            _dictionary.Clear();
 
             OnCommonPropertiesChanged();
             OnCollectionReset();
@@ -185,7 +163,7 @@ namespace DQPlayer.Helpers.CustomCollections
 
         bool IDictionary.Contains(object key)
         {
-            return _keyedEntryCollection.Contains((TKey)key);
+            return _dictionary.ContainsKey((TKey) key);
         }
 
         void IDictionary.Add(object key, object value)
@@ -200,7 +178,7 @@ namespace DQPlayer.Helpers.CustomCollections
 
         public bool Contains(KeyValuePair<TKey, TValue> item)
         {
-            return _keyedEntryCollection.Contains(new DictionaryEntry(item.Key, item.Value));
+            return _dictionary.TryGetValue(item.Key, out var value) && value.Equals(item.Value);
         }
 
         public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex)
@@ -209,11 +187,7 @@ namespace DQPlayer.Helpers.CustomCollections
             {
                 throw new ArgumentNullException(nameof(array));
             }
-            for (int i = 0; i < _keyedEntryCollection.Count; i++)
-            {
-                var entry = _keyedEntryCollection[i];
-                array[i] = new KeyValuePair<TKey, TValue>((TKey)entry.Key, (TValue)entry.Value);
-            }
+            ((IDictionary<TKey, TValue>) _dictionary).CopyTo(array, arrayIndex);
         }
 
         public bool Remove(KeyValuePair<TKey, TValue> item)
@@ -223,14 +197,13 @@ namespace DQPlayer.Helpers.CustomCollections
 
         void ICollection.CopyTo(Array array, int arrayIndex)
         {
-            ((ICollection)_keyedEntryCollection).CopyTo(array, arrayIndex);
+            ((ICollection) _dictionary).CopyTo(array, arrayIndex);
         }
 
-        int ICollection.Count => _keyedEntryCollection.Count;
-        object ICollection.SyncRoot => ((ICollection)_keyedEntryCollection).SyncRoot;
-        bool ICollection.IsSynchronized => ((ICollection)_keyedEntryCollection).IsSynchronized;
-        int ICollection<KeyValuePair<TKey, TValue>>.Count => _keyedEntryCollection.Count;
-        ICollection IDictionary.Values => Dictionary.Values;
+        int ICollection.Count => _dictionary.Count;
+        object ICollection.SyncRoot => ((ICollection)_dictionary).SyncRoot;
+        bool ICollection.IsSynchronized => ((ICollection)_dictionary).IsSynchronized;
+        int ICollection<KeyValuePair<TKey, TValue>>.Count => _dictionary.Count;
         bool IDictionary.IsReadOnly => false;
         public bool IsFixedSize => false;
         bool ICollection<KeyValuePair<TKey, TValue>>.IsReadOnly => false;
@@ -241,12 +214,13 @@ namespace DQPlayer.Helpers.CustomCollections
 
         public Dictionary<TKey, TValue>.Enumerator GetEnumerator()
         {
-            return Dictionary.GetEnumerator();
+            return _dictionary.GetEnumerator();
         }
 
+        [Pure]
         public bool ContainsKey(TKey key)
         {
-            return _keyedEntryCollection.Contains(key);
+            return _dictionary.ContainsKey(key);
         }
 
         public void Add(TKey key, TValue value)
@@ -261,24 +235,20 @@ namespace DQPlayer.Helpers.CustomCollections
 
         public bool TryGetValue(TKey key, out TValue value)
         {
-            if (_keyedEntryCollection.Contains(key))
-            {
-                value = (TValue)_keyedEntryCollection[key].Value;
-                return true;
-            }
-            value = default(TValue);
-            return false;
+            return _dictionary.TryGetValue(key, out value);
         }
 
         public TValue this[TKey key]
         {
-            get => (TValue)_keyedEntryCollection[key].Value;
+            get => _dictionary[key];
             set => SetEntry(key, value);
         }
 
-        ICollection<TKey> IDictionary<TKey, TValue>.Keys => Dictionary.Keys;
-        ICollection IDictionary.Keys => Dictionary.Keys;
-        ICollection<TValue> IDictionary<TKey, TValue>.Values => Dictionary.Values;
+        ICollection IDictionary.Keys => _dictionary.Keys;
+        ICollection IDictionary.Values => _dictionary.Values;
+
+        ICollection<TKey> IDictionary<TKey, TValue>.Keys => _dictionary.Keys;
+        ICollection<TValue> IDictionary<TKey, TValue>.Values => _dictionary.Values;
 
         #endregion
 
@@ -287,13 +257,9 @@ namespace DQPlayer.Helpers.CustomCollections
         [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
         void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            var entries = new DictionaryEntry[_keyedEntryCollection.Count];
-            for (int i = 0; i < entries.Length; i++)
-            {
-                entries[i] = _keyedEntryCollection[i];
-            }
+            var entries = _dictionary.ToDictionary(entry => entry.Key, entry => entry.Value);
             info.AddValue("entries", entries);
-            info.AddValue("comparer", _keyedEntryCollection.Comparer);
+            info.AddValue("comparer", _dictionary.Comparer);
         }
 
         #endregion
@@ -302,15 +268,12 @@ namespace DQPlayer.Helpers.CustomCollections
 
         public void OnDeserialization(object sender)
         {
-            var entries = (DictionaryEntry[])_serializationInfo.GetValue("entries", typeof(DictionaryEntry[]));
+            var entries =
+                (Dictionary<TKey, TValue>) _serializationInfo.GetValue("entries", typeof(Dictionary<TKey, TValue>));
             var comparer =
                 (EqualityComparer<TKey>)_serializationInfo.GetValue("comparer", typeof(EqualityComparer<TKey>));
 
-            _keyedEntryCollection = new KeyedEntryCollection<TKey>(comparer);
-            foreach (var entry in entries)
-            {
-                AddEntry((TKey)entry.Key, (TValue)entry.Value);
-            }
+            _dictionary = new Dictionary<TKey, TValue>(entries, comparer);
         }
 
         #endregion
@@ -352,7 +315,7 @@ namespace DQPlayer.Helpers.CustomCollections
             OnPropertyChanged(IndexerName);
             OnPropertyChanged(ValuesName);
             OnPropertyChanged(KeysName);
-            OnPropertyChanged(nameof(_keyedEntryCollection.Count));
+            OnPropertyChanged(nameof(_dictionary.Count));
         }
 
         #endregion

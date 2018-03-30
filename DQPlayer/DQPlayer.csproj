@@ -125,7 +125,6 @@
     <Compile Include="Helpers\Adorners\SortAdorner.cs" />
     <Compile Include="Helpers\Animations\AnimationManager.cs" />
     <Compile Include="Helpers\Animations\AnimationWrapper.cs" />
-    <Compile Include="Helpers\CustomCollections\KeyedEntryCollection.cs" />
     <Compile Include="Helpers\CustomCollections\ObservableDictionary.cs" />
     <Compile Include="Helpers\DialogHelpers\WindowDialogHelper.cs" />
     <Compile Include="Helpers\Extensions\LoopUtilities.cs" />

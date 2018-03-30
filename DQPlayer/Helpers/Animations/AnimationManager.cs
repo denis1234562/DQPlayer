@@ -32,7 +32,7 @@ namespace DQPlayer.Helpers.Animations
             }
             else if (e.Action == NotifyCollectionChangedAction.Remove)
             {
-                var removedAnimation = (KeyValuePair<string, AnimationWrapper>) e.NewItems[0];
+                var removedAnimation = (KeyValuePair<string, AnimationWrapper>) e.OldItems[0];
                 _animationObjectPoolers.Remove(removedAnimation.Key);
             }
         }

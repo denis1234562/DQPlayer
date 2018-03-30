@@ -72,7 +72,7 @@ namespace DQPlayer.MVVMFiles.Views
             {
                 Settings.AnimationManager.CancelAnimation("FadeOut", ucMediaPlayerControls);
                 ucMediaPlayerControls.Visibility = Visibility.Visible;
-                ucMediaPlayerControls.Opacity = 0.5;
+                ucMediaPlayerControls.Opacity = 0.9;
                 if (!ucMediaPlayerControls.IsMouseOver)
                 {
                     Settings.AnimationManager.BeginAnimation("FadeOut", ucMediaPlayerControls);
