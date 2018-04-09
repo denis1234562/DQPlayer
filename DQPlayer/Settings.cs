@@ -12,15 +12,17 @@ using System.Windows.Media.Imaging;
 using System.Windows.Media.Animation;
 using DQPlayer.Helpers.FileManagement;
 using static System.Windows.Interop.Imaging;
+using Size = System.Windows.Size;
 
 namespace DQPlayer
 {
     public static class Settings
     {
         public static TimeSpan TimerTickUpdate { get; private set; }
-        public static TimeSpan SkipSeconds { get; private set; }
-        public static System.Windows.Size MinimumMainWindowSize { get; private set; }
-        public static System.Windows.Size MinimumSettingsWindowSize { get; private set; }
+        public static TimeSpan FastForwardSeconds { get; private set; }
+        public static TimeSpan RewindSeconds { get; private set; }
+        public static Size MinimumMainWindowSize { get; private set; }
+        public static Size MinimumSettingsWindowSize { get; private set; }
         public static Encoding Cyrillic { get; private set; }
 
         public static TemplateCreator<MediaElement, UIElement> MediaPlayerTemplate { get; private set; }
@@ -37,6 +39,10 @@ namespace DQPlayer
 
         public const string SubtitleSeparationString = @"-->";
         public const string SubtitleExtensionString = @".srt";
+
+        //Will be replaced later.
+        public static bool DetectSubtitlesAutomatically { get; } = true;
+        public const string PreferedSubtitleLanguage = ".bg";
 
         private static readonly string[] _timeSpanStringFormats =
         {
@@ -85,9 +91,10 @@ namespace DQPlayer
         private static void ConfigureGeneralSettings()
         {
             TimerTickUpdate = TimeSpan.FromMilliseconds(250);
-            SkipSeconds = TimeSpan.FromSeconds(10);
-            MinimumMainWindowSize = new System.Windows.Size(700, 410);
-            MinimumSettingsWindowSize = new System.Windows.Size(550, 610);
+            FastForwardSeconds = TimeSpan.FromSeconds(15);
+            RewindSeconds = -TimeSpan.FromSeconds(10);
+            MinimumMainWindowSize = new Size(width: 720, height: 410);
+            MinimumSettingsWindowSize = new Size(550, 610);
             Cyrillic = Encoding.GetEncoding("Windows-1251");
         }
 
@@ -113,6 +120,7 @@ namespace DQPlayer
                 new FileExtension(".mkv", Strings.MatrioshkaFile),
                 new FileExtension(".mp3", Strings.MusicFile),
                 new FileExtension(".mp4", Strings.MovieFile),
+                new FileExtension(".avi", Strings.AviFile)
             });
 
             MediaPlayerExtensionsPackage = new FileExtensionPackage(Strings.AllFiles, NonMediaExtensionsPackage);

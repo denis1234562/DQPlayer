@@ -1,55 +1,53 @@
 ﻿using System;
-using System.Diagnostics;
-using System.Reflection;
 using System.Threading;
+using System.Reflection;
+using System.Diagnostics;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Threading;
 
 namespace DQPlayer
 {
     public class IntermissionTimer : DispatcherTimer
     {
+        protected MulticastDelegate _tickEventHandlers;
+        protected MulticastDelegate TickEventHandlers =>
+            _tickEventHandlers ?? (_tickEventHandlers = (MulticastDelegate)typeof(DispatcherTimer)
+                .GetField("Tick", BindingFlags.Instance | BindingFlags.NonPublic)
+                ?.GetValue(this));
+
+        protected CancellationTokenSource _cancellationToken;
+
+        protected readonly Stopwatch _internalTickCounter;
+        protected Stopwatch _intervalTickedTime;
+
+        public TimeSpan Elapsed => _internalTickCounter.Elapsed;
+
         public new TimeSpan Interval
         {
             get => base.Interval;
             set
             {
                 base.Interval = value;
-                if (_intervalTickedTime.IsRunning)
-                {
-                    _intervalTickedTime.Restart();
-                    return;
-                }
+                _cancellationToken.Cancel();
+                _cancellationToken = new CancellationTokenSource();
                 _intervalTickedTime.Reset();
+                if (_internalTickCounter.IsRunning)
+                {
+                    Start();
+                }
             }
         }
 
-        private readonly Stopwatch _sw;
-
-        private MulticastDelegate _tickEventHandlers;
-        private MulticastDelegate TickEventHandlers =>
-            _tickEventHandlers ?? (_tickEventHandlers = (MulticastDelegate) typeof(DispatcherTimer)
-                .GetField("Tick", BindingFlags.Instance | BindingFlags.NonPublic)
-                ?.GetValue(this));
-
-        private CancellationTokenSource _cancelationToken;
-        private Task _task;
-
-        public TimeSpan Elapsed => _sw.Elapsed;
-        private Stopwatch _intervalTickedTime;
-
-        private bool _hasScheduledIntermission;
-
         public IntermissionTimer()
         {
-            _sw = new Stopwatch();
+            _cancellationToken = new CancellationTokenSource();
+            _internalTickCounter = new Stopwatch();
             _intervalTickedTime = new Stopwatch();
-             Tick += IntermissionTimer_Tick;
-            Cancelation();
+
+            Tick += IntermissionTimer_Tick;
         }
 
-        private void IntermissionTimer_Tick(object sender, EventArgs e)
+        protected virtual void IntermissionTimer_Tick(object sender, EventArgs e)
         {
             if (sender == this)
             {
@@ -57,85 +55,54 @@ namespace DQPlayer
             }
         }
 
-        public new void Start()
+        public new virtual void Start()
         {
             base.Start();
-            _sw.Start();
+            _internalTickCounter.Start();
             _intervalTickedTime = Stopwatch.StartNew();
         }
 
-        public new void Stop()
+        public new virtual void Stop()
         {
             base.Stop();
-            _sw.Reset();
+            _internalTickCounter.Reset();
+            _intervalTickedTime.Reset();
+            _cancellationToken.Cancel();
         }
 
-        private void Cancelation()
+        public virtual void Pause()
         {
-            _cancelationToken = new CancellationTokenSource();
-            _cancelationToken.Token.Register(() =>
-            {
-                _hasScheduledIntermission = false;
-                _sw.Stop();
-            });
-        }
-
-        public void Pause()
-        {
-            if (_task != null && !_task.IsCompleted)
-            {
-                _cancelationToken.Cancel();
-            }
-            else
-            {
-                Cancelation();
-            }
+            _cancellationToken.Cancel();
+            _cancellationToken = new CancellationTokenSource();
             base.Stop();
-            _sw.Stop();
+            _internalTickCounter.Stop();
             _intervalTickedTime.Stop();
-            _hasScheduledIntermission = true;
         }
 
-        public async void Resume()
+        public virtual void Resume()
         {
-            //allows await Task.Delay(scheduledIntermissionTime, _cancelationToken.Token); to cancel in case of spam,
-            //which would otherwise cause an throw exception by .NET's API (cant be catched)
-            await Task.Delay(1);
-            if ((_task == null || _task.IsCompleted) && (_hasScheduledIntermission || _sw.ElapsedTicks == 0))
+            if (!_internalTickCounter.IsRunning)
             {
-                _task = Task.Run(async () =>
+                Task.Factory.StartNew(async () =>
                 {
-                    _sw.Start();
+                    _internalTickCounter.Start();
                     _intervalTickedTime.Start();
                     var scheduledIntermissionTime =
                         Math.Abs((int) (Interval - _intervalTickedTime.Elapsed).TotalMilliseconds);
-                    if (_cancelationToken.IsCancellationRequested)
-                    {
-                        Cancelation();
-                        return;
-                    }
-                    try
-                    {
-                        await Task.Delay(scheduledIntermissionTime, _cancelationToken.Token).ContinueWith(task => {});
-                    }
-                    catch (TaskCanceledException ex)
-                    {
-                        Console.WriteLine(ex.Message);
-                    }
-                    if (_cancelationToken.IsCancellationRequested)
-                    {
-                        Cancelation();
-                        return;
-                    }
-                    foreach (var handler in TickEventHandlers.GetInvocationList())
-                    {
-                        Dispatcher.Invoke(() => handler.Method.Invoke(handler.Target,
-                            new object[] {this, EventArgs.Empty}));
-                    }
-                    Start();
-                    _hasScheduledIntermission = false;
-                }, _cancelationToken.Token);
-                Cancelation();
+                    await Task.Delay(scheduledIntermissionTime, _cancellationToken.Token)
+                        .ContinueWith(task =>
+                        {
+                            if (task.Status == TaskStatus.RanToCompletion)
+                            {
+                                foreach (var handler in TickEventHandlers.GetInvocationList())
+                                {
+                                    handler.Method.Invoke(handler.Target, new object[] {this, EventArgs.Empty});
+                                }
+                                Start();
+                            }
+                        }, TaskScheduler.FromCurrentSynchronizationContext());
+                    _cancellationToken = new CancellationTokenSource();
+                }, CancellationToken.None, TaskCreationOptions.None, TaskScheduler.FromCurrentSynchronizationContext());
             }
         }
     }

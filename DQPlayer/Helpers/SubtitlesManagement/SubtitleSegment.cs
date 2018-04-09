@@ -1,24 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
+using DQPlayer.Annotations;
 
 namespace DQPlayer.Helpers.SubtitlesManagement
 {
     [Serializable]
-    public class SubtitleSegment : IComparable<SubtitleSegment>, IEquatable<SubtitleSegment>
+    public class SubtitleSegment : IEquatable<SubtitleSegment>, IComparable<SubtitleSegment>
     {
         public SubtitleInterval SubtitleInterval { get; }
 
         public string Content { get; }
 
-        public SubtitleSegment(SubtitleInterval subtitleInterval, string content)
+        public SubtitleSegment([NotNull] SubtitleInterval subtitleInterval, string content)
         {
-            SubtitleInterval = subtitleInterval;
+            SubtitleInterval = subtitleInterval ?? throw new ArgumentNullException(nameof(subtitleInterval));
             Content = content;
         }
 
         public override string ToString()
         {
-            return $"{SubtitleInterval} {Environment.NewLine}{Content}";
+            return $"{SubtitleInterval} {Environment.NewLine} {Content}";
         }
 
         #region IEquatable implementation
@@ -57,6 +58,7 @@ namespace DQPlayer.Helpers.SubtitlesManagement
             if (ReferenceEquals(null, other)) return 1;
             return Comparer<SubtitleInterval>.Default.Compare(SubtitleInterval, other.SubtitleInterval);
         }
+
         #endregion
     }
 }

@@ -63,7 +63,7 @@ namespace DQPlayer.MVVMFiles.ViewModels
 
         private void OnFileDrop(DragEventArgs e)
         {
-            if (FileDropHandler.ExtractDroppedItemsUri(e, Settings.MediaPlayerExtensionsPackage, out var files))
+            if (FileDropHandler.ExtractDroppedFiles(e, Settings.MediaPlayerExtensionsPackage, out var files))
             {
                 FileManagerHelper.Request(this, files);
                 return;

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using DQPlayer.Helpers.CustomCollections;
 using DQPlayer.Helpers.Extensions.CollectionsExtensions;
+using DQPlayer.Properties;
 
 namespace DQPlayer.Helpers.SubtitlesManagement
 {
@@ -12,13 +13,17 @@ namespace DQPlayer.Helpers.SubtitlesManagement
     {
         public Encoding Encoding { get; }
 
-        public SubtitleReader(Encoding encoding)
+        public SubtitleReader([NotNull] Encoding encoding)
         {
-            Encoding = encoding;
+            Encoding = encoding ?? throw new ArgumentNullException(nameof(encoding));
         }
 
-        public CircularList<SubtitleSegment> ExtractSubtitles(string path)
+        public CircularList<SubtitleSegment> ExtractSubtitles([NotNull] string path)
         {
+            if (string.IsNullOrEmpty(path))
+            {
+                throw new ArgumentNullException(nameof(path));
+            }
             var subtitles = new CircularList<SubtitleSegment>();
             using (StreamReader sr = new StreamReader(path, Encoding))
             {

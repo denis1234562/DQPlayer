@@ -29,21 +29,17 @@ namespace DQPlayer.Helpers.FileManagement.FileInformation
             }
         }
 
-        public MediaFileInformation(string filePath)
+        public MediaFileInformation([NotNull] string filePath)
+            : this(new Uri(filePath))
         {
-            if (string.IsNullOrEmpty(filePath))
-            {
-                throw new ArgumentNullException(nameof(filePath));
-            }
-            FileInfo = new FileInfo(filePath);
-            FileName = Path.GetFileNameWithoutExtension(FileInfo.Name);
-            FileLength = FileInfo.GetFileDuration();
-            Uri = new Uri(FileInfo.FullName);
         }
 
-        public MediaFileInformation(Uri fileUri)
-            : this(fileUri.OriginalString)
+        public MediaFileInformation([NotNull] Uri fileUri)
         {
+            Uri = fileUri ?? throw new ArgumentNullException(nameof(fileUri));
+            FileInfo = new FileInfo(fileUri.OriginalString);
+            FileName = Path.GetFileNameWithoutExtension(FileInfo.Name);
+            FileLength = FileInfo.GetFileDuration();
         }
 
         #region INotifyPropertyChanged Implementation

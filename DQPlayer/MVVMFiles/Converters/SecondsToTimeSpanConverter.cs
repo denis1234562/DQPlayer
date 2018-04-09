@@ -9,7 +9,11 @@ namespace DQPlayer.MVVMFiles.Converters
         public object Convert(object value, Type targetType, object parameter,
             System.Globalization.CultureInfo culture)
         {
-            return value;
+            if (value is TimeSpan ts)
+            {
+                return ts;
+            }
+            return TimeSpan.FromSeconds((double)value);
         }
 
         public object ConvertBack(object value, Type targetType, object parameter,

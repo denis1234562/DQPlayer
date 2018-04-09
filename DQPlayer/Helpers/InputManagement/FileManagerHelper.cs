@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using DQPlayer.Helpers.FileManagement.FileInformation;
+using DQPlayer.Properties;
 using ExtendedDotNet.ReflectionHelpers;
 
 namespace DQPlayer.Helpers.InputManagement
@@ -26,13 +27,21 @@ namespace DQPlayer.Helpers.InputManagement
             }
         }
 
-        public static void Request(object sender, IEnumerable<IFileInformation> selectedFiles)
+        public static void Request(object sender, [NotNull] IEnumerable<IFileInformation> selectedFiles)
         {
+            if (selectedFiles == null)
+            {
+                throw new ArgumentNullException(nameof(selectedFiles));
+            }
             Request(sender, new FileManagerEventArgs<IFileInformation>(selectedFiles));
         }
 
-        public static void Request(object sender, FileManagerEventArgs<IFileInformation> args)
+        public static void Request(object sender, [NotNull] FileManagerEventArgs<IFileInformation> args)
         {
+            if (args == null)
+            {
+                throw new ArgumentNullException(nameof(args));
+            }
             var typeGroups = args.SelectedFiles.GroupBy(information => information.GetType());
             foreach (var typeGroup in typeGroups)
             {

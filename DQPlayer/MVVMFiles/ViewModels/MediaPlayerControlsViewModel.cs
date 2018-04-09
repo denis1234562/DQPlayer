@@ -9,7 +9,6 @@ using System.ComponentModel;
 using DQPlayer.MVVMFiles.Views;
 using DQPlayer.MVVMFiles.Commands;
 using DQPlayer.Helpers.DialogHelpers;
-using DQPlayer.Helpers.MediaControls;
 using System.Runtime.CompilerServices;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -18,6 +17,7 @@ using DQPlayer.Helpers.FileManagement;
 using DQPlayer.Helpers.InputManagement;
 using DQPlayer.MVVMFiles.UserControls.MainWindow;
 using DQPlayer.Helpers.FileManagement.FileInformation;
+using DQPlayer.Helpers.MediaEnumerations;
 
 namespace DQPlayer.MVVMFiles.ViewModels
 {
@@ -29,14 +29,14 @@ namespace DQPlayer.MVVMFiles.ViewModels
             RepeatCheckCommand = new RelayCommand<bool>(OnRepeatChecked);
             SettingsClickCommand = new RelayCommand(OnSettingsClicked);
             BrowseFilesCommand = new RelayCommand(OnBrowseFiles);
-            RewindClickCommand = new RelayCommand(OnRewindClick);
-            MovePreviousCommand = new RelayCommand(OnMovePrevious);
             PlayPauseClickCommand = new RelayCommand<bool>(OnPlayPauseClick);
-            MoveNextCommand = new RelayCommand(OnMoveNext);
             FastForwardClickCommand = new RelayCommand(OnFastForwardClick);
+            RewindClickCommand = new RelayCommand(OnRewindClick);
             StopClickCommand = new RelayCommand<ThumbDragSlider>(OnStopClick);
+            MoveNextCommand = new RelayCommand(OnMoveNext);
+            MovePreviousCommand = new RelayCommand(OnMovePrevious);
             PositionSliderDragStartedCommand = new RelayCommand<ThumbDragSlider>(OnPositionSliderDragStarted);
-            PositionSliderDragCompletedCommand = new RelayCommand(OnPositionSliderDragCompleted);
+            PositionSliderDragCompletedCommand = new RelayCommand<TimeSpan>(OnPositionSliderDragCompleted);
             PositionSliderThumbMouseEnterCommand = new RelayCommand<MouseEventArgs>(OnThumbMouseEnter);
             VolumeSliderValueChangedCommand = new RelayCommand<RoutedPropertyChangedEventArgs<double>>(OnVolumeSliderValueChanged);
         }
@@ -45,9 +45,9 @@ namespace DQPlayer.MVVMFiles.ViewModels
 
         private void OnPlayPauseClick(bool state)
         {
-            OnNotify(state
-                ? new MediaControlEventArgs(MediaControlEventType.PlayClick)
-                : new MediaControlEventArgs(MediaControlEventType.PauseClick));
+            OnNotify(new MediaEventArgs<MediaControlEventType>(state
+                ? MediaControlEventType.PlayClick
+                : MediaControlEventType.PauseClick));
         }
 
         private void OnThumbMouseEnter(MouseEventArgs e)
@@ -62,51 +62,60 @@ namespace DQPlayer.MVVMFiles.ViewModels
             }
         }
 
-        private void OnPositionSliderDragCompleted()
-            => OnNotify(new MediaControlEventArgs(MediaControlEventType.PositionSliderDragCompleted));
+        private void OnPositionSliderDragCompleted(TimeSpan newPosition)
+            => OnNotify(new MediaEventArgs<MediaControlEventType>(
+                MediaControlEventType.PositionSliderDragCompleted,
+                newPosition));
 
         private void OnPositionSliderDragStarted(ThumbDragSlider slider)
-            => OnNotify(new MediaControlEventArgs(MediaControlEventType.PositionSliderDragStarted, slider));
+            => OnNotify(new MediaEventArgs<MediaControlEventType>(MediaControlEventType.PositionSliderDragStarted, slider));
 
         private void OnVolumeSliderValueChanged(RoutedPropertyChangedEventArgs<double> e) 
-            => OnNotify(new MediaControlEventArgs(MediaControlEventType.VolumeSliderValueChanged, e));
+            => OnNotify(new MediaEventArgs<MediaControlEventType>(MediaControlEventType.VolumeSliderValueChanged, e));
 
         private void OnMoveNext() 
-            => OnNotify(new MediaControlEventArgs(MediaControlEventType.MoveNextClick));
+            => OnNotify(new MediaEventArgs<MediaControlEventType>(MediaControlEventType.MoveNextClick));
 
         private void OnMovePrevious() 
-            => OnNotify(new MediaControlEventArgs(MediaControlEventType.MovePreviousClick));
+            => OnNotify(new MediaEventArgs<MediaControlEventType>(MediaControlEventType.MovePreviousClick));
 
         private void OnPlaylistClick()
             => WindowDialogHelper<PlaylistView>.Instance.Show();
 
         private void OnRepeatChecked(bool state) 
-            => OnNotify(new MediaControlEventArgs(MediaControlEventType.RepeatCheck, state));
+            => OnNotify(new MediaEventArgs<MediaControlEventType>(MediaControlEventType.RepeatCheck, state));
 
         private void OnSettingsClicked()
             => WindowDialogHelper<SettingsView>.Instance.Show();
 
         private void OnRewindClick()
-            => OnNotify(new MediaControlEventArgs(MediaControlEventType.RewindClick));
+        {
+            TimeSpan time = CurrentMediaPlayer.MediaElement.Position.Add(Settings.RewindSeconds);
+            OnNotify(new MediaEventArgs<MediaControlEventType>(MediaControlEventType.RewindClick, time));
+        }
 
         private void OnFastForwardClick()
-            => OnNotify(new MediaControlEventArgs(MediaControlEventType.FastForwardClick));
+        {
+            TimeSpan time = CurrentMediaPlayer.MediaElement.Position.Add(Settings.FastForwardSeconds);
+            OnNotify(new MediaEventArgs<MediaControlEventType>(MediaControlEventType.FastForwardClick, time));
+        }
 
         private void OnStopClick(ThumbDragSlider slider)
         {
             slider.Value = TimeSpan.Zero;
-            OnNotify(new MediaControlEventArgs(MediaControlEventType.StopClick));
+            OnNotify(new MediaEventArgs<MediaControlEventType>(MediaControlEventType.StopClick));
+            IsCheckedState = false;
         }
 
         private void OnMediaAttached()
         {
-            FileManager<MediaFileInformation>.Instance.NewRequest += CurrentMediaPlayer_MediaPlayedNewSource;
+            FileManager<MediaFileInformation>.Instance.Notify += CurrentMediaPlayer_MediaPlayedNewSource;
             MediaAttached?.Invoke(this, CurrentMediaPlayer);
         }
 
         private void OnMediaDetached()
         {
-            FileManager<MediaFileInformation>.Instance.NewRequest -= CurrentMediaPlayer_MediaPlayedNewSource;
+            FileManager<MediaFileInformation>.Instance.Notify -= CurrentMediaPlayer_MediaPlayedNewSource;
         }
 
         private void CurrentMediaPlayer_MediaPlayedNewSource(object sender, FileManagerEventArgs<MediaFileInformation> e)
@@ -126,7 +135,7 @@ namespace DQPlayer.MVVMFiles.ViewModels
             {
                 var files = fileDialog.FileNames.Select(FileProcesser.Selector);
                 FileManagerHelper.Request(this, files);
-                OnNotify(new MediaControlEventArgs(MediaControlEventType.BrowseClick, files));
+                OnNotify(new MediaEventArgs<MediaControlEventType>(MediaControlEventType.BrowseClick, files));
             }
         }
 
@@ -154,9 +163,9 @@ namespace DQPlayer.MVVMFiles.ViewModels
 
         #region Implementation of ICustomObservable<MediaControlEventArgs>
 
-        public event EventHandler<MediaControlEventArgs> Notify;
+        public event EventHandler<MediaEventArgs<MediaControlEventType>> Notify;
 
-        protected virtual void OnNotify(MediaControlEventArgs eventArgs)
+        protected virtual void OnNotify(MediaEventArgs<MediaControlEventType> eventArgs)
         {
             Notify?.Invoke(this, eventArgs);
         }
@@ -210,15 +219,15 @@ namespace DQPlayer.MVVMFiles.ViewModels
         public RelayCommand<bool> RepeatCheckCommand { get; }
         public RelayCommand SettingsClickCommand { get; }
         public RelayCommand BrowseFilesCommand { get; }
-        public RelayCommand RewindClickCommand { get; }
-        public RelayCommand MovePreviousCommand { get; }
         public RelayCommand<bool> PlayPauseClickCommand { get; }
-        public RelayCommand MoveNextCommand { get; }
-        public RelayCommand FastForwardClickCommand { get; }
         public RelayCommand<ThumbDragSlider> StopClickCommand { get; }
+        public RelayCommand RewindClickCommand { get; }
+        public RelayCommand FastForwardClickCommand { get; }
+        public RelayCommand MoveNextCommand { get; }
+        public RelayCommand MovePreviousCommand { get; }
         public RelayCommand<RoutedPropertyChangedEventArgs<double>> VolumeSliderValueChangedCommand { get; }
         public RelayCommand<ThumbDragSlider> PositionSliderDragStartedCommand { get; }
-        public RelayCommand PositionSliderDragCompletedCommand { get; }
+        public RelayCommand<TimeSpan> PositionSliderDragCompletedCommand { get; }
         public RelayCommand<MouseEventArgs> PositionSliderThumbMouseEnterCommand { get; }
         public MultiValueRelayCommand TooltipUpdateCommand => new MultiValueRelayCommand(TooltipUpdate);
 

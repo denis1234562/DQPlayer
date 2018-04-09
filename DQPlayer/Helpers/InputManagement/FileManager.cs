@@ -28,19 +28,27 @@ namespace DQPlayer.Helpers.InputManagement
             }
         }
 
-        public event EventHandler<FileManagerEventArgs<TFileInformation>> NewRequest;
+        public event EventHandler<FileManagerEventArgs<TFileInformation>> Notify;
 
         private FileManager()
         {
         }
 
-        public void Request(object sender, IEnumerable<TFileInformation> selectedFiles)
+        public void Request(object sender, [NotNull] IEnumerable<TFileInformation> selectedFiles)
         {
+            if (selectedFiles == null)
+            {
+                throw new ArgumentNullException(nameof(selectedFiles));
+            }
             Request(sender, new FileManagerEventArgs<TFileInformation>(selectedFiles));
         }
 
-        public void Request(object sender, FileManagerEventArgs<TFileInformation> args)
+        public void Request(object sender, [NotNull] FileManagerEventArgs<TFileInformation> args)
         {
+            if (args == null)
+            {
+                throw new ArgumentNullException(nameof(args));
+            }
             OnNewRequest(sender, args);
         }
 
@@ -57,7 +65,7 @@ namespace DQPlayer.Helpers.InputManagement
 
         private void OnNewRequest(object sender, FileManagerEventArgs<TFileInformation> args)
         {
-            NewRequest?.Invoke(sender, args);
+            Notify?.Invoke(sender, args);
         }
     }
 }

@@ -70,6 +70,15 @@ namespace DQPlayer.ResourceFiles {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Audio/Video file.
+        /// </summary>
+        public static string AviFile {
+            get {
+                return ResourceManager.GetString("AviFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Browse.
         /// </summary>
         public static string Browse {

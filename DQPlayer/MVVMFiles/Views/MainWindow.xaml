@@ -10,7 +10,7 @@
         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
         xmlns:system="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
-        Title="JDPlayer" Height="580" Width="700" AllowDrop="True"
+        Title="JDPlayer" Height="580" Width="720" AllowDrop="True"
         MinHeight="{Binding Source={x:Static local:Settings.MinimumMainWindowSize}, Path=Height}"
         MinWidth="{Binding Source={x:Static local:Settings.MinimumMainWindowSize}, Path=Width}"
         Background="{DynamicResource WindowBackgroundBrush}" Icon="/DQPlayer;component/bin/Debug/Assets/JD_Icon.png" 
@@ -44,10 +44,10 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <mainWindow:MediaElementUserControl x:Name="ucMediaElement" Grid.Row="0" Grid.ColumnSpan="3"/>
+        <mainWindow:MediaElementUserControl x:Name="ucMediaElement" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3"/>
+        <mainWindow:SubtitlesUserControl x:Name="ucSubtitles" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3"/>
         <mainWindow:MediaPlayerControlsUserControl x:Name="ucMediaPlayerControls" VerticalAlignment="Bottom" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3"
-                                                   MouseLeave="MediaPlayerControls_OnMouseLeave">
-        </mainWindow:MediaPlayerControlsUserControl>
+                                                   MouseLeave="MediaPlayerControls_OnMouseLeave"/>
     </Grid>
 </Window>
 

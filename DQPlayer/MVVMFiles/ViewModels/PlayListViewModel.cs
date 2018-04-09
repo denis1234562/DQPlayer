@@ -52,8 +52,8 @@ namespace DQPlayer.MVVMFiles.ViewModels
 
             FilesCollection.CollectionChanged += FilesCollection_CollectionChanged;
 
-            FileManager<MediaFileInformation>.Instance.NewRequest += FileManager_OnNewRequest;
-            PlaylistManager.Instance.NewRequest += PlaylistManager_OnNewRequest;
+            FileManager<MediaFileInformation>.Instance.Notify += FileManager_OnNewRequest;
+            PlaylistManager.Instance.Notify += PlaylistManager_OnNewRequest;
         }
 
         private void PlaylistManager_OnNewRequest(object sender, PlaylistManagerEventArgs e) =>
@@ -70,7 +70,7 @@ namespace DQPlayer.MVVMFiles.ViewModels
 
         private void OnListViewFileDropCommand(DragEventArgs e)
         {
-            if (FileDropHandler.ExtractDroppedItemsUri(e, Settings.MediaExtensionsPackage, out var filesInformation))
+            if (FileDropHandler.ExtractDroppedFiles(e, Settings.MediaExtensionsPackage, out var filesInformation))
             {
                 FilesCollection.AddRange(filesInformation.Cast<MediaFileInformation>());
             }
@@ -161,8 +161,6 @@ namespace DQPlayer.MVVMFiles.ViewModels
 
         private void FileManagerCallback(MediaFileInformation currentPlayingFile, bool repeatState)
         {
-            //Check if replay is checked
-            //if so ignore the equals call
             if (!FilesCollection.Last().Equals(FilesCollection.Current) || repeatState)
             {
                 RequestNewFiles(FilesCollection.Next, FileManagerCallback);

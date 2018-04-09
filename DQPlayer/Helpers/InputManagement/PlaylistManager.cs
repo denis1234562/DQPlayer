@@ -19,17 +19,16 @@ namespace DQPlayer.Helpers.InputManagement
             }
         }
 
-        public event EventHandler<PlaylistManagerEventArgs> NewRequest;
+        public event EventHandler<PlaylistManagerEventArgs> Notify;
 
         private PlaylistManager()
         {
-
         }
 
         public void Request(object sender, PlaylistManagerEventArgs e)
             => OnNewRequest(sender, e);
 
         protected virtual void OnNewRequest(object sender, PlaylistManagerEventArgs e)
-            => NewRequest?.Invoke(this, e);
+            => Notify?.Invoke(this, e);
     }
 }

@@ -55,14 +55,14 @@ namespace DQPlayer.MVVMFiles.Models.MediaPlayer
 
         void IRegulatableMediaService.Rewind()
         {
-            var position = GeneralExtensions.Max(_mediaElement.Position.Subtract(Settings.SkipSeconds), TimeSpan.Zero);
+            var position = GeneralExtensions.Max(_mediaElement.Position.Add(Settings.RewindSeconds), TimeSpan.Zero);
             SetNewPlayerPosition(position);
         }
 
         void IRegulatableMediaService.FastForward()
         {
             var position = GeneralExtensions.Min(_mediaElement.NaturalDuration.TimeSpan,
-                _mediaElement.Position.Add(Settings.SkipSeconds));
+                _mediaElement.Position.Add(Settings.FastForwardSeconds));
             SetNewPlayerPosition(position);
         }
 

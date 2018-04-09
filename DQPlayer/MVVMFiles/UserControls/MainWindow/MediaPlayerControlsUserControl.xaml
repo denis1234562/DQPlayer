@@ -9,6 +9,7 @@
              xmlns:customControls="clr-namespace:DQPlayer.Helpers.CustomControls"
              xmlns:command="http://www.galasoft.ch/mvvmlight"
              xmlns:mainWindow="clr-namespace:DQPlayer.MVVMFiles.UserControls.MainWindow"
+             xmlns:dqPlayer="clr-namespace:DQPlayer"
              mc:Ignorable="d" 
              Background="{DynamicResource WindowBackgroundBrush}" Height="Auto" Width="Auto">
 
@@ -106,7 +107,7 @@
                             <i:InvokeCommandAction Command="{Binding PositionSliderDragStartedCommand}" CommandParameter="{Binding ElementName=sMovieSkipSlider}"/>
                         </i:EventTrigger>
                         <i:EventTrigger EventName="DragCompleted">
-                            <i:InvokeCommandAction Command="{Binding PositionSliderDragCompletedCommand}"/>
+                            <i:InvokeCommandAction Command="{Binding PositionSliderDragCompletedCommand}" CommandParameter = "{Binding ElementName=sMovieSkipSlider, Path=Value, Converter={converters:SecondsToTimeSpanConverter}}"/>
                         </i:EventTrigger>
                         <i:EventTrigger EventName="ThumbMouseEnter">
                             <command:EventToCommand Command="{Binding PositionSliderThumbMouseEnterCommand}" PassEventArgsToCommand="True"/>
@@ -165,7 +166,7 @@
                     </Button>
                     <Button Name="bRewind" Height="24" Width="32" Margin="15,0"
                             IsEnabled="{Binding PlayerSourceState}"
-                            Command="{Binding RewindClickCommand}"
+                            Command="{Binding RewindClickCommand}" 
                             Style="{StaticResource TransparentButton}">
                         <Image Source="pack://application:,,,/bin/Debug/Assets/MediaPlayerLayout/Rewind copy.png"/>
                     </Button>
@@ -217,10 +218,10 @@
                     </Button>
                 </StackPanel>
 
-                <customControls:ThumbDragSlider Grid.Column="3" x:Name="sVolumeSlider" Minimum="0" Maximum="1" HorizontalAlignment="Right" VerticalAlignment="Center" Width="120" Margin="0,18,10,18"
+                <customControls:ThumbDragSlider Grid.Column="3" x:Name="sVolumeSlider" Minimum="0" Maximum="1" HorizontalAlignment="Right" VerticalAlignment="Center" Width="120" Margin="10"
                                                 Style="{StaticResource {x:Type Slider}}"
                                                 IsMoveToPointEnabled="True"
-                                                Value="{Binding ElementName=Player, Path=Volume}"
+                                                Value="{Binding ElementName=Player, Path=Volume, Mode=TwoWay}"
                                                 MouseMove="Slider_OnPreviewMouseMove"
                                                 MouseLeave="Slider_OnMouseLeave">
                     <i:Interaction.Triggers>

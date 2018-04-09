@@ -120,6 +120,9 @@
   <data name="AllFiles" xml:space="preserve">
     <value>Всички файлове</value>
   </data>
+  <data name="AviFile" xml:space="preserve">
+    <value>Аудио/Видео файл</value>
+  </data>
   <data name="Browse" xml:space="preserve">
     <value>Разгледай</value>
   </data>

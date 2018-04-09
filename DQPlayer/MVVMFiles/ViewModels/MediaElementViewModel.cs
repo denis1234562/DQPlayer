@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -7,10 +6,11 @@ using System.Windows;
 using System.Windows.Controls;
 using DQPlayer.Annotations;
 using DQPlayer.Helpers;
+using DQPlayer.Helpers.CustomCollections;
 using DQPlayer.Helpers.CustomControls;
 using DQPlayer.Helpers.FileManagement.FileInformation;
 using DQPlayer.Helpers.InputManagement;
-using DQPlayer.Helpers.MediaControls;
+using DQPlayer.Helpers.MediaEnumerations;
 using DQPlayer.MVVMFiles.Commands;
 using DQPlayer.MVVMFiles.Models.MediaPlayer;
 using DQPlayer.States;
@@ -19,12 +19,10 @@ namespace DQPlayer.MVVMFiles.ViewModels
 {
     public class MediaElementViewModel : IMediaElementViewModel
     {
-        private readonly Dictionary<MediaControlEventType, EventHandler<MediaControlEventArgs>> _handlers;
+        private readonly MediaObservableMap<MediaControlEventType> _handlers;
 
         private Action _currentFileCallback;
         private bool _repeatState;
-
-        public event Action<object, MediaElement> MediaEnded;
 
         public RelayCommand<MediaElement> MediaEndedCommand { get; }       
 
@@ -52,7 +50,7 @@ namespace DQPlayer.MVVMFiles.ViewModels
         public MediaElementViewModel()
         {
             MediaEndedCommand = new RelayCommand<MediaElement>(OnMediaEnded);
-            _handlers = new Dictionary<MediaControlEventType, EventHandler<MediaControlEventArgs>>
+            _handlers = new MediaObservableMap<MediaControlEventType>((map, args) => args.EventType)
             {
                 [MediaControlEventType.RewindClick] = (s, e) => MediaPlayerModel.MediaController.Rewind(),
                 [MediaControlEventType.PlayClick] = (s, e) => MediaPlayerModel.SetMediaState(MediaPlayerStates.Play),
@@ -68,14 +66,14 @@ namespace DQPlayer.MVVMFiles.ViewModels
                 [MediaControlEventType.MovePreviousClick] = OnMovePreviousClick,
                 [MediaControlEventType.RepeatCheck] = (sender, args) => _repeatState = (bool) args.AdditionalInfo
             };
-            FileManager<MediaFileInformation>.Instance.NewRequest += FileManager_OnNewRequest;
+            FileManager<MediaFileInformation>.Instance.Notify += FileManager_OnNewRequest;
         }
 
-        private void OnMoveNextClick(object s, MediaControlEventArgs e) => PlaylistManager.Instance.Request(this,
-            new PlaylistManagerEventArgs(PlaylistAction.PlayNext));
+        private void OnMoveNextClick(object s, MediaEventArgs<MediaControlEventType> e) => PlaylistManager.Instance
+            .Request(this, new PlaylistManagerEventArgs(PlaylistAction.PlayNext));
 
-        private void OnMovePreviousClick(object s, MediaControlEventArgs e) => PlaylistManager.Instance.Request(this,
-            new PlaylistManagerEventArgs(PlaylistAction.PlayPrevious));
+        private void OnMovePreviousClick(object s, MediaEventArgs<MediaControlEventType> e) => PlaylistManager.Instance
+            .Request(this, new PlaylistManagerEventArgs(PlaylistAction.PlayPrevious));
 
         private void FileManager_OnNewRequest(object sender, FileManagerEventArgs<MediaFileInformation> e)
         {
@@ -88,8 +86,9 @@ namespace DQPlayer.MVVMFiles.ViewModels
                 {
                     _currentFileCallback = () => e.Callback?.Invoke(firstFile, _repeatState);
                     MediaPlayerModel.SetMediaState(MediaPlayerStates.Play);
+                    OnNotify(MediaElementEventType.Started, firstFile);
                 }
-            }   
+            }
         }
 
         private void OnControlsAttached(IMediaControlsViewModel controlsViewModel)
@@ -97,7 +96,7 @@ namespace DQPlayer.MVVMFiles.ViewModels
             ControlsAttached?.Invoke(controlsViewModel);
         }
 
-        private void ControlsViewModel_Notify(object sender, MediaControlEventArgs e)
+        private void ControlsViewModel_Notify(object sender, MediaEventArgs<MediaControlEventType> e)
         {
             if (_handlers.TryGetValue(e.EventType, out var action))
             {
@@ -105,19 +104,19 @@ namespace DQPlayer.MVVMFiles.ViewModels
             }
         }
 
-        private void Subscribe(ICustomObservable<MediaControlEventArgs> provider)
+        private void Subscribe(ICustomObservable<MediaEventArgs<MediaControlEventType>> provider)
         {
             provider.Notify += ControlsViewModel_Notify;
         }
 
-        private void Unsubscribe(ICustomObservable<MediaControlEventArgs> provider)
+        private void Unsubscribe(ICustomObservable<MediaEventArgs<MediaControlEventType>> provider)
         {
             provider.Notify -= ControlsViewModel_Notify;
         }
 
         #region Media Controls Event Handlers
 
-        private void OnPositionSliderDragStarted(object sender, MediaControlEventArgs e)
+        private void OnPositionSliderDragStarted(object sender, MediaEventArgs<MediaControlEventType> e)
         {
             //force video update
             MediaPlayerModel.MediaController.SetNewPlayerPosition(
@@ -125,7 +124,7 @@ namespace DQPlayer.MVVMFiles.ViewModels
             MediaPlayerModel.SerializeState(MediaPlayerStates.Pause);
         }
 
-        private void ControlsViewModel_VolumeSliderValueChanged(object sender, MediaControlEventArgs e)
+        private void ControlsViewModel_VolumeSliderValueChanged(object sender, MediaEventArgs<MediaControlEventType> e)
         {
             var routedArgs = (RoutedPropertyChangedEventArgs<double>) e.AdditionalInfo;
             MediaPlayerModel.MediaController.ChangeVolume(routedArgs.NewValue);
@@ -134,7 +133,7 @@ namespace DQPlayer.MVVMFiles.ViewModels
         private void OnMediaEnded(MediaElement mediaElement)
         {
             _currentFileCallback?.Invoke();
-            MediaEnded?.Invoke(this, mediaElement);
+            OnNotify(MediaElementEventType.Ended);
         }      
 
         #endregion
@@ -148,6 +147,21 @@ namespace DQPlayer.MVVMFiles.ViewModels
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
+        #endregion
+
+        #region Implementation of ICustomObservable<MediaEventArgs<MediaElementEventType>>
+
+        public event EventHandler<MediaEventArgs<MediaElementEventType>> Notify;
+
+        private void OnNotify([NotNull] MediaElementEventType eventType, object additionalInfo = null)
+        {
+            if (eventType == null)
+            {
+                throw new ArgumentNullException(nameof(eventType));
+            }
+            Notify?.Invoke(this, new MediaEventArgs<MediaElementEventType>(eventType, additionalInfo));
+        }
+
         #endregion
     }
 }

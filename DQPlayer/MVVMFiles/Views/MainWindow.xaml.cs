@@ -1,13 +1,12 @@
 ﻿using System;
+using System.Text;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Controls;
+using System.Windows.Media.Animation;
 using DQPlayer.Helpers.DialogHelpers;
 using DQPlayer.Helpers.Extensions;
 using DQPlayer.MVVMFiles.ViewModels;
-using DQPlayer.Helpers.InputManagement;
-using DQPlayer.Helpers.FileManagement.FileInformation;
-
 namespace DQPlayer.MVVMFiles.Views
 {
     public partial class MainWindow
@@ -17,12 +16,14 @@ namespace DQPlayer.MVVMFiles.Views
         public MainWindow()
         {
             InitializeComponent();
-
             ConfigureUserControls();
         }
 
         private void ConfigureUserControls()
         {
+            Timeline.DesiredFrameRateProperty.OverrideMetadata(
+                typeof(Timeline),
+                new FrameworkPropertyMetadata {DefaultValue = 25});
             Application.Current.ShutdownMode = ShutdownMode.OnMainWindowClose;
 
             WindowDialogHelper<PlaylistView>.Instance.Show();
@@ -30,10 +31,13 @@ namespace DQPlayer.MVVMFiles.Views
 
             var mediaControlsVM = ucMediaPlayerControls.DataContext as IMediaControlsViewModel;
             var mediaElementVM = ucMediaElement.DataContext as IMediaElementViewModel;
+            var subtitlesVM = ucSubtitles.DataContext as ISubtitlesViewModel;
 
             mediaElementVM.CurentControls = mediaControlsVM;
 
             mediaControlsVM.CurrentMediaPlayer = ucMediaElement;
+
+            subtitlesVM.CurrentMediaElement = mediaElementVM;
 
             ViewModel.WindowFullScreen += ViewModel_WindowFullScreen;
             ViewModel.WindowNormalize += ViewModel_WindowNormalize;
@@ -48,6 +52,7 @@ namespace DQPlayer.MVVMFiles.Views
             Grid.SetColumnSpan(ucMediaPlayerControls, 1);
 
             Grid.SetRowSpan(ucMediaElement, 2);
+            Grid.SetRowSpan(ucSubtitles, 2);
 
             Settings.AnimationManager.BeginAnimation("FadeOut", ucMediaPlayerControls);
         }
@@ -62,6 +67,7 @@ namespace DQPlayer.MVVMFiles.Views
             Grid.SetColumnSpan(ucMediaPlayerControls, 3);
 
             Grid.SetRowSpan(ucMediaElement, 1);
+            Grid.SetRowSpan(ucSubtitles, 1);
 
             Settings.AnimationManager.CancelAnimation("FadeOut", ucMediaPlayerControls);
         }
