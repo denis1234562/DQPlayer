@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows.Controls;
 using DQPlayer.Annotations;
 using DQPlayer.Helpers.CustomControls;
 
@@ -12,22 +11,16 @@ namespace DQPlayer.Helpers.SubtitlesManagement
         private static readonly Dictionary<SubtitleSegment, IEnumerable<OutlinedLabel>> _currentlyShownSubtitles =
             new Dictionary<SubtitleSegment, IEnumerable<OutlinedLabel>>();
 
-        public static void ShowSubtitle([NotNull] this Grid grid, [NotNull] SubtitleSegment segment)
+        public static void ShowSubtitle([NotNull] this IEnumerable<OutlinedLabel> labels, [NotNull] SubtitleSegment segment)
         {
-            if (grid == null)
-            {
-                throw new ArgumentNullException(nameof(grid));
-            }
-            if (segment == null)
-            {
-                throw new ArgumentNullException(nameof(segment));
-            }
-            var lines = GetAvailableLines(segment, grid.Children.OfType<OutlinedLabel>()).ToArray();
+            if (labels == null) throw new ArgumentNullException(nameof(labels));
+            if (segment == null) throw new ArgumentNullException(nameof(segment));
+
+            var lines = GetAvailableLines(segment, labels).ToArray();
             foreach (var line in lines)
             {
                 line.Label.Text = line.Value;
             }
-
             _currentlyShownSubtitles.Add(segment, lines.Select(l => l.Label));
         }
 
@@ -36,29 +29,19 @@ namespace DQPlayer.Helpers.SubtitlesManagement
             IEnumerable<OutlinedLabel> labels)
         {
             var splitedLines = segment.Content.Split(new[] {'\n'}, StringSplitOptions.RemoveEmptyEntries);
-
             var availableLines = labels.Where(l => string.IsNullOrEmpty(l.Text));
 
-            foreach (var availableLine in splitedLines.Reverse().Zip(availableLines,
-                (s, label) => new SubtitleLabelWrapper(label, s)))
-            {
-                yield return availableLine;
-            }
+            return splitedLines.Reverse().Zip(availableLines, (s, label) => new SubtitleLabelWrapper(label, s));
         }
 
-        public static void HideSubtitle([NotNull]this Grid grid, [NotNull] SubtitleSegment segment)
+        public static void HideSubtitle([NotNull] this IEnumerable<OutlinedLabel> labels, [NotNull] SubtitleSegment segment)
         {
-            if (grid == null)
+            if (labels == null) throw new ArgumentNullException(nameof(labels));
+            if (segment == null) throw new ArgumentNullException(nameof(segment));
+
+            if (_currentlyShownSubtitles.TryGetValue(segment, out var shownLabels))
             {
-                throw new ArgumentNullException(nameof(grid));
-            }
-            if (segment == null)
-            {
-                throw new ArgumentNullException(nameof(segment));
-            }
-            if (_currentlyShownSubtitles.TryGetValue(segment, out var value))
-            {
-                foreach (var label in value)
+                foreach (var label in shownLabels)
                 {
                     label.Text = string.Empty;
                 }

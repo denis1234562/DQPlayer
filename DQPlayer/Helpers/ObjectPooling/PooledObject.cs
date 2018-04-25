@@ -1,4 +1,5 @@
 ﻿using System;
+using DQPlayer.Annotations;
 
 namespace DQPlayer.Helpers.ObjectPooling
 {
@@ -7,7 +8,7 @@ namespace DQPlayer.Helpers.ObjectPooling
         public Func<T> ObjectInitializer { get; }
         public bool CreateOnStartup { get; }
 
-        public PooledObject(Func<T> objectInitializer, bool createOnStartup = true)
+        public PooledObject([NotNull] Func<T> objectInitializer, bool createOnStartup = true)
         {
             ObjectInitializer = objectInitializer ?? throw new ArgumentNullException(nameof(objectInitializer)); ;
             CreateOnStartup = createOnStartup;

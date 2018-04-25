@@ -1,4 +1,5 @@
 ﻿using System;
+using DQPlayer.Annotations;
 
 namespace DQPlayer.Helpers.Templates
 {
@@ -7,7 +8,7 @@ namespace DQPlayer.Helpers.Templates
     {
         private readonly Template<TSource, TBase> _sourceOfTemplate;
 
-        public TemplateCreator(Template<TSource, TBase> sourceOfTemplate)
+        public TemplateCreator([NotNull] Template<TSource, TBase> sourceOfTemplate)
         {
             _sourceOfTemplate = sourceOfTemplate ?? throw new ArgumentNullException(nameof(sourceOfTemplate));
         }
@@ -28,7 +29,7 @@ namespace DQPlayer.Helpers.Templates
     {
         private readonly Template<TSource> _sourceOfTemplate;
 
-        public TemplateCreator(Template<TSource> sourceOfTemplate)
+        public TemplateCreator([NotNull] Template<TSource> sourceOfTemplate)
         {
             _sourceOfTemplate = sourceOfTemplate ?? throw new ArgumentNullException(nameof(sourceOfTemplate));
         }

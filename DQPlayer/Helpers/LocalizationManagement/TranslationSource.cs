@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using System.Reflection;
 using System.Resources;
 using System.Runtime.CompilerServices;
 using DQPlayer.Annotations;
+using DQPlayer.Helpers.Extensions.CollectionsExtensions;
 
 namespace DQPlayer.Helpers.LocalizationManagement
 {
@@ -21,7 +21,7 @@ namespace DQPlayer.Helpers.LocalizationManagement
         {
             get
             {
-                var rm = GetValueAndAddToCache(_rmCache, resourceManager,
+                var rm = _rmCache.GetOrAdd(resourceManager,
                     () => new ResourceManager(resourceManager, Assembly.GetExecutingAssembly()));
                 return rm.GetString(key, currentCulture);
             }
@@ -45,17 +45,6 @@ namespace DQPlayer.Helpers.LocalizationManagement
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-
-        private static TValue GetValueAndAddToCache<TKey, TValue>(IDictionary<TKey, TValue> cache,
-            TKey key, Func<TValue> valueToAdd)
-        {
-            if (!cache.TryGetValue(key, out var value))
-            {
-                cache.Add(key, valueToAdd.Invoke());
-                return cache[key];
-            }
-            return value;
         }
     }
 }

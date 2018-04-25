@@ -1,4 +1,5 @@
 using System;
+using DQPlayer.Annotations;
 
 namespace DQPlayer.Helpers.FileManagement
 {
@@ -7,20 +8,17 @@ namespace DQPlayer.Helpers.FileManagement
         public string Extension { get; }
         public string Name { get; }
 
-        public FileExtension(string extension, string name)
+        public FileExtension([NotNull] string extension, string name)
         {
-            if (string.IsNullOrEmpty(extension))
-            {
-                throw new ArgumentException(nameof(extension));
-            }
+            if (string.IsNullOrEmpty(extension)) throw new ArgumentException(nameof(extension));
+
             Extension = extension;
             Name = name;
         }
 
         public FileExtension(string extension) 
             : this(extension, string.Empty)
-        {
-            
+        {         
         }
 
         public override string ToString() => $"{Name} ({Extension})";

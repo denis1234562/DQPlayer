@@ -52,28 +52,28 @@ namespace DQPlayer.MVVMFiles.ViewModels
             MediaEndedCommand = new RelayCommand<MediaElement>(OnMediaEnded);
             _handlers = new MediaObservableMap<MediaControlEventType>((map, args) => args.EventType)
             {
-                [MediaControlEventType.RewindClick] = (s, e) => MediaPlayerModel.MediaController.Rewind(),
-                [MediaControlEventType.PlayClick] = (s, e) => MediaPlayerModel.SetMediaState(MediaPlayerStates.Play),
-                [MediaControlEventType.PauseClick] = (s, e) => MediaPlayerModel.SetMediaState(MediaPlayerStates.Pause),
-                [MediaControlEventType.FastForwardClick] = (s, e) => MediaPlayerModel.MediaController.FastForward(),
-                [MediaControlEventType.StopClick] = (s, e) => MediaPlayerModel.SetMediaState(MediaPlayerStates.Stop),
+                {MediaControlEventType.RewindClick, (s, e) => MediaPlayerModel.MediaController.Rewind()},
+                {MediaControlEventType.PlayClick, (s, e) => MediaPlayerModel.SetMediaState(MediaPlayerStates.Play)},
+                {MediaControlEventType.PauseClick, (s, e) => MediaPlayerModel.SetMediaState(MediaPlayerStates.Pause)},
+                {MediaControlEventType.FastForwardClick, (s, e) => MediaPlayerModel.MediaController.FastForward()},
+                {MediaControlEventType.StopClick, (s, e) => MediaPlayerModel.SetMediaState(MediaPlayerStates.Stop)},
 
-                [MediaControlEventType.PositionSliderDragStarted] = OnPositionSliderDragStarted,
-                [MediaControlEventType.PositionSliderDragCompleted] = (s, e) => MediaPlayerModel.ResumeSerializedState(),
-                [MediaControlEventType.VolumeSliderValueChanged] = ControlsViewModel_VolumeSliderValueChanged,
+                {MediaControlEventType.PositionSliderDragStarted, OnPositionSliderDragStarted},
+                {MediaControlEventType.PositionSliderDragCompleted, (s, e) => MediaPlayerModel.ResumeSerializedState()},
+                {MediaControlEventType.VolumeSliderValueChanged, ControlsViewModel_VolumeSliderValueChanged},
 
-                [MediaControlEventType.MoveNextClick] = OnMoveNextClick,
-                [MediaControlEventType.MovePreviousClick] = OnMovePreviousClick,
-                [MediaControlEventType.RepeatCheck] = (sender, args) => _repeatState = (bool) args.AdditionalInfo
+                {MediaControlEventType.MoveNextClick, OnMoveNextClick},
+                {MediaControlEventType.MovePreviousClick, OnMovePreviousClick},
+                {MediaControlEventType.RepeatCheck, (sender, args) => _repeatState = (bool) args.AdditionalInfo}
             };
             FileManager<MediaFileInformation>.Instance.Notify += FileManager_OnNewRequest;
         }
 
-        private void OnMoveNextClick(object s, MediaEventArgs<MediaControlEventType> e) => PlaylistManager.Instance
-            .Request(this, new PlaylistManagerEventArgs(PlaylistAction.PlayNext));
+        private void OnMoveNextClick(object s, MediaEventArgs<MediaControlEventType> e)
+            => PlaylistManager.Instance.Request(this, new PlaylistManagerEventArgs(PlaylistAction.PlayNext));
 
-        private void OnMovePreviousClick(object s, MediaEventArgs<MediaControlEventType> e) => PlaylistManager.Instance
-            .Request(this, new PlaylistManagerEventArgs(PlaylistAction.PlayPrevious));
+        private void OnMovePreviousClick(object s, MediaEventArgs<MediaControlEventType> e) 
+            => PlaylistManager.Instance.Request(this, new PlaylistManagerEventArgs(PlaylistAction.PlayPrevious));
 
         private void FileManager_OnNewRequest(object sender, FileManagerEventArgs<MediaFileInformation> e)
         {
@@ -153,12 +153,8 @@ namespace DQPlayer.MVVMFiles.ViewModels
 
         public event EventHandler<MediaEventArgs<MediaElementEventType>> Notify;
 
-        private void OnNotify([NotNull] MediaElementEventType eventType, object additionalInfo = null)
+        private void OnNotify(MediaElementEventType eventType, object additionalInfo = null)
         {
-            if (eventType == null)
-            {
-                throw new ArgumentNullException(nameof(eventType));
-            }
             Notify?.Invoke(this, new MediaEventArgs<MediaElementEventType>(eventType, additionalInfo));
         }
 

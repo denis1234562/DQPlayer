@@ -13,9 +13,6 @@
     </UserControl.DataContext>
 
     <Grid Name="gridSubtitles" IsHitTestVisible="False" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-        <Grid.Effect>
-            <DropShadowEffect Color="Black"/>
-        </Grid.Effect>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <RowDefinition Height="*"/>
@@ -27,15 +24,15 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        
-        <customControls:OutlinedLabel Grid.Row="8" TextAlignment="Center" TextColor="White" OutlineBrush="Black" FontWeight="Bold" FontSize="32" FontFamily="Arial" Thickness="0.5"/>
-        <customControls:OutlinedLabel Grid.Row="7" TextAlignment="Center" TextColor="White" OutlineBrush="Black" FontWeight="Bold" FontSize="32" FontFamily="Arial" Thickness="0.5"/>
-        <customControls:OutlinedLabel Grid.Row="6" TextAlignment="Center" TextColor="White" OutlineBrush="Black" FontWeight="Bold" FontSize="32" FontFamily="Arial" Thickness="0.5"/>
-        <customControls:OutlinedLabel Grid.Row="5" TextAlignment="Center" TextColor="White" OutlineBrush="Black" FontWeight="Bold" FontSize="32" FontFamily="Arial" Thickness="0.5"/>
-        <customControls:OutlinedLabel Grid.Row="4" TextAlignment="Center" TextColor="White" OutlineBrush="Black" FontWeight="Bold" FontSize="32" FontFamily="Arial" Thickness="0.5"/>
-        <customControls:OutlinedLabel Grid.Row="3" TextAlignment="Center" TextColor="White" OutlineBrush="Black" FontWeight="Bold" FontSize="32" FontFamily="Arial" Thickness="0.5"/>
-        <customControls:OutlinedLabel Grid.Row="2" TextAlignment="Center" TextColor="White" OutlineBrush="Black" FontWeight="Bold" FontSize="32" FontFamily="Arial" Thickness="0.5"/>
-        <customControls:OutlinedLabel Grid.Row="1" TextAlignment="Center" TextColor="White" OutlineBrush="Black" FontWeight="Bold" FontSize="32" FontFamily="Arial" Thickness="0.5"/>
-        <customControls:OutlinedLabel Grid.Row="0" TextAlignment="Center" TextColor="White" OutlineBrush="Black" FontWeight="Bold" FontSize="32" FontFamily="Arial" Thickness="0.5"/>
+
+        <customControls:OutlinedLabel Grid.Row="8" TextAlignment="Center" TextColor="White" OutlineBrush="Black" FontWeight="Bold" FontFamily="Arial" Thickness="0.5"/>
+        <customControls:OutlinedLabel Grid.Row="7" TextAlignment="Center" TextColor="White" OutlineBrush="Black" FontWeight="Bold" FontFamily="Arial" Thickness="0.5"/>
+        <customControls:OutlinedLabel Grid.Row="6" TextAlignment="Center" TextColor="White" OutlineBrush="Black" FontWeight="Bold" FontFamily="Arial" Thickness="0.5"/>
+        <customControls:OutlinedLabel Grid.Row="5" TextAlignment="Center" TextColor="White" OutlineBrush="Black" FontWeight="Bold" FontFamily="Arial" Thickness="0.5"/>
+        <customControls:OutlinedLabel Grid.Row="4" TextAlignment="Center" TextColor="White" OutlineBrush="Black" FontWeight="Bold" FontFamily="Arial" Thickness="0.5"/>
+        <customControls:OutlinedLabel Grid.Row="3" TextAlignment="Center" TextColor="White" OutlineBrush="Black" FontWeight="Bold" FontFamily="Arial" Thickness="0.5"/>
+        <customControls:OutlinedLabel Grid.Row="2" TextAlignment="Center" TextColor="White" OutlineBrush="Black" FontWeight="Bold" FontFamily="Arial" Thickness="0.5"/>
+        <customControls:OutlinedLabel Grid.Row="1" TextAlignment="Center" TextColor="White" OutlineBrush="Black" FontWeight="Bold" FontFamily="Arial" Thickness="0.5"/>
+        <customControls:OutlinedLabel Grid.Row="0" TextAlignment="Center" TextColor="White" OutlineBrush="Black" FontWeight="Bold" FontFamily="Arial" Thickness="0.5"/>
     </Grid>
 </UserControl>

@@ -18,10 +18,7 @@ namespace DQPlayer.States
             var ctor = typeof(MediaPlayerState).GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic, null,
                 new[] {typeof(int), typeof(bool), typeof(Action<IRegulatableMediaService>)}, null);
 
-            if (ctor == null)
-            {
-                throw new MissingMethodException(nameof(ctor));
-            }
+            if (ctor == null) throw new MissingMethodException(nameof(ctor));
 
             None = (MediaPlayerState) ctor.Invoke(new object[] {0, false, null});
 

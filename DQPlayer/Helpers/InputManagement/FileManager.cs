@@ -36,19 +36,15 @@ namespace DQPlayer.Helpers.InputManagement
 
         public void Request(object sender, [NotNull] IEnumerable<TFileInformation> selectedFiles)
         {
-            if (selectedFiles == null)
-            {
-                throw new ArgumentNullException(nameof(selectedFiles));
-            }
+            if (selectedFiles == null) throw new ArgumentNullException(nameof(selectedFiles));
+
             Request(sender, new FileManagerEventArgs<TFileInformation>(selectedFiles));
         }
 
         public void Request(object sender, [NotNull] FileManagerEventArgs<TFileInformation> args)
         {
-            if (args == null)
-            {
-                throw new ArgumentNullException(nameof(args));
-            }
+            if (args == null) throw new ArgumentNullException(nameof(args));
+
             OnNewRequest(sender, args);
         }
 

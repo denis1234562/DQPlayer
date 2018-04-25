@@ -8,12 +8,11 @@ namespace DQPlayer.Helpers.SubtitlesManagement
 {
     public static class SubtitleDetector
     {
-        public static FileInformation DetectSubtitles([NotNull] MediaFileInformation file, string preferedSubtitleLanguage)
+        public static FileInformation DetectSubtitles(
+            [NotNull] MediaFileInformation file,
+            string preferedSubtitleLanguage)
         {
-            if (file == null)
-            {
-                throw new ArgumentNullException(nameof(file));
-            }
+            if (file == null) throw new ArgumentNullException(nameof(file));
 
             var availableSubtitles =
                 file.FileInfo.Directory.GetFiles($"*{Settings.SubtitleExtensionString}", SearchOption.AllDirectories);

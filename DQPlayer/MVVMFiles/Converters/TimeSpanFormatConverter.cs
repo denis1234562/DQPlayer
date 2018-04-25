@@ -10,10 +10,8 @@ namespace DQPlayer.MVVMFiles.Converters
         public object Convert(object value, Type targetType, object parameter,
             System.Globalization.CultureInfo culture)
         {
-            if (targetType != typeof(string))
-            {
-                throw new InvalidOperationException($"The target must be a {nameof(String)}");
-            }
+            if (targetType != typeof(string)) throw new InvalidOperationException($"The target must be a {nameof(String)}");
+
             return ((TimeSpan)value).ToShortString();
         }
 

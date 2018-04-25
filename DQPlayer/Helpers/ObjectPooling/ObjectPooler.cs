@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using DQPlayer.Annotations;
 using DQPlayer.Helpers.Extensions;
 
 namespace DQPlayer.Helpers.ObjectPooling
@@ -29,7 +30,7 @@ namespace DQPlayer.Helpers.ObjectPooling
 
         private readonly Dictionary<PoolRefillMethod, Action> _poolRefillMethods;
 
-        public ObjectPooler(PooledObject<T> pooledObject, int amount, PoolRefillMethod refillMethod)
+        public ObjectPooler([NotNull] PooledObject<T> pooledObject, int amount, PoolRefillMethod refillMethod)
         {
             _pooledObject = pooledObject ?? throw new ArgumentNullException(nameof(pooledObject));
             Amount = amount;

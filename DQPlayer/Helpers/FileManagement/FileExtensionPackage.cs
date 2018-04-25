@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using DQPlayer.Annotations;
 
 namespace DQPlayer.Helpers.FileManagement
 {
@@ -11,7 +12,7 @@ namespace DQPlayer.Helpers.FileManagement
 
         public string PackageName { get; }
 
-        public FileExtensionPackage(string packageName, ISet<FileExtension> extensions)
+        public FileExtensionPackage(string packageName, [NotNull] ISet<FileExtension> extensions)
         {
             _extensions = extensions ?? throw new ArgumentNullException(nameof(extensions));
             PackageName = packageName;

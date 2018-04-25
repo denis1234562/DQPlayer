@@ -3,6 +3,7 @@ using System.Windows;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Windows.Media.Animation;
+using DQPlayer.Annotations;
 using DQPlayer.Helpers.CustomCollections;
 using DQPlayer.Helpers.ObjectPooling;
 
@@ -45,12 +46,11 @@ namespace DQPlayer.Helpers.Animations
                     PoolRefillMethod.WholePool));
         }
 
-        public void BeginAnimation(string name, UIElement element, TimeSpan? beginTime, Duration duration)
+        public void BeginAnimation([NotNull] string name, [NotNull] UIElement element, TimeSpan? beginTime, Duration duration)
         {
-            if (element == null)
-            {
-                throw new ArgumentNullException(nameof(element));
-            }
+            if (name == null) throw new ArgumentNullException(nameof(name));
+            if (element == null) throw new ArgumentNullException(nameof(element));
+
             if (!_animationCache.TryGetValue(name, out var animationWrapper))
             {
                 throw new KeyNotFoundException(nameof(name));
@@ -64,14 +64,13 @@ namespace DQPlayer.Helpers.Animations
 
         public void BeginAnimation(string name, UIElement element)
         {
-            if (element == null)
-            {
-                throw new ArgumentNullException(nameof(element));
-            }
+            if (element == null) throw new ArgumentNullException(nameof(element));
+
             if (!_animationCache.TryGetValue(name, out var animationWrapper))
             {
                 throw new KeyNotFoundException(nameof(name));
             }
+
             BeginAnimationImpl(animationWrapper, element);
         }
 
@@ -90,12 +89,11 @@ namespace DQPlayer.Helpers.Animations
             element.BeginAnimation(animationWrapper.TargetProperty, animation);
         }
 
-        public void CancelAnimation(string name, UIElement element)
+        public void CancelAnimation([NotNull]string name, [NotNull] UIElement element)
         {
-            if (element == null)
-            {
-                throw new ArgumentNullException(nameof(element));
-            }
+            if (name == null) throw new ArgumentNullException(nameof(name));
+            if (element == null) throw new ArgumentNullException(nameof(element));
+
             if (!_animationCache.TryGetValue(name, out var animationWrapper))
             {
                 throw new KeyNotFoundException(nameof(name));
@@ -103,12 +101,10 @@ namespace DQPlayer.Helpers.Animations
             element.BeginAnimation(animationWrapper.TargetProperty, null);
         }
 
-        public bool AddAnimation(AnimationWrapper animation)
+        public bool AddAnimation([NotNull] AnimationWrapper animation)
         {
-            if (animation == null)
-            {
-                throw new ArgumentNullException(nameof(animation));
-            }
+            if (animation == null) throw new ArgumentNullException(nameof(animation));
+
             if (_animationCache.ContainsKey(animation.Name))
             {
                 return false;
@@ -117,30 +113,24 @@ namespace DQPlayer.Helpers.Animations
             return true;
         }
 
-        public AnimationWrapper GetAnimation(string name)
+        public AnimationWrapper GetAnimation([NotNull] string name)
         {
-            if (name == null)
-            {
-                throw new ArgumentNullException(nameof(name));
-            }
+            if (name == null) throw new ArgumentNullException(nameof(name));
+
             return _animationCache.TryGetValue(name, out var animation) ? animation : null;
         }
 
-        public bool RemoveAnimation(string name)
+        public bool RemoveAnimation([NotNull] string name)
         {
-            if (name == null)
-            {
-                throw new ArgumentNullException(nameof(name));
-            }
+            if (name == null) throw new ArgumentNullException(nameof(name));
+
             return _animationCache.Remove(name);
         }
 
-        public bool RemoveAnimation(AnimationWrapper animation)
+        public bool RemoveAnimation([NotNull] AnimationWrapper animation)
         {
-            if (animation == null)
-            {
-                throw new ArgumentNullException(nameof(animation));
-            }
+            if (animation == null) throw new ArgumentNullException(nameof(animation));
+
             return RemoveAnimation(animation.Name);
         }
     }

@@ -60,10 +60,7 @@ namespace DQPlayer.Helpers.Extensions
 
         public static T SerializedClone<T>(this T source)
         {
-            if (!typeof(T).IsSerializable)
-            {
-                throw new ArgumentException(@"The type must be serializable.", nameof(source));
-            }
+            if (!typeof(T).IsSerializable) throw new ArgumentException(@"The type must be serializable.", nameof(source));
 
             if (ReferenceEquals(source, null))
             {

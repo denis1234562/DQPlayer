@@ -14,14 +14,9 @@ namespace DQPlayer.MVVMFiles.Converters
         {
             var slider = value as Slider;
             var converter = parameter as IValueConverter;
-            if (slider == null)
-            {
-                throw new InvalidOperationException($"The target must be of type {nameof(Slider)}");
-            }
-            if (converter == null)
-            {
-                throw new InvalidOperationException($"The parameter must be of type {nameof(IValueConverter)}");
-            }
+            if (slider == null) throw new InvalidOperationException($"The target must be of type {nameof(Slider)}");
+            if (converter == null) throw new InvalidOperationException($"The parameter must be of type {nameof(IValueConverter)}");
+
             return new Func<object>(() =>
             {
                 var track = slider.GetElementFromTemplate<Track>("PART_Track");

@@ -3,11 +3,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
+using DQPlayer.Annotations;
 
 namespace DQPlayer.Helpers.CustomCollections
 {
@@ -35,13 +35,11 @@ namespace DQPlayer.Helpers.CustomCollections
 
         #region Constructors
 
-        public ObservableDictionary(IDictionary<TKey, TValue> dictionary, IEqualityComparer<TKey> comparer)
+        public ObservableDictionary([NotNull] IDictionary<TKey, TValue> dictionary, IEqualityComparer<TKey> comparer)
         {
-            if (dictionary == null)
-            {
-                throw new ArgumentNullException(nameof(dictionary));
-            }
-            _dictionary = new Dictionary<TKey, TValue>(comparer);
+            if (dictionary == null) throw new ArgumentNullException(nameof(dictionary));
+
+            _dictionary = new Dictionary<TKey, TValue>(dictionary, comparer);
             foreach (var entry in dictionary)
             {
                 AddEntry(entry);
@@ -181,12 +179,11 @@ namespace DQPlayer.Helpers.CustomCollections
             return _dictionary.TryGetValue(item.Key, out var value) && value.Equals(item.Value);
         }
 
-        public void CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex)
+        public void CopyTo([NotNull] KeyValuePair<TKey, TValue>[] array, int arrayIndex)
         {
-            if (array == null)
-            {
-                throw new ArgumentNullException(nameof(array));
-            }
+            if (array == null) throw new ArgumentNullException(nameof(array));
+            if (arrayIndex < 0) throw new ArgumentOutOfRangeException(nameof(arrayIndex));
+
             ((IDictionary<TKey, TValue>) _dictionary).CopyTo(array, arrayIndex);
         }
 
@@ -195,8 +192,11 @@ namespace DQPlayer.Helpers.CustomCollections
             return RemoveEntry(item.Key);
         }
 
-        void ICollection.CopyTo(Array array, int arrayIndex)
+        void ICollection.CopyTo([NotNull] Array array, [NotNull] int arrayIndex)
         {
+            if (array == null) throw new ArgumentNullException(nameof(array));
+            if (arrayIndex < 0) throw new ArgumentOutOfRangeException(nameof(arrayIndex));
+
             ((ICollection) _dictionary).CopyTo(array, arrayIndex);
         }
 
@@ -217,7 +217,7 @@ namespace DQPlayer.Helpers.CustomCollections
             return _dictionary.GetEnumerator();
         }
 
-        [Pure]
+        [System.Diagnostics.Contracts.Pure]
         public bool ContainsKey(TKey key)
         {
             return _dictionary.ContainsKey(key);

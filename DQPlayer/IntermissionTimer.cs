@@ -3,31 +3,30 @@ using System.Threading;
 using System.Reflection;
 using System.Diagnostics;
 using System.Threading.Tasks;
-using System.Windows.Threading;
 
 namespace DQPlayer
 {
-    public class IntermissionTimer : DispatcherTimer
+    public class IntermissionTimer : System.Timers.Timer
     {
-        protected MulticastDelegate _tickEventHandlers;
-        protected MulticastDelegate TickEventHandlers =>
-            _tickEventHandlers ?? (_tickEventHandlers = (MulticastDelegate)typeof(DispatcherTimer)
-                .GetField("Tick", BindingFlags.Instance | BindingFlags.NonPublic)
-                ?.GetValue(this));
+        protected MulticastDelegate _elapsedEventHandlers;
+        protected MulticastDelegate ElapsedEventHandlers
+            => _elapsedEventHandlers ?? (_elapsedEventHandlers = (MulticastDelegate) typeof(System.Timers.Timer)
+                   .GetField("onIntervalElapsed", BindingFlags.Instance | BindingFlags.NonPublic)
+                   ?.GetValue(this));
 
         protected CancellationTokenSource _cancellationToken;
 
         protected readonly Stopwatch _internalTickCounter;
         protected Stopwatch _intervalTickedTime;
 
-        public TimeSpan Elapsed => _internalTickCounter.Elapsed;
-
+        private TimeSpan _interval;
         public new TimeSpan Interval
         {
-            get => base.Interval;
+            get => _interval;
             set
             {
-                base.Interval = value;
+                _interval = value;
+                base.Interval = _interval.TotalMilliseconds;
                 _cancellationToken.Cancel();
                 _cancellationToken = new CancellationTokenSource();
                 _intervalTickedTime.Reset();
@@ -44,10 +43,10 @@ namespace DQPlayer
             _internalTickCounter = new Stopwatch();
             _intervalTickedTime = new Stopwatch();
 
-            Tick += IntermissionTimer_Tick;
+            Elapsed += IntermissionTimer_Elapsed;
         }
 
-        protected virtual void IntermissionTimer_Tick(object sender, EventArgs e)
+        protected virtual void IntermissionTimer_Elapsed(object sender, EventArgs e)
         {
             if (sender == this)
             {
@@ -94,15 +93,15 @@ namespace DQPlayer
                         {
                             if (task.Status == TaskStatus.RanToCompletion)
                             {
-                                foreach (var handler in TickEventHandlers.GetInvocationList())
+                                foreach (var handler in ElapsedEventHandlers.GetInvocationList())
                                 {
                                     handler.Method.Invoke(handler.Target, new object[] {this, EventArgs.Empty});
                                 }
                                 Start();
                             }
-                        }, TaskScheduler.FromCurrentSynchronizationContext());
+                        }, TaskScheduler.Default);
                     _cancellationToken = new CancellationTokenSource();
-                }, CancellationToken.None, TaskCreationOptions.None, TaskScheduler.FromCurrentSynchronizationContext());
+                }, CancellationToken.None, TaskCreationOptions.None, TaskScheduler.Default);
             }
         }
     }

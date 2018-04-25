@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using DQPlayer.Annotations;
 
 namespace DQPlayer.Helpers.Templates
 {
@@ -13,12 +14,10 @@ namespace DQPlayer.Helpers.Templates
             _actions = new List<Action<TSource>>();
         }
 
-        public Template<TSource, TBase> WithArgument(Action<TSource> action)
+        public Template<TSource, TBase> WithArgument([NotNull] Action<TSource> action)
         {
-            if (action == null)
-            {
-                throw new ArgumentNullException(nameof(action));
-            }
+            if (action == null) throw new ArgumentNullException(nameof(action));
+
             _actions.Add(action);
             return this;
         }
@@ -48,12 +47,10 @@ namespace DQPlayer.Helpers.Templates
             _actions = new List<Action<TSource>>();
         }
 
-        public Template<TSource> WithArgument(Action<TSource> action)
+        public Template<TSource> WithArgument([NotNull] Action<TSource> action)
         {
-            if (action == null)
-            {
-                throw new ArgumentNullException(nameof(action));
-            }
+            if (action == null) throw new ArgumentNullException(nameof(action));
+
             _actions.Add(action);
             return this;
         }

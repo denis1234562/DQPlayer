@@ -1,19 +1,21 @@
 using Shell32;
 using System;
 using System.IO;
+using DQPlayer.Annotations;
 
 namespace DQPlayer.Helpers.Extensions
 {
     public static class StringExtensions
     {
-        public static string GetFileExtension(this string fileName)
+        public static string GetFileExtension([NotNull] this string fileName)
         {
             return fileName?.Substring(fileName.LastIndexOf(".", StringComparison.Ordinal)) ??
                    throw new ArgumentNullException(nameof(fileName));
         }
 
-        public static TimeSpan GetFileDuration(this FileInfo fileInfo)
+        public static TimeSpan GetFileDuration([NotNull] this FileInfo fileInfo)
         {
+            if(fileInfo == null) throw new ArgumentNullException(nameof(fileInfo));
             if (fileInfo.Extension != Settings.SubtitleExtensionString)
             {
                 Shell shell = new Shell();

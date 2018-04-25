@@ -29,19 +29,15 @@ namespace DQPlayer.Helpers.InputManagement
 
         public static void Request(object sender, [NotNull] IEnumerable<IFileInformation> selectedFiles)
         {
-            if (selectedFiles == null)
-            {
-                throw new ArgumentNullException(nameof(selectedFiles));
-            }
+            if (selectedFiles == null) throw new ArgumentNullException(nameof(selectedFiles));
+
             Request(sender, new FileManagerEventArgs<IFileInformation>(selectedFiles));
         }
 
         public static void Request(object sender, [NotNull] FileManagerEventArgs<IFileInformation> args)
         {
-            if (args == null)
-            {
-                throw new ArgumentNullException(nameof(args));
-            }
+            if (args == null) throw new ArgumentNullException(nameof(args));
+
             var typeGroups = args.SelectedFiles.GroupBy(information => information.GetType());
             foreach (var typeGroup in typeGroups)
             {

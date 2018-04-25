@@ -23,12 +23,13 @@ namespace DQPlayer.MVVMFiles.UserControls.MainWindow
         private void SetupTimers()
         {
             ViewModel.CurrentMediaPlayer.MediaPlayerModel.MediaPlayerTimer.Interval = Settings.TimerTickUpdate;
-            ViewModel.CurrentMediaPlayer.MediaPlayerModel.MediaPlayerTimer.Tick += MediaPlayerTimer_Tick;
+            ViewModel.CurrentMediaPlayer.MediaPlayerModel.MediaPlayerTimer.Elapsed += MediaPlayerTimer_Elapsed;
         }
 
-        private void MediaPlayerTimer_Tick(object sender, EventArgs e)
+        private void MediaPlayerTimer_Elapsed(object sender, EventArgs e)
         {
-            sMovieSkipSlider.Value = ViewModel.CurrentMediaPlayer.MediaElement.Position;
+            Application.Current.Dispatcher.Invoke(() => sMovieSkipSlider.Value =
+                ViewModel.CurrentMediaPlayer.MediaElement.Position);
         }
 
         private void ViewModel_MediaElementAttached(object sender, IMediaElementUserControl args)

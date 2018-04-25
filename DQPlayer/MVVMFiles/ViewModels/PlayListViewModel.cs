@@ -1,10 +1,10 @@
 ﻿using System.Linq;
 using System.Windows;
 using Microsoft.Win32;
+using System.Collections;
 using System.Windows.Input;
 using DQPlayer.Annotations;
 using System.ComponentModel;
-using System.Windows.Controls;
 using DQPlayer.MVVMFiles.Views;
 using System.Collections.Generic;
 using DQPlayer.Helpers.Extensions;
@@ -24,7 +24,7 @@ namespace DQPlayer.MVVMFiles.ViewModels
         public RelayCommand<DragEventArgs> ListViewFileDrop { get; }
         public RelayCommand<MouseButtonEventArgs> ListViewDoubleClickCommand { get; }
         public RelayCommand ClearAllCommand { get; }
-        public RelayCommand<ListView> RemoveCommand { get; }
+        public RelayCommand<IList> RemoveCommand { get; }
         public RelayCommand BrowseCommand { get; }
         public RelayCommand<CancelEventArgs> WindowClosingCommand { get; }
 
@@ -39,15 +39,15 @@ namespace DQPlayer.MVVMFiles.ViewModels
             FilesCollection = new ObservableCircularList<MediaFileInformation>();
             ListViewFileDrop = new RelayCommand<DragEventArgs>(OnListViewFileDropCommand);
             ListViewDoubleClickCommand = new RelayCommand<MouseButtonEventArgs>(OnListViewDoubleClickCommand);
-            RemoveCommand = new RelayCommand<ListView>(OnRemoveCommand);
+            RemoveCommand = new RelayCommand<IList>(OnRemoveCommand);
             ClearAllCommand = new RelayCommand(OnClearAllCommand);
             BrowseCommand = new RelayCommand(OnBrowseCommand);
             WindowClosingCommand = new RelayCommand<CancelEventArgs>(OnWindowClosingCommand);
 
             _playlistActions = new Dictionary<PlaylistAction, PlaylistActionDelegate>
             {
-                [PlaylistAction.PlayNext] = files => RequestNewFiles(files.Next, FileManagerCallback),
-                [PlaylistAction.PlayPrevious] = files => RequestNewFiles(files.Previous, FileManagerCallback),
+                [PlaylistAction.PlayNext] = files => RequestNewFiles(files.Next, callback: FileManagerCallback),
+                [PlaylistAction.PlayPrevious] = files => RequestNewFiles(files.Previous, callback: FileManagerCallback),
             };
 
             FilesCollection.CollectionChanged += FilesCollection_CollectionChanged;
@@ -94,7 +94,7 @@ namespace DQPlayer.MVVMFiles.ViewModels
             if (e.ChangedButton == MouseButton.Left &&
                 ((FrameworkElement) e.OriginalSource).DataContext is MediaFileInformation item)
             {
-                RequestNewFiles(item, FileManagerCallback);
+                RequestNewFiles(item, callback: FileManagerCallback);
             }
         }
 
@@ -104,16 +104,20 @@ namespace DQPlayer.MVVMFiles.ViewModels
             RequestNewFiles(new MediaFileInformation[] { null });
         }
 
-        private void OnRemoveCommand(ListView listView)
+        private void OnRemoveCommand(IList selectedItems)
         {
-            var lastPlayedFile = FilesCollection.Current;
-            while(listView.SelectedItems.Count > 0)
+            if (selectedItems == null || selectedItems.Count == 0)
             {
-                FilesCollection.Remove((MediaFileInformation) listView.SelectedItems[0]);
+                return;
+            }
+            var lastPlayedFile = FilesCollection.Current;
+            while(selectedItems.Count > 0)
+            {
+                FilesCollection.Remove((MediaFileInformation) selectedItems[0]);
             }
             if (!lastPlayedFile.Equals(FilesCollection.Current))
             {
-                RequestNewFiles(new MediaFileInformation[] { null });
+                RequestNewFiles(new MediaFileInformation[] {null});
             }
         }
 
@@ -131,7 +135,7 @@ namespace DQPlayer.MVVMFiles.ViewModels
             if (!sender.Equals(this))
             {
                 FilesCollection.AddRange(e.SelectedFiles);
-                RequestNewFiles(e.SelectedFiles, FileManagerCallback);
+                RequestNewFiles(e.SelectedFiles, sender, FileManagerCallback);
             }
             ChangePlayingFile(firstMediaFile);
         }
@@ -146,24 +150,28 @@ namespace DQPlayer.MVVMFiles.ViewModels
             FilesCollection.Current.IsPlaying = newFileState;
         }
 
-        private void RequestNewFiles(IEnumerable<MediaFileInformation> files,
+        private void RequestNewFiles(
+            MediaFileInformation file,
+            object originalSource = null,
+            FileManager<MediaFileInformation>.FileManagerCallback callback = null)
+        {
+            RequestNewFiles(file.AsEnumerable(), originalSource, callback);
+        }
+
+        private void RequestNewFiles(
+            IEnumerable<MediaFileInformation> files,
+            object originalSource = null,
             FileManager<MediaFileInformation>.FileManagerCallback callback = null)
         {
             FileManager<MediaFileInformation>.Instance.Request(this,
-                new FileManagerEventArgs<MediaFileInformation>(files, callback));
-        }
-
-        private void RequestNewFiles(MediaFileInformation file,
-            FileManager<MediaFileInformation>.FileManagerCallback callback = null)
-        {
-            RequestNewFiles(file.AsEnumerable(), callback);
+                new FileManagerEventArgs<MediaFileInformation>(files, originalSource, callback));
         }
 
         private void FileManagerCallback(MediaFileInformation currentPlayingFile, bool repeatState)
         {
             if (!FilesCollection.Last().Equals(FilesCollection.Current) || repeatState)
             {
-                RequestNewFiles(FilesCollection.Next, FileManagerCallback);
+                RequestNewFiles(FilesCollection.Next, callback: FileManagerCallback);
             }
         }
 

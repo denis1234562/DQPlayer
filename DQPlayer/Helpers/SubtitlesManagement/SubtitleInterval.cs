@@ -2,7 +2,6 @@
 
 namespace DQPlayer.Helpers.SubtitlesManagement
 {
-    //TODO maybe overload operators?
     [Serializable]
     public class SubtitleInterval : IInterval<SubtitleInterval>
     {

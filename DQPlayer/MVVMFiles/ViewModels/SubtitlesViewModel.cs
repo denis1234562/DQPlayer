@@ -35,13 +35,17 @@ namespace DQPlayer.MVVMFiles.ViewModels
         private void InitializeMaps()
         {
             _subtitleMap = new MediaObservableMap<SubtitlesEventType>
-            ((map, args) => args.EventType)
-            {
-                [SubtitlesEventType.Display] =
-                (sender, args) => OnSubtitlesNotify(SubtitlesEventType.Display, args.AdditionalInfo),
-                [SubtitlesEventType.Hide] =
-                (sender, args) => OnSubtitlesNotify(SubtitlesEventType.Hide, args.AdditionalInfo),
-            };
+                ((map, args) => args.EventType)
+                {
+                    {
+                        SubtitlesEventType.Display,
+                        (sender, args) => OnSubtitlesNotify(SubtitlesEventType.Display, args.AdditionalInfo)
+                    },
+                    {
+                        SubtitlesEventType.Hide,
+                        (sender, args) => OnSubtitlesNotify(SubtitlesEventType.Hide, args.AdditionalInfo)
+                    },
+                };
         }
 
         private void SubtitleHandler_OnNotify(object sender, MediaEventArgs<SubtitlesEventType> e)

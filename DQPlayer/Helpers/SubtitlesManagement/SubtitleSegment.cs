@@ -7,19 +7,19 @@ namespace DQPlayer.Helpers.SubtitlesManagement
     [Serializable]
     public class SubtitleSegment : IEquatable<SubtitleSegment>, IComparable<SubtitleSegment>
     {
-        public SubtitleInterval SubtitleInterval { get; }
+        public SubtitleInterval Interval { get; }
 
         public string Content { get; }
 
         public SubtitleSegment([NotNull] SubtitleInterval subtitleInterval, string content)
         {
-            SubtitleInterval = subtitleInterval ?? throw new ArgumentNullException(nameof(subtitleInterval));
+            Interval = subtitleInterval ?? throw new ArgumentNullException(nameof(subtitleInterval));
             Content = content;
         }
 
         public override string ToString()
         {
-            return $"{SubtitleInterval} {Environment.NewLine} {Content}";
+            return $"{Interval} {Environment.NewLine} {Content}";
         }
 
         #region IEquatable implementation
@@ -28,7 +28,7 @@ namespace DQPlayer.Helpers.SubtitlesManagement
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
-            return Equals(SubtitleInterval, other.SubtitleInterval) && string.Equals(Content, other.Content);
+            return Equals(Interval, other.Interval) && string.Equals(Content, other.Content);
         }
 
         public override bool Equals(object obj)
@@ -43,7 +43,7 @@ namespace DQPlayer.Helpers.SubtitlesManagement
         {
             unchecked
             {
-                return ((SubtitleInterval != null ? SubtitleInterval.GetHashCode() : 0) * 397) ^
+                return ((Interval != null ? Interval.GetHashCode() : 0) * 397) ^
                        (Content != null ? Content.GetHashCode() : 0);
             }
         }
@@ -56,7 +56,7 @@ namespace DQPlayer.Helpers.SubtitlesManagement
         {
             if (ReferenceEquals(this, other)) return 0;
             if (ReferenceEquals(null, other)) return 1;
-            return Comparer<SubtitleInterval>.Default.Compare(SubtitleInterval, other.SubtitleInterval);
+            return Interval.CompareTo(other.Interval);
         }
 
         #endregion

@@ -6,20 +6,17 @@ namespace DQPlayer.Helpers.Extensions.CollectionsExtensions
 {
     public static class IEnumerableExtensions
     {
-        public static int BinarySearch<T>([NotNull] this IList<T> values, [NotNull] T value,
+        public static int BinarySearch<T>(
+            [NotNull] this IList<T> values,
+            [NotNull] T value,
             [NotNull] Comparison<T> comparer)
         {
-            if (values == null)
-            {
-                throw new ArgumentNullException(nameof(values));
-            }
+            if (values == null) throw new ArgumentNullException(nameof(values));
+            if (comparer == null) throw new ArgumentNullException(nameof(comparer));
+
             if (values.Count == 0)
             {
                 return -1;
-            }
-            if (comparer == null)
-            {
-                throw new ArgumentNullException(nameof(comparer));
             }
             if (value == null)
             {
@@ -51,22 +48,23 @@ namespace DQPlayer.Helpers.Extensions.CollectionsExtensions
             return midIndex;
         }
 
-        public static int BinarySearch<T>([NotNull] this IList<T> values, [NotNull] T value,
+        public static int BinarySearch<T>(
+            [NotNull] this IList<T> values,
+            [NotNull] T value,
             [NotNull] IComparer<T> comparer)
         {
             return BinarySearch(values, value, comparer.Compare);
         }
 
-        public static int DuplicateBinarySearch<T>([NotNull] this IList<T> values, [NotNull] T value,
+        public static int DuplicateBinarySearch<T>(
+            [NotNull] this IList<T> values,
+            [NotNull] T value,
             [NotNull] Comparison<T> comparer)
         {
+            if (comparer == null) throw new ArgumentNullException(nameof(comparer));
             if (values.Count == 0)
             {
                 return -1;
-            }
-            if (comparer == null)
-            {
-                throw new ArgumentNullException(nameof(comparer));
             }
             if (value == null)
             {
@@ -99,22 +97,23 @@ namespace DQPlayer.Helpers.Extensions.CollectionsExtensions
             return firstOccuranceIndex;
         }
 
-        public static int DuplicateBinarySearch<T>([NotNull] this IList<T> values, [NotNull] T value,
+        public static int DuplicateBinarySearch<T>(
+            [NotNull] this IList<T> values, 
+            [NotNull] T value,
             [NotNull] IComparer<T> comparer)
         {
             return DuplicateBinarySearch(values, value, comparer.Compare);
         }
 
-        public static int DuplicateBinarySearch<T, TTarget>([NotNull] this IList<T> values,
-            [NotNull] SingleComparer<TTarget> comparer, [NotNull] Func<T, TTarget> converter)
+        public static int DuplicateBinarySearch<T, TTarget>(
+            [NotNull] this IList<T> values,
+            [NotNull] SingleComparer<TTarget> comparer, 
+            [NotNull] Func<T, TTarget> converter)
         {
+            if (comparer == null) throw new ArgumentNullException(nameof(comparer));
             if (values.Count == 0)
             {
                 return -1;
-            }
-            if (comparer == null)
-            {
-                throw new ArgumentNullException(nameof(comparer));
             }
             int start = 0;
             int end = values.Count - 1;

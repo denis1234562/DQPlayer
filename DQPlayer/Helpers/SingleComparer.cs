@@ -25,7 +25,7 @@ namespace DQPlayer.Helpers
         /// Initializes new instance of <see cref="SingleComparer{T}"/> with no predicate and a concrete comparer.
         /// </summary>
         /// <param name="comparer"></param>
-        public SingleComparer(IComparer<T> comparer)
+        public SingleComparer([NotNull] IComparer<T> comparer)
             : this(null, comparer)
         {
         }

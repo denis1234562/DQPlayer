@@ -1,11 +1,13 @@
 ﻿using System;
-using System.Text;
+using System.Timers;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Controls;
 using System.Windows.Media.Animation;
 using DQPlayer.Helpers.DialogHelpers;
 using DQPlayer.Helpers.Extensions;
+using DQPlayer.Helpers.FileManagement.FileInformation;
+using DQPlayer.Helpers.InputManagement;
 using DQPlayer.MVVMFiles.ViewModels;
 namespace DQPlayer.MVVMFiles.Views
 {
@@ -23,7 +25,7 @@ namespace DQPlayer.MVVMFiles.Views
         {
             Timeline.DesiredFrameRateProperty.OverrideMetadata(
                 typeof(Timeline),
-                new FrameworkPropertyMetadata {DefaultValue = 25});
+                new FrameworkPropertyMetadata {DefaultValue = 30});
             Application.Current.ShutdownMode = ShutdownMode.OnMainWindowClose;
 
             WindowDialogHelper<PlaylistView>.Instance.Show();
@@ -41,11 +43,13 @@ namespace DQPlayer.MVVMFiles.Views
 
             ViewModel.WindowFullScreen += ViewModel_WindowFullScreen;
             ViewModel.WindowNormalize += ViewModel_WindowNormalize;
+
+//            FileManagerHelper.Request(this, new MediaFileInformation(new Uri(
+//                @"F:\Movies\World Of Warcraft\07\game.of.thrones.s07e07.720p.web.h264-strife.mkv")).AsEnumerable());
         }
 
         private void ViewModel_WindowFullScreen()
         {
-            //TODO * Use 2 grids
             //TODO serialize/resume + use settings
             ucMediaPlayerControls.SetBottomMargin(20);
             Grid.SetColumn(ucMediaPlayerControls, 1);

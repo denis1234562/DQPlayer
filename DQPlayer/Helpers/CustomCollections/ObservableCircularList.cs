@@ -20,12 +20,10 @@ namespace DQPlayer.Helpers.CustomCollections
         public event NotifyCollectionChangedEventHandler CollectionChanged;
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public ObservableCircularList(IEnumerable<T> items)
+        public ObservableCircularList([NotNull] IEnumerable<T> items)
         {
-            if (items == null)
-            {
-                throw new ArgumentNullException(nameof(items));
-            }
+            if (items == null) throw new ArgumentNullException(nameof(items));
+
             _elements = new List<T>(items);
         }
 
@@ -33,12 +31,10 @@ namespace DQPlayer.Helpers.CustomCollections
         {
         }
 
-        public void AddRange(IEnumerable<T> items)
+        public void AddRange([NotNull] IEnumerable<T> items)
         {
-            if (items == null)
-            {
-                throw new ArgumentNullException(nameof(items));
-            }
+            if (items == null) throw new ArgumentNullException(nameof(items));
+
             foreach (var item in items)
             {
                 Add(item);
@@ -140,8 +136,11 @@ namespace DQPlayer.Helpers.CustomCollections
             return _elements.Contains(item);
         }
 
-        public void CopyTo(T[] array, int arrayIndex)
+        public void CopyTo([NotNull] T[] array, int arrayIndex)
         {
+            if (array == null) throw new ArgumentNullException(nameof(array));
+            if (arrayIndex < 0) throw new ArgumentOutOfRangeException(nameof(arrayIndex));
+
             _elements.CopyTo(array, arrayIndex);
         }
 
@@ -183,6 +182,8 @@ namespace DQPlayer.Helpers.CustomCollections
 
         public void RemoveAt(int index)
         {
+            if(index < 0) throw new ArgumentOutOfRangeException(nameof(index));
+
             var item = _elements[index];
             _elements.RemoveAt(index);
             var previousCurrentIndex = _lastUsedElementIndex;

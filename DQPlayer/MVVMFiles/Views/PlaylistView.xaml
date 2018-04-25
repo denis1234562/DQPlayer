@@ -10,8 +10,6 @@
         xmlns:cmd="http://www.galasoft.ch/mvvmlight"
         mc:Ignorable="d"
         Title="Playlist" Height="415" Width="510"
-        MinHeight="{Binding Source={x:Static local:Settings.MinimumMainWindowSize}, Path=Height}"
-        MinWidth="{Binding Source={x:Static local:Settings.MinimumMainWindowSize}, Path=Width}"
         Background="{DynamicResource WindowBackgroundBrush}" Icon="/DQPlayer;component/bin/Debug/Assets/JD_Icon.png">
 
     <ia:Interaction.Triggers>
@@ -64,7 +62,7 @@
                             <Image Stretch="Fill" Height="15" Width="15" Source="/DQPlayer;component/bin/Debug/Assets/Plus_Sign.png"/>
                         </MenuItem.Icon>
                     </MenuItem>
-                    <MenuItem Header="Remove" Command="{Binding RemoveCommand}" CommandParameter="{x:Reference Name=lvListView}">
+                    <MenuItem Header="Remove" Command="{Binding RemoveCommand}" CommandParameter="{Binding ElementName=lvListView, Path=SelectedItems}">
                         <MenuItem.Icon>
                             <Image Stretch="Fill" Height="15" Width="15" Source="/DQPlayer;component/bin/Debug/Assets/Minus_Sign.png"/>
                         </MenuItem.Icon>
@@ -127,7 +125,7 @@
             <Button Name="bRemove" DockPanel.Dock="Right" HorizontalAlignment="Right" Margin="5,0" 
                 Padding="20,0" FontSize="12" Content="Remove"    
                 Command="{Binding RemoveCommand}" 
-                CommandParameter="{x:Reference Name=lvListView}"/>
+                CommandParameter="{Binding ElementName=lvListView, Path=SelectedItems}"/>
 
             <Button Name="bClearAll" DockPanel.Dock="Right" HorizontalAlignment="Right"  Margin="5,0" 
                 Padding="20,0" FontSize="12" Content="Clear All"                

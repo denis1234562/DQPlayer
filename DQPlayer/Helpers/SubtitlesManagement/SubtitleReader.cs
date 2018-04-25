@@ -20,15 +20,13 @@ namespace DQPlayer.Helpers.SubtitlesManagement
 
         public CircularList<SubtitleSegment> ExtractSubtitles([NotNull] string path)
         {
-            if (string.IsNullOrEmpty(path))
-            {
-                throw new ArgumentNullException(nameof(path));
-            }
+            if (string.IsNullOrEmpty(path)) throw new ArgumentNullException(nameof(path));
+
             var subtitles = new CircularList<SubtitleSegment>();
-            using (StreamReader sr = new StreamReader(path, Encoding))
+            using (var sr = new StreamReader(path, Encoding))
             {
                 var text = sr.ReadToEnd();
-                var lines = text.Split(new[] { "\r\n" }, StringSplitOptions.None);
+                var lines = text.Split(new[] {"\r\n"}, StringSplitOptions.None);
                 for (int i = 0; i < lines.Length; i++)
                 {
                     if (TryParseSubtitleInterval(lines[i], out var interval))
@@ -43,7 +41,7 @@ namespace DQPlayer.Helpers.SubtitlesManagement
 
         private string ExtractCurrentSubtitleContent(int startIndex, string[] lines)
         {
-            StringBuilder subtitleContent = new StringBuilder();
+            var subtitleContent = new StringBuilder();
             int endIndex = Array.IndexOf(lines, string.Empty, startIndex);
             for (int i = startIndex + 1; i < endIndex; i++)
             {

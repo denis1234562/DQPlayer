@@ -8,20 +8,31 @@ namespace DQPlayer.Helpers.CustomCollections
         where TEnumeration : Enumeration<TEnumeration>
     {
         internal MediaObservableMap(
-            Func<ObservableMap<TEnumeration, MediaEventArgs<TEnumeration>>,
-                MediaEventArgs<TEnumeration>, TEnumeration> invokator)
-            : base(invokator)
+            IDictionary<TEnumeration, EventHandler<MediaEventArgs<TEnumeration>>> values,
+            Func<ObservableMap<TEnumeration, MediaEventArgs<TEnumeration>>, MediaEventArgs<TEnumeration>, TEnumeration> selector,
+            Func<ObservableMap<TEnumeration, MediaEventArgs<TEnumeration>>, TEnumeration, bool> predicate)
+            : base(values, selector, predicate)
         {
         }
 
-        internal MediaObservableMap(IDictionary<TEnumeration, EventHandler<MediaEventArgs<TEnumeration>>> values)
-            : base(values)
+        internal MediaObservableMap(
+            IDictionary<TEnumeration, EventHandler<MediaEventArgs<TEnumeration>>> values,
+            Func<ObservableMap<TEnumeration, MediaEventArgs<TEnumeration>>, MediaEventArgs<TEnumeration>, TEnumeration> selector)
+            : base(values, selector)
         {
         }
 
-        internal EventHandler<MediaEventArgs<TEnumeration>> GetHandler(TEnumeration enumerationValue)
+        internal MediaObservableMap(
+            Func<ObservableMap<TEnumeration, MediaEventArgs<TEnumeration>>, MediaEventArgs<TEnumeration>, TEnumeration> selector, 
+            Func<ObservableMap<TEnumeration, MediaEventArgs<TEnumeration>>, TEnumeration, bool> predicate)
+            : base(selector, predicate)
         {
-            return TryGetValue(enumerationValue, out var handler) ? handler : null;
+        }
+
+        internal MediaObservableMap(
+            Func<ObservableMap<TEnumeration, MediaEventArgs<TEnumeration>>, MediaEventArgs<TEnumeration>, TEnumeration> selector) 
+            : base(selector)
+        {
         }
     }
 }

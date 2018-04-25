@@ -55,7 +55,7 @@ namespace DQPlayer.MVVMFiles.Commands
 
         public void Execute(object parameter)
         {
-            _execute((T) parameter);
+            _execute((T)parameter);
         }
     }
 }

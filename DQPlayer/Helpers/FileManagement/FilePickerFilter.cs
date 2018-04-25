@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using DQPlayer.Annotations;
 
 namespace DQPlayer.Helpers.FileManagement
 {
@@ -9,12 +10,10 @@ namespace DQPlayer.Helpers.FileManagement
     {
         public string Filter { get; }
 
-        public FilePickerFilter(FileExtensionPackage extensionPackage)
+        public FilePickerFilter([NotNull] FileExtensionPackage extensionPackage)
         {
-            if (extensionPackage == null)
-            {
-                throw new ArgumentNullException(nameof(extensionPackage));
-            }
+            if (extensionPackage == null) throw new ArgumentNullException(nameof(extensionPackage));
+
             Filter = ConstructFilter(extensionPackage);
         }
 

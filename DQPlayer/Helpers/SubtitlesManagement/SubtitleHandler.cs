@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Linq;
 using System.Text;
+using DQPlayer.States;
 using System.Threading;
 using DQPlayer.Annotations;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Windows;
 using DQPlayer.MVVMFiles.ViewModels;
 using DQPlayer.Helpers.InputManagement;
 using Microsoft.VisualStudio.Threading;
@@ -17,7 +19,8 @@ namespace DQPlayer.Helpers.SubtitlesManagement
 {
     public sealed class SubtitleHandler : ICustomObservable<MediaEventArgs<SubtitlesEventType>>
     {
-        private CancellationTokenSource _cancellationToken = new CancellationTokenSource();
+        private CancellationTokenSource _forceHidingToken = new CancellationTokenSource();
+        private CancellationTokenSource _pauseToken = new CancellationTokenSource();
         private readonly AsyncManualResetEvent _manualResetEventAsync = new AsyncManualResetEvent();
 
         private CircularList<SubtitleSegment> _subtitles;
@@ -43,68 +46,55 @@ namespace DQPlayer.Helpers.SubtitlesManagement
 
         public SubtitleHandler([NotNull] Encoding encoding, [NotNull] ISubtitlesViewModel provider)
         {
-            if (provider == null)
-            {
-                throw new ArgumentNullException(nameof(provider));
-            }
+            if (provider == null) throw new ArgumentNullException(nameof(provider));
             _encoding = encoding ?? throw new ArgumentNullException(nameof(encoding));
             _subtitleDisplayTracker = new IntermissionTimer();
-            _subtitleDisplayTracker.Tick += SubtitleDisplayTracker_OnTick;
+            _subtitleDisplayTracker.Elapsed += SubtitleDisplayTracker_OnElapsed;
             InitializeMaps();
             ConfigureNotifications(provider);
         }
-
+        
         private void InitializeMaps()
         {
             _subtitlesProviderMap = new MediaObservableMap<SubscriptionEventType>((map, args) => args.EventType)
             {
-                [SubscriptionEventType.MediaAttached] =
-                (sender, args) => AttachMediaElement((IMediaElementViewModel) args.AdditionalInfo),
-                [SubscriptionEventType.MediaDetached] = (sender, args) => DetachMediaElement()
+                {SubscriptionEventType.MediaAttached,
+                    (sender, args) => AttachMediaElement((IMediaElementViewModel) args.AdditionalInfo)
+                },
+                {SubscriptionEventType.MediaDetached, (sender, args) => DetachMediaElement()},
             };
 
             _mediaElementProviderMap = new MediaObservableMap<MediaElementEventType>((map, args) => args.EventType)
             {
-                [MediaElementEventType.Started] =
-                (sender, args) => TryBegin((MediaFileInformation) args.AdditionalInfo),
-                [MediaElementEventType.Ended] = (sender, args) => Stop()
+                {MediaElementEventType.Started, (sender, args) => TryBegin((MediaFileInformation) args.AdditionalInfo)},
+                {MediaElementEventType.Ended, (sender, args) => Stop()}
             };
 
-            _mediaControlsProviderMap = new MediaObservableMap<MediaControlEventType>((map, args) => args.EventType)
+            _mediaControlsProviderMap = new MediaObservableMap<MediaControlEventType>(
+                (map, args) => args.EventType,
+                (map, type) => _subtitles != null)
             {
-                [MediaControlEventType.FastForwardClick] = Skip,
-                [MediaControlEventType.RewindClick] = Skip,
-                [MediaControlEventType.PauseClick] = (sender, args) => Pause(),
-                [MediaControlEventType.PlayClick] = (sender, args) => Resume(),
-                [MediaControlEventType.StopClick] = (sender, args) => Stop(),
-                [MediaControlEventType.PositionSliderDragStarted] = (sender, args) =>
+                {MediaControlEventType.FastForwardClick, SkipAsync},
+                {MediaControlEventType.RewindClick, SkipAsync},
+                {MediaControlEventType.PauseClick, (sender, args) => Pause()},
+                {MediaControlEventType.PlayClick, (sender, args) => Resume()},
+                {MediaControlEventType.StopClick, (sender, args) => Stop()},
+                {MediaControlEventType.PositionSliderDragStarted, (sender, args) =>
                 {
                     ForceHidingAllSubtitles();
                     Pause();
-                },
-                [MediaControlEventType.PositionSliderDragCompleted] =
-                async (sender, args) => await ResyncAndResumeAsync((TimeSpan) args.AdditionalInfo)
+                }},
+                {MediaControlEventType.PositionSliderDragCompleted, SkipAsync}
             };
 
             _fileManagerMap = new ObservableMap<bool, FileManagerEventArgs<FileInformation>>(
                 (map, args) => args.SelectedFiles.FirstOrDefault() != null)
             {
-                [true] = (sender, args) => Begin(args.SelectedFiles.First(),
-                    _providerControls?.CurrentMediaPlayer.MediaElement.Position ?? default(TimeSpan))
+                {
+                    true, (sender, args) => Begin(args.SelectedFiles.First(),
+                        _providerControls?.CurrentMediaPlayer.MediaElement.Position ?? default(TimeSpan))
+                }
             };
-        }
-
-        private async void Skip(object sender, MediaEventArgs<MediaControlEventType> args)
-        {
-            var time = (TimeSpan) args.AdditionalInfo;
-            if (_subtitleDisplayTracker.IsEnabled)
-            {
-                await ResyncAndResumeAsync(time);
-            }
-            else
-            {
-                Resync(time);
-            }
         }
 
         private void ConfigureNotifications(ISubtitlesViewModel subtitlesProvider)
@@ -128,13 +118,25 @@ namespace DQPlayer.Helpers.SubtitlesManagement
             ForceHidingAllSubtitles();
         }
 
-        private async void SubtitleDisplayTracker_OnTick(object sender, EventArgs e)
+        private async void SubtitleDisplayTracker_OnElapsed(object sender, EventArgs e)
         {
-            SubtitleSegment lastSubtitle = _subtitles.Current;
+            var lastSubtitle = _subtitles.Current;
             _subtitles.MoveNext();
-            _subtitleDisplayTracker.Interval = _subtitles.Current.SubtitleInterval.Start -
-                                               lastSubtitle.SubtitleInterval.Start;
-            await ShowSubtitleAsync(lastSubtitle, lastSubtitle.SubtitleInterval.Duration);
+            _subtitleDisplayTracker.Interval = _subtitles.Current.Interval.Start - lastSubtitle.Interval.Start;
+            await Application.Current.Dispatcher.Invoke(async () => await ResyncWithPlayerAsync(lastSubtitle.Interval));
+            await ShowSubtitleAsync(lastSubtitle, lastSubtitle.Interval.Duration);
+        }
+
+        private async Task ResyncWithPlayerAsync(SubtitleInterval currentInterval)
+        {
+            TimeSpan mediaPosition = _providerControls.CurrentMediaPlayer.MediaElement.Position;
+            var result = currentInterval.Start.Subtract(mediaPosition);
+            var tolerance = TimeSpan.FromMilliseconds(10);
+            if (result > tolerance)
+            {
+                //current is ahead
+                await Task.Delay(result, _pauseToken.Token).ContinueWith(_ => { });
+            }
         }
 
         private void TryBegin(MediaFileInformation file)
@@ -157,63 +159,47 @@ namespace DQPlayer.Helpers.SubtitlesManagement
             }
             _subtitles = new SubtitleReader(_encoding).ExtractSubtitles(subtitleFile.Uri.OriginalString);
             Resync(startTime);
-            _cancellationToken = new CancellationTokenSource();
+            _pauseToken = new CancellationTokenSource();
             _manualResetEventAsync.Set();
             _subtitleDisplayTracker.Start();
         }
 
         private void Pause()
         {
-            if (_subtitles == null)
-            {
-                return;
-            }
             _subtitleDisplayTracker.Pause();
             _manualResetEventAsync.Reset();
-            _cancellationToken.Cancel();
+            _pauseToken.Cancel();
         }
 
         private void Resume()
         {
-            if (_subtitles == null)
-            {
-                return;
-            }
             _manualResetEventAsync.Set();
-            _cancellationToken = new CancellationTokenSource();
+            _pauseToken = new CancellationTokenSource();
             _subtitleDisplayTracker.Resume();
         }
 
         private void Resync(TimeSpan time)
         {
-            if (_subtitles == null)
-            {
-                return;
-            }
             ForceHidingAllSubtitles();
             _resyncComparer.TargetValue = time;
             var targetIndex =
-                _subtitles.DuplicateBinarySearch(_resyncComparer, segment => segment.SubtitleInterval.End);
+                _subtitles.DuplicateBinarySearch(_resyncComparer, segment => segment.Interval.End);
             var targetSubs = _subtitles[targetIndex];
 
             _subtitles.SetCurrent(targetIndex);
-            if (time > targetSubs.SubtitleInterval.Start)
+            if (time > targetSubs.Interval.Start)
             {
                 _subtitles.SetCurrent(targetIndex + 1);
 #pragma warning disable 4014
-                ShowSubtitleAsync(targetSubs, targetSubs.SubtitleInterval.End.Subtract(time));
+                ShowSubtitleAsync(targetSubs, targetSubs.Interval.End.Subtract(time));
 #pragma warning restore 4014
             }
-            _subtitleDisplayTracker.Interval = _subtitles.Current.SubtitleInterval.Start.Subtract(time);
+            _subtitleDisplayTracker.Interval = _subtitles.Current.Interval.Start.Subtract(time);
         }
 
         private async Task ResyncAndResumeAsync(TimeSpan span)
         {
-            if (_subtitles == null)
-            {
-                return;
-            }
-            _cancellationToken = new CancellationTokenSource();
+            _pauseToken = new CancellationTokenSource();
             await Task.Factory.StartNew(() =>
                     {
                         lock (_padLock)
@@ -221,49 +207,50 @@ namespace DQPlayer.Helpers.SubtitlesManagement
                             Resync(span);
                         }
                     },
-                    _cancellationToken.Token,
+                    _pauseToken.Token,
                     TaskCreationOptions.RunContinuationsAsynchronously,
-                    TaskScheduler.FromCurrentSynchronizationContext())
+                    TaskScheduler.Current)
                 .ContinueWith(task =>
                 {
                     if (task.Status == TaskStatus.RanToCompletion)
                     {
                         Resume();
                     }
-                }, TaskScheduler.FromCurrentSynchronizationContext());
+                }, TaskScheduler.Current);
+        }
+
+        private async void SkipAsync(object sender, MediaEventArgs<MediaControlEventType> e)
+        {
+            var time = (TimeSpan) e.AdditionalInfo;
+            if (_providerControls.CurrentMediaPlayer.MediaPlayerModel.CurrentState.Equals(MediaPlayerStates.Play))
+            {
+                await ResyncAndResumeAsync(time);
+            }
+            else
+            {
+                Resync(time);
+            }
         }
 
         private void Stop()
         {
-            if (_subtitles == null)
-            {
-                return;
-            }
             _subtitleDisplayTracker.Stop();
             Resync(TimeSpan.Zero);
         }
 
         private async Task ShowSubtitleAsync(SubtitleSegment subtitle, TimeSpan duration)
         {
-            if (_subtitles == null)
-            {
-                return;
-            }
             OnDisplaySubtitle(subtitle);
             _currentlyShownSubtitles.Add(subtitle);
-
+            _forceHidingToken = new CancellationTokenSource();
             await ScheduleSubtitleHidingAsync(subtitle, duration);
         }
 
         private async Task ScheduleSubtitleHidingAsync(SubtitleSegment subtitle, TimeSpan span)
         {
-            if (_subtitles == null)
-            {
-                return;
-            }
             var startTime = DateTime.Now;
 
-            await Task.Delay(span, _cancellationToken.Token)
+            await Task.Delay(span, _pauseToken.Token)
                 .ContinueWith(task =>
                 {
                     if (task.Status == TaskStatus.RanToCompletion)
@@ -271,24 +258,28 @@ namespace DQPlayer.Helpers.SubtitlesManagement
                         OnHideSubtitle(subtitle);
                         _currentlyShownSubtitles.Remove(subtitle);
                     }
-                }, TaskScheduler.FromCurrentSynchronizationContext());
+                }, TaskScheduler.Current);
 
             var leftTime = span.Subtract(TimeSpan.FromTicks(DateTime.Now.Subtract(startTime).Ticks));
             if (leftTime > TimeSpan.FromMilliseconds(1))
             {
                 await _manualResetEventAsync.WaitAsync();
-                await ScheduleSubtitleHidingAsync(subtitle, leftTime);
+                if (!_forceHidingToken.IsCancellationRequested)
+                {
+                    await ScheduleSubtitleHidingAsync(subtitle, leftTime);
+                }
             }
         }
 
         private void ForceHidingAllSubtitles()
         {
-            if (_subtitles == null || _currentlyShownSubtitles.Count == 0)
+            if (_currentlyShownSubtitles.Count == 0)
             {
                 return;
             }
-            _cancellationToken.Cancel(false);
+            _pauseToken.Cancel(false);
             _manualResetEventAsync.Reset();
+            _forceHidingToken.Cancel(false);
             lock (_padLock)
             {
                 foreach (var currentlyShownSubtitle in _currentlyShownSubtitles)
@@ -301,19 +292,11 @@ namespace DQPlayer.Helpers.SubtitlesManagement
 
         private void OnHideSubtitle(SubtitleSegment subtitle)
         {
-            if (_subtitles == null)
-            {
-                return;
-            }
             OnNotify(SubtitlesEventType.Hide, subtitle);
         }
 
         private void OnDisplaySubtitle(SubtitleSegment subtitle)
         {
-            if (_subtitles == null)
-            {
-                return;
-            }
             OnNotify(SubtitlesEventType.Display, subtitle);
         }
 

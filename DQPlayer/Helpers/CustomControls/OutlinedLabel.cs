@@ -1,18 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Drawing;
 using System.Globalization;
-using System.Linq;
 using System.Windows;
 using System.Windows.Media;
-using DQPlayer.Helpers.Extensions;
-using Brush = System.Windows.Media.Brush;
-using Brushes = System.Windows.Media.Brushes;
-using FontFamily = System.Windows.Media.FontFamily;
-using Pen = System.Windows.Media.Pen;
-using Point = System.Windows.Point;
-using Size = System.Windows.Size;
 
 namespace DQPlayer.Helpers.CustomControls
 {
@@ -56,23 +46,13 @@ namespace DQPlayer.Helpers.CustomControls
         public double Thickness
         {
             get => (double)GetValue(ThicknessProperty);
-            set
-            {
-                SetValue(ThicknessProperty, value);
-                InvalidateVisual();
-            }
+            set => SetValue(ThicknessProperty, value);
         }
 
         public FontFamily FontFamily
         {
             get => (FontFamily)GetValue(FontFamilyProperty);
             set => SetValue(FontFamilyProperty, value);
-        }
-
-        public double FontSize
-        {
-            get => (double)GetValue(FontSizeProperty);
-            set => SetValue(FontSizeProperty, value);
         }
 
         public static readonly DependencyProperty TextColorProperty =
@@ -99,50 +79,44 @@ namespace DQPlayer.Helpers.CustomControls
             DependencyProperty.Register(nameof(FontFamily), typeof(FontFamily), typeof(OutlinedLabel),
                 new PropertyMetadata(null));
 
-        public static readonly DependencyProperty FontSizeProperty =
-            DependencyProperty.Register(nameof(FontSize), typeof(double), typeof(OutlinedLabel),
-                new PropertyMetadata(null));
-
         private Size _startSize;
-
 
         public OutlinedLabel()
         {
-            FontSize = 12;
             Text = string.Empty;
             FontFamily = new FontFamily("Seago UI");
             TextColor = Brushes.Black;
         }
-      
+
         protected override void OnRender(DrawingContext drawingContext)
         {
             if (_startSize == default(Size))
             {
                 _startSize = new Size(ActualWidth, ActualHeight);
             }
-            var bg_rect = new Rect(0, 0, ActualWidth, ActualHeight);
-            drawingContext.DrawRectangle(Brushes.Transparent, null, bg_rect);
 
             if (string.IsNullOrEmpty(Text))
             {
                 return;
             }
 
-            var currentOutlineBrush = OutlineBrush ?? TextColor;
-            var typeface = new Typeface(FontFamily.Source);
+            var pen = new Pen(OutlineBrush ?? TextColor, (ActualHeight / _startSize.Height) * Thickness);
+            drawingContext.DrawGeometry(TextColor, pen, BuildGeometryOfLabel());
+        }
+
+        private Geometry BuildGeometryOfLabel()
+        {
             var emSize = (72 / 128d) * ActualHeight;
-            var formattedText = new FormattedText(Text, new CultureInfo("en-us"), FlowDirection, typeface,
-                emSize,
-                currentOutlineBrush);
+            var formattedText = new FormattedText(
+                Text, new CultureInfo("en-us"), FlowDirection, new Typeface(FontFamily.Source), emSize, Brushes.Black)
+            {
+                TextAlignment = TextAlignment
+            };
             formattedText.SetFontWeight(FontWeight);
-            formattedText.TextAlignment = TextAlignment;
 
             var origin = new Point(ActualWidth / 2, (ActualHeight - formattedText.Height) / 2);
 
-            var geometry = formattedText.BuildGeometry(origin);
-
-            var pen = new Pen(currentOutlineBrush, (ActualHeight / _startSize.Height) * Thickness);
-            drawingContext.DrawGeometry(TextColor, pen, geometry);
+            return formattedText.BuildGeometry(origin);
         }
     }
 }
