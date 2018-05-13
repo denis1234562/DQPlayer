@@ -29,10 +29,10 @@ namespace DQPlayer.MVVMFiles.UserControls.MainWindow
         private void MediaPlayerTimer_Elapsed(object sender, EventArgs e)
         {
             Application.Current.Dispatcher.Invoke(() => sMovieSkipSlider.Value =
-                ViewModel.CurrentMediaPlayer.MediaElement.Position);
+                ViewModel.CurrentMediaPlayer.MediaElement.Position.TotalSeconds);
         }
 
-        private void ViewModel_MediaElementAttached(object sender, IMediaElementUserControl args)
+        private void ViewModel_MediaElementAttached(object sender, IMediaElementViewModel args)
         {
             SetupTimers();
             if (args.MediaElement.NaturalDuration.HasTimeSpan)
@@ -48,7 +48,7 @@ namespace DQPlayer.MVVMFiles.UserControls.MainWindow
         private void MediaElement_MediaOpened(object sender, RoutedEventArgs e)
         {
             //TODO maybe detach?
-            BindSliderMaxValueToMediaElement((MediaElement) sender);
+            BindSliderMaxValueToMediaElement((MediaElement)sender);
         }
 
         private void BindSliderMaxValueToMediaElement(MediaElement args)
@@ -59,12 +59,11 @@ namespace DQPlayer.MVVMFiles.UserControls.MainWindow
 
         private void Slider_OnPreviewMouseMove(object sender, MouseEventArgs e)
         {
-            var slider = (Slider) e.Source;
+            var slider = (Slider)e.Source;
             var tt = (ToolTip)slider.ToolTip;
             if (e.MouseDevice.DirectlyOver.GetType() == typeof(Thumb))
             {
                 //in case it was covered by thumb
-                //TODO doesn't really work
                 tt.IsOpen = true;
             }
             tt.HorizontalOffset = Mouse.GetPosition(slider).X - tt.ActualWidth / 2;
@@ -73,7 +72,7 @@ namespace DQPlayer.MVVMFiles.UserControls.MainWindow
 
         private void Slider_OnMouseLeave(object sender, MouseEventArgs e)
         {
-            var tt = (ToolTip) ((Slider) e.Source).ToolTip;
+            var tt = (ToolTip)((Slider)e.Source).ToolTip;
             tt.IsOpen = false;
         }
     }

@@ -99,12 +99,14 @@
                 <customControls:ThumbDragSlider Grid.Column="1" x:Name="sMovieSkipSlider" Height="14" HorizontalAlignment="Stretch" VerticalAlignment="Center" IsMoveToPointEnabled="True"
                                                 IsEnabled="{Binding PlayerSourceState}"
                                                 Style="{StaticResource {x:Type Slider}}"
-                                                Value="{Binding CurrentMediaPlayer.MediaElement.Position, Mode=TwoWay, Converter={converters:SecondsToTimeSpanConverter}}"
                                                 MouseMove="Slider_OnPreviewMouseMove"
                                                 MouseLeave="Slider_OnMouseLeave">
                     <i:Interaction.Triggers>
                         <i:EventTrigger EventName="DragStarted">
-                            <i:InvokeCommandAction Command="{Binding PositionSliderDragStartedCommand}" CommandParameter="{Binding ElementName=sMovieSkipSlider}"/>
+                            <i:InvokeCommandAction Command="{Binding PositionSliderDragStartedCommand}" CommandParameter="{Binding ElementName=sMovieSkipSlider, Path=Value, Converter={converters:SecondsToTimeSpanConverter}}"/>
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="DragDelta">
+                            <i:InvokeCommandAction Command="{Binding PositionSliderDragDeltaCommand}" CommandParameter="{Binding ElementName=sMovieSkipSlider, Path=Value, Converter={converters:SecondsToTimeSpanConverter}}"/>
                         </i:EventTrigger>
                         <i:EventTrigger EventName="DragCompleted">
                             <i:InvokeCommandAction Command="{Binding PositionSliderDragCompletedCommand}" CommandParameter = "{Binding ElementName=sMovieSkipSlider, Path=Value, Converter={converters:SecondsToTimeSpanConverter}}"/>

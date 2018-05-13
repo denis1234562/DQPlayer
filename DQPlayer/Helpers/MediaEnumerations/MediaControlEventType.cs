@@ -9,11 +9,13 @@ namespace DQPlayer.Helpers.MediaEnumerations
         public static MediaControlEventType FastForwardClick = new MediaControlEventType(nameof(FastForwardClick), 4);
         public static MediaControlEventType StopClick = new MediaControlEventType(nameof(StopClick), 5);
         public static MediaControlEventType PositionSliderDragStarted = new MediaControlEventType(nameof(PositionSliderDragStarted), 6);
-        public static MediaControlEventType PositionSliderDragCompleted = new MediaControlEventType(nameof(PositionSliderDragCompleted), 7);
-        public static MediaControlEventType VolumeSliderValueChanged = new MediaControlEventType(nameof(VolumeSliderValueChanged), 8);
-        public static MediaControlEventType MovePreviousClick = new MediaControlEventType(nameof(MovePreviousClick), 9);
-        public static MediaControlEventType MoveNextClick = new MediaControlEventType(nameof(MoveNextClick), 10);
-        public static MediaControlEventType RepeatCheck = new MediaControlEventType(nameof(RepeatCheck), 11);
+        public static MediaControlEventType PositionSliderDragDelta = new MediaControlEventType(nameof(PositionSliderDragDelta), 7);
+        public static MediaControlEventType PositionSliderDragCompleted = new MediaControlEventType(nameof(PositionSliderDragCompleted), 8);
+        public static MediaControlEventType VolumeSliderValueChanged = new MediaControlEventType(nameof(VolumeSliderValueChanged), 9);
+        public static MediaControlEventType MovePreviousClick = new MediaControlEventType(nameof(MovePreviousClick), 10);
+        public static MediaControlEventType MoveNextClick = new MediaControlEventType(nameof(MoveNextClick), 11);
+        public static MediaControlEventType RepeatCheck = new MediaControlEventType(nameof(RepeatCheck), 12);
+
 
         private MediaControlEventType(string name, int value)
             : base(name, value)

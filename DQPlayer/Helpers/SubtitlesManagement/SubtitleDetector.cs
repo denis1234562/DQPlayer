@@ -19,6 +19,7 @@ namespace DQPlayer.Helpers.SubtitlesManagement
 
             if (!string.IsNullOrEmpty(preferedSubtitleLanguage))
             {
+                //en -> .en, bg -> .bg
                 if (preferedSubtitleLanguage[0] != '.')
                 {
                     preferedSubtitleLanguage = preferedSubtitleLanguage.Insert(0, ".");

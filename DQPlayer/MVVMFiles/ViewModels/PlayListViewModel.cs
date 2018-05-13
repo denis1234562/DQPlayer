@@ -92,7 +92,7 @@ namespace DQPlayer.MVVMFiles.ViewModels
         private void OnListViewDoubleClickCommand(MouseButtonEventArgs e)
         {
             if (e.ChangedButton == MouseButton.Left &&
-                ((FrameworkElement) e.OriginalSource).DataContext is MediaFileInformation item)
+                ((FrameworkElement)e.OriginalSource).DataContext is MediaFileInformation item)
             {
                 RequestNewFiles(item, callback: FileManagerCallback);
             }
@@ -111,13 +111,13 @@ namespace DQPlayer.MVVMFiles.ViewModels
                 return;
             }
             var lastPlayedFile = FilesCollection.Current;
-            while(selectedItems.Count > 0)
+            while (selectedItems.Count > 0)
             {
-                FilesCollection.Remove((MediaFileInformation) selectedItems[0]);
+                FilesCollection.Remove((MediaFileInformation)selectedItems[0]);
             }
             if (!lastPlayedFile.Equals(FilesCollection.Current))
             {
-                RequestNewFiles(new MediaFileInformation[] {null});
+                RequestNewFiles(new MediaFileInformation[] { null });
             }
         }
 
@@ -135,15 +135,14 @@ namespace DQPlayer.MVVMFiles.ViewModels
             if (!sender.Equals(this))
             {
                 FilesCollection.AddRange(e.SelectedFiles);
-                RequestNewFiles(e.SelectedFiles, sender, FileManagerCallback);
             }
             ChangePlayingFile(firstMediaFile);
         }
-         
+
         private void ChangePlayingFile(MediaFileInformation file, bool newFileState = true)
         {
             if (FilesCollection.Current != null)
-            { 
+            {
                 FilesCollection.Current.IsPlaying = false;
             }
             FilesCollection.SetCurrent(FilesCollection.IndexOf(file));

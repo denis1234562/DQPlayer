@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using DQPlayer.Annotations;
 
 namespace DQPlayer.Helpers.SubtitlesManagement
@@ -33,17 +32,14 @@ namespace DQPlayer.Helpers.SubtitlesManagement
 
         public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != this.GetType()) return false;
-            return Equals((SubtitleSegment) obj);
+            return obj is SubtitleSegment ss && Equals(ss);
         }
 
         public override int GetHashCode()
         {
             unchecked
             {
-                return ((Interval != null ? Interval.GetHashCode() : 0) * 397) ^
+                return ((Interval?.GetHashCode() ?? 0) * 397) ^
                        (Content != null ? Content.GetHashCode() : 0);
             }
         }

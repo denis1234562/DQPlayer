@@ -46,8 +46,7 @@
 
         <mainWindow:MediaElementUserControl x:Name="ucMediaElement" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3"/>
         <mainWindow:SubtitlesUserControl x:Name="ucSubtitles" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3"/>
-        <mainWindow:MediaPlayerControlsUserControl x:Name="ucMediaPlayerControls" VerticalAlignment="Bottom" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3"
-                                                   MouseLeave="MediaPlayerControls_OnMouseLeave"/>
+        <mainWindow:MediaPlayerControlsUserControl x:Name="ucMediaPlayerControls" VerticalAlignment="Bottom" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3"/>
     </Grid>
 </Window>
 

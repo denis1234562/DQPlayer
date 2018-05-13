@@ -1,11 +1,12 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace DQPlayer.Helpers.CustomCollections
 {
     public class CircularList<T> : ICircularList<T>
     {
-        private readonly IList<T> _elements = new List<T>();
+        private readonly List<T> _elements = new List<T>();
 
         private int _lastUsedElementIndex;
 
@@ -137,6 +138,15 @@ namespace DQPlayer.Helpers.CustomCollections
         public void Reset()
         {
             _lastUsedElementIndex = 0;
+        }
+
+        #endregion
+
+        #region Helpers
+
+        public void AddRange(IEnumerable<T> items)
+        {
+            _elements.AddRange(items);
         }
 
         #endregion

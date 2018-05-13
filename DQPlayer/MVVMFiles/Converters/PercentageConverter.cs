@@ -9,10 +9,10 @@ namespace DQPlayer.MVVMFiles.Converters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            var simulatedPosition = (double) value;
-            var slider = (Slider) parameter;
+            var simulatedPosition = (double)value;
+            var slider = (Slider)parameter;
 
-            return $"{simulatedPosition / slider.Maximum * 100d}%";
+            return $"{(simulatedPosition / slider.Maximum * 100d):N0}%";
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

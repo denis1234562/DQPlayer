@@ -13,9 +13,9 @@ using System.Runtime.CompilerServices;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using DQPlayer.Helpers.CustomControls;
+using DQPlayer.Helpers.Extensions;
 using DQPlayer.Helpers.FileManagement;
 using DQPlayer.Helpers.InputManagement;
-using DQPlayer.MVVMFiles.UserControls.MainWindow;
 using DQPlayer.Helpers.FileManagement.FileInformation;
 using DQPlayer.Helpers.MediaEnumerations;
 
@@ -35,7 +35,8 @@ namespace DQPlayer.MVVMFiles.ViewModels
             StopClickCommand = new RelayCommand<ThumbDragSlider>(OnStopClick);
             MoveNextCommand = new RelayCommand(OnMoveNext);
             MovePreviousCommand = new RelayCommand(OnMovePrevious);
-            PositionSliderDragStartedCommand = new RelayCommand<ThumbDragSlider>(OnPositionSliderDragStarted);
+            PositionSliderDragStartedCommand = new RelayCommand<TimeSpan>(OnPositionSliderDragStarted);
+            PositionSliderDragDeltaCommand = new RelayCommand<TimeSpan>(OnPositionSliderDragDelta);
             PositionSliderDragCompletedCommand = new RelayCommand<TimeSpan>(OnPositionSliderDragCompleted);
             PositionSliderThumbMouseEnterCommand = new RelayCommand<MouseEventArgs>(OnThumbMouseEnter);
             VolumeSliderValueChangedCommand = new RelayCommand<RoutedPropertyChangedEventArgs<double>>(OnVolumeSliderValueChanged);
@@ -67,22 +68,29 @@ namespace DQPlayer.MVVMFiles.ViewModels
                 MediaControlEventType.PositionSliderDragCompleted,
                 newPosition));
 
-        private void OnPositionSliderDragStarted(ThumbDragSlider slider)
-            => OnNotify(new MediaEventArgs<MediaControlEventType>(MediaControlEventType.PositionSliderDragStarted, slider));
+        private void OnPositionSliderDragDelta(TimeSpan newPosition)
+            => OnNotify(new MediaEventArgs<MediaControlEventType>(
+                MediaControlEventType.PositionSliderDragDelta,
+                newPosition));
 
-        private void OnVolumeSliderValueChanged(RoutedPropertyChangedEventArgs<double> e) 
+        private void OnPositionSliderDragStarted(TimeSpan newPosition)
+            => OnNotify(new MediaEventArgs<MediaControlEventType>(
+                MediaControlEventType.PositionSliderDragStarted,
+                newPosition));
+
+        private void OnVolumeSliderValueChanged(RoutedPropertyChangedEventArgs<double> e)
             => OnNotify(new MediaEventArgs<MediaControlEventType>(MediaControlEventType.VolumeSliderValueChanged, e));
 
-        private void OnMoveNext() 
+        private void OnMoveNext()
             => OnNotify(new MediaEventArgs<MediaControlEventType>(MediaControlEventType.MoveNextClick));
 
-        private void OnMovePrevious() 
+        private void OnMovePrevious()
             => OnNotify(new MediaEventArgs<MediaControlEventType>(MediaControlEventType.MovePreviousClick));
 
         private void OnPlaylistClick()
             => WindowDialogHelper<PlaylistView>.Instance.Show();
 
-        private void OnRepeatChecked(bool state) 
+        private void OnRepeatChecked(bool state)
             => OnNotify(new MediaEventArgs<MediaControlEventType>(MediaControlEventType.RepeatCheck, state));
 
         private void OnSettingsClicked()
@@ -90,19 +98,20 @@ namespace DQPlayer.MVVMFiles.ViewModels
 
         private void OnRewindClick()
         {
-            TimeSpan time = CurrentMediaPlayer.MediaElement.Position.Add(Settings.RewindSeconds);
+            var time = GeneralExtensions.Max(TimeSpan.Zero,
+                CurrentMediaPlayer.MediaElement.Position.Add(Settings.RewindSeconds));
             OnNotify(new MediaEventArgs<MediaControlEventType>(MediaControlEventType.RewindClick, time));
         }
 
         private void OnFastForwardClick()
         {
-            TimeSpan time = CurrentMediaPlayer.MediaElement.Position.Add(Settings.FastForwardSeconds);
+            var time = GeneralExtensions.Min(CurrentMediaPlayer.MediaElement.Position.Add(Settings.FastForwardSeconds));
             OnNotify(new MediaEventArgs<MediaControlEventType>(MediaControlEventType.FastForwardClick, time));
         }
 
         private void OnStopClick(ThumbDragSlider slider)
         {
-            slider.Value = TimeSpan.Zero;
+            slider.Value = 0;
             OnNotify(new MediaEventArgs<MediaControlEventType>(MediaControlEventType.StopClick));
             IsCheckedState = false;
         }
@@ -175,10 +184,10 @@ namespace DQPlayer.MVVMFiles.ViewModels
 
     public partial class MediaPlayerControlsViewModel
     {
-        public event Action<object, IMediaElementUserControl> MediaAttached;
+        public event Action<object, IMediaElementViewModel> MediaAttached;
 
-        private IMediaElementUserControl _currentMediaPlayer;
-        public IMediaElementUserControl CurrentMediaPlayer
+        private IMediaElementViewModel _currentMediaPlayer;
+        public IMediaElementViewModel CurrentMediaPlayer
         {
             get => _currentMediaPlayer;
             set
@@ -226,7 +235,8 @@ namespace DQPlayer.MVVMFiles.ViewModels
         public RelayCommand MoveNextCommand { get; }
         public RelayCommand MovePreviousCommand { get; }
         public RelayCommand<RoutedPropertyChangedEventArgs<double>> VolumeSliderValueChangedCommand { get; }
-        public RelayCommand<ThumbDragSlider> PositionSliderDragStartedCommand { get; }
+        public RelayCommand<TimeSpan> PositionSliderDragStartedCommand { get; }
+        public RelayCommand<TimeSpan> PositionSliderDragDeltaCommand { get; }
         public RelayCommand<TimeSpan> PositionSliderDragCompletedCommand { get; }
         public RelayCommand<MouseEventArgs> PositionSliderThumbMouseEnterCommand { get; }
         public MultiValueRelayCommand TooltipUpdateCommand => new MultiValueRelayCommand(TooltipUpdate);

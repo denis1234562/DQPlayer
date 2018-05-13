@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Globalization;
+using DQPlayer.Annotations;
 
 namespace DQPlayer.Helpers.SubtitlesManagement
 {
@@ -14,6 +16,39 @@ namespace DQPlayer.Helpers.SubtitlesManagement
         {
             Start = start;
             End = end;
+        }
+
+        public static bool TryParse(
+            [NotNull] string[] segments,
+            [NotNull] string[] formats,
+            out SubtitleInterval interval)
+        {
+            return TryParse(segments, formats, DateTimeFormatInfo.InvariantInfo, out interval);
+        }
+
+        public static bool TryParse(
+            [NotNull] string[] segments,
+            [NotNull] string[] formats,
+            DateTimeFormatInfo formatInfo,
+            out SubtitleInterval interval)
+        {
+            if (segments == null) throw new ArgumentNullException(nameof(segments));
+            if (formats == null) throw new ArgumentNullException(nameof(formats));
+
+            if (segments.Length != 2)
+            {
+                interval = null;
+                return false;
+            }
+
+            if (TimeSpan.TryParseExact(segments[0], formats, formatInfo, out var start) &&
+                TimeSpan.TryParseExact(segments[1], formats, formatInfo, out var end))
+            {
+                interval = new SubtitleInterval(start, end);
+                return true;
+            }
+            interval = null;
+            return false;
         }
 
         public override string ToString()
@@ -32,10 +67,7 @@ namespace DQPlayer.Helpers.SubtitlesManagement
 
         public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != this.GetType()) return false;
-            return Equals((SubtitleInterval)obj);
+            return obj is SubtitleInterval si && Equals(si);
         }
 
         public override int GetHashCode()

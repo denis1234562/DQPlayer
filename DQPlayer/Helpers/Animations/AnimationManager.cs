@@ -46,7 +46,11 @@ namespace DQPlayer.Helpers.Animations
                     PoolRefillMethod.WholePool));
         }
 
-        public void BeginAnimation([NotNull] string name, [NotNull] UIElement element, TimeSpan? beginTime, Duration duration)
+        public void BeginAnimation(
+            [NotNull] string name, 
+            [NotNull] UIElement element,
+            TimeSpan? beginTime,
+            Duration duration)
         {
             if (name == null) throw new ArgumentNullException(nameof(name));
             if (element == null) throw new ArgumentNullException(nameof(element));
@@ -74,7 +78,10 @@ namespace DQPlayer.Helpers.Animations
             BeginAnimationImpl(animationWrapper, element);
         }
 
-        private void BeginAnimationImpl(AnimationWrapper animationWrapper, UIElement element, Action<AnimationTimeline> modifiers = null)
+        private void BeginAnimationImpl(
+            AnimationWrapper animationWrapper, 
+            UIElement element, 
+            Action<AnimationTimeline> modifiers = null)
         {
             var animation = _animationObjectPoolers[animationWrapper.Name].GetObject();
             modifiers?.Invoke(animation);

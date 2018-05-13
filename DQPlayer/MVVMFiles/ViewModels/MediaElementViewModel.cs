@@ -7,7 +7,6 @@ using System.Windows.Controls;
 using DQPlayer.Annotations;
 using DQPlayer.Helpers;
 using DQPlayer.Helpers.CustomCollections;
-using DQPlayer.Helpers.CustomControls;
 using DQPlayer.Helpers.FileManagement.FileInformation;
 using DQPlayer.Helpers.InputManagement;
 using DQPlayer.Helpers.MediaEnumerations;
@@ -24,14 +23,14 @@ namespace DQPlayer.MVVMFiles.ViewModels
         private Action _currentFileCallback;
         private bool _repeatState;
 
-        public RelayCommand<MediaElement> MediaEndedCommand { get; }       
+        public RelayCommand<MediaElement> MediaEndedCommand { get; }
 
         public MediaPlayerModel MediaPlayerModel { get; set; }
 
         public event Action<IMediaControlsViewModel> ControlsAttached;
 
         private IMediaControlsViewModel _curentControls;
-        public IMediaControlsViewModel CurentControls
+        public IMediaControlsViewModel CurrentControls
         {
             get => _curentControls;
             set
@@ -47,8 +46,11 @@ namespace DQPlayer.MVVMFiles.ViewModels
             }
         }
 
-        public MediaElementViewModel()
+        public MediaElement MediaElement { get; }
+
+        public MediaElementViewModel(MediaElement mediaElement)
         {
+            MediaElement = mediaElement;
             MediaEndedCommand = new RelayCommand<MediaElement>(OnMediaEnded);
             _handlers = new MediaObservableMap<MediaControlEventType>((map, args) => args.EventType)
             {
@@ -59,7 +61,8 @@ namespace DQPlayer.MVVMFiles.ViewModels
                 {MediaControlEventType.StopClick, (s, e) => MediaPlayerModel.SetMediaState(MediaPlayerStates.Stop)},
 
                 {MediaControlEventType.PositionSliderDragStarted, OnPositionSliderDragStarted},
-                {MediaControlEventType.PositionSliderDragCompleted, (s, e) => MediaPlayerModel.ResumeSerializedState()},
+                {MediaControlEventType.PositionSliderDragDelta, OnPositionSliderDragDelta },
+                {MediaControlEventType.PositionSliderDragCompleted, OnPositionSliderDragCompleted},
                 {MediaControlEventType.VolumeSliderValueChanged, ControlsViewModel_VolumeSliderValueChanged},
 
                 {MediaControlEventType.MoveNextClick, OnMoveNextClick},
@@ -72,7 +75,7 @@ namespace DQPlayer.MVVMFiles.ViewModels
         private void OnMoveNextClick(object s, MediaEventArgs<MediaControlEventType> e)
             => PlaylistManager.Instance.Request(this, new PlaylistManagerEventArgs(PlaylistAction.PlayNext));
 
-        private void OnMovePreviousClick(object s, MediaEventArgs<MediaControlEventType> e) 
+        private void OnMovePreviousClick(object s, MediaEventArgs<MediaControlEventType> e)
             => PlaylistManager.Instance.Request(this, new PlaylistManagerEventArgs(PlaylistAction.PlayPrevious));
 
         private void FileManager_OnNewRequest(object sender, FileManagerEventArgs<MediaFileInformation> e)
@@ -85,6 +88,12 @@ namespace DQPlayer.MVVMFiles.ViewModels
                 if (firstFile != null)
                 {
                     _currentFileCallback = () => e.Callback?.Invoke(firstFile, _repeatState);
+                    if (e.Callback == null)
+                    {
+                        _currentFileCallback =
+                            () => PlaylistManager.Instance.Request(this,
+                                new PlaylistManagerEventArgs(PlaylistAction.PlayNext));
+                    }
                     MediaPlayerModel.SetMediaState(MediaPlayerStates.Play);
                     OnNotify(MediaElementEventType.Started, firstFile);
                 }
@@ -118,15 +127,24 @@ namespace DQPlayer.MVVMFiles.ViewModels
 
         private void OnPositionSliderDragStarted(object sender, MediaEventArgs<MediaControlEventType> e)
         {
-            //force video update
-            MediaPlayerModel.MediaController.SetNewPlayerPosition(
-                ((ThumbDragSlider) e.AdditionalInfo).Value.Add(TimeSpan.FromMilliseconds(10)));
+            MediaPlayerModel.MediaController.SetNewPlayerPosition((TimeSpan)e.AdditionalInfo);
             MediaPlayerModel.SerializeState(MediaPlayerStates.Pause);
+        }
+
+        private void OnPositionSliderDragDelta(object sender, MediaEventArgs<MediaControlEventType> e)
+        {
+            MediaPlayerModel.MediaController.SetNewPlayerPosition((TimeSpan)e.AdditionalInfo);
+        }
+
+        private void OnPositionSliderDragCompleted(object s, MediaEventArgs<MediaControlEventType> e)
+        {
+            MediaPlayerModel.MediaController.SetNewPlayerPosition((TimeSpan)e.AdditionalInfo);
+            MediaPlayerModel.ResumeSerializedState();
         }
 
         private void ControlsViewModel_VolumeSliderValueChanged(object sender, MediaEventArgs<MediaControlEventType> e)
         {
-            var routedArgs = (RoutedPropertyChangedEventArgs<double>) e.AdditionalInfo;
+            var routedArgs = (RoutedPropertyChangedEventArgs<double>)e.AdditionalInfo;
             MediaPlayerModel.MediaController.ChangeVolume(routedArgs.NewValue);
         }
 
@@ -134,7 +152,7 @@ namespace DQPlayer.MVVMFiles.ViewModels
         {
             _currentFileCallback?.Invoke();
             OnNotify(MediaElementEventType.Ended);
-        }      
+        }
 
         #endregion
 

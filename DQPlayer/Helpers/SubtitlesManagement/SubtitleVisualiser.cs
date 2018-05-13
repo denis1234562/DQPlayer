@@ -11,10 +11,13 @@ namespace DQPlayer.Helpers.SubtitlesManagement
         private static readonly Dictionary<SubtitleSegment, IEnumerable<OutlinedLabel>> _currentlyShownSubtitles =
             new Dictionary<SubtitleSegment, IEnumerable<OutlinedLabel>>();
 
-        public static void ShowSubtitle([NotNull] this IEnumerable<OutlinedLabel> labels, [NotNull] SubtitleSegment segment)
+        public static void ShowSubtitle(
+            [NotNull] this IEnumerable<OutlinedLabel> labels,
+            [NotNull] SubtitleSegment segment)
         {
             if (labels == null) throw new ArgumentNullException(nameof(labels));
             if (segment == null) throw new ArgumentNullException(nameof(segment));
+            if (_currentlyShownSubtitles.ContainsKey(segment)) return;
 
             var lines = GetAvailableLines(segment, labels).ToArray();
             foreach (var line in lines)
@@ -28,13 +31,15 @@ namespace DQPlayer.Helpers.SubtitlesManagement
             SubtitleSegment segment,
             IEnumerable<OutlinedLabel> labels)
         {
-            var splitedLines = segment.Content.Split(new[] {'\n'}, StringSplitOptions.RemoveEmptyEntries);
+            var splitedLines = segment.Content.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
             var availableLines = labels.Where(l => string.IsNullOrEmpty(l.Text));
 
             return splitedLines.Reverse().Zip(availableLines, (s, label) => new SubtitleLabelWrapper(label, s));
         }
 
-        public static void HideSubtitle([NotNull] this IEnumerable<OutlinedLabel> labels, [NotNull] SubtitleSegment segment)
+        public static void HideSubtitle(
+            [NotNull] this IEnumerable<OutlinedLabel> labels,
+            [NotNull] SubtitleSegment segment)
         {
             if (labels == null) throw new ArgumentNullException(nameof(labels));
             if (segment == null) throw new ArgumentNullException(nameof(segment));
