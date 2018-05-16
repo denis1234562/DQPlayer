@@ -49,9 +49,6 @@ namespace DQPlayer.MVVMFiles.Views
 
             ViewModel.WindowFullScreen += ViewModel_WindowFullScreen;
             ViewModel.WindowNormalize += ViewModel_WindowNormalize;
-
-            FileManagerHelper.Request(this, new MediaFileInformation(new Uri(
-                @"F:\Movies\World Of Warcraft\07\game.of.thrones.s07e07.720p.web.h264-strife.mkv")).AsEnumerable());
         }
 
         private void ViewModel_WindowFullScreen()
